@@ -19,9 +19,11 @@ Ta-da! PyPozyx is now installed.
 ### Is it really?
 Yes! It definitely should be. Not convinced? If you followed all the steps correctly, and know which port your Pozyx is on, the following code should work:
 
-    from pypozyx import *
-    port = 'COMX' # on UNIX systems this will be '/dev/ttyACMX'
-    p = PozyxSerial(port)
+```python
+from pypozyx import *
+port = 'COMX' # on UNIX systems this will be '/dev/ttyACMX'
+p = PozyxSerial(port)
+```
 If your port is correct and the serial connection to the Pozyx isn't used by other software, this will run without any errors.
 
 #### But! How do I know what port my Pozyx is on?
@@ -34,11 +36,10 @@ The ``[0]`` index lists the first detected COM port. If you have multiple serial
 You might notice the current lack of documentation and examples that use this library! This is being worked on! For now, these pointers and pages should be very helpful:
 * All functions that exist in the Arduino library, also exist in the Python library under the same name and functionality, so most of the [Arduino Library Documentation](https://www.pozyx.io/Documentation/Datasheet/arduino) is transformable to this. The difference however, is that you don't ever again need to pass along the length of the data you're reading/writing. This is taken care of by the library:
 * The Data and SingleRegister classes take care of this. eg. to read out the WhoAmI register, appending to the test code above.    
-
-    `whoami = SingleRegister()`
-    
-    `pozyx.regRead(POZYX_WHO_AM_I, whoami) # which is pozyx.getWhoAmI(whoami)`
-
+```python
+whoami = SingleRegister()
+pozyx.regRead(POZYX_WHO_AM_I, whoami) # which is pozyx.getWhoAmI(whoami)
+```
 * `SingleRegister(value=0, size=1, signed=1)` is basically an instance `Data([0], 'B')`, which functions as a single uint8_t. If you want to make your custom data, for a single register you can adapt the size and signed parameters, and for larger data structures you can use your own data formats. `Data([0]*3, 'BHI')`, for example, creates a structure of 1 uint8_t, uint16_t and uint32_t. Writing and reading data using this example as a parameter will automatically read/write 7 bytes worth of data. To specify your own data formats, check the [struct package documentation](https://docs.python.org/3.5/library/struct.html#format-characters).
  
 * Examples and tutorials source code will be put on the [Pozyx website](http://pozyx.io/) eventually, but will also appear as source code on GitHub.
