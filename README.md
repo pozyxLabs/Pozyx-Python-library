@@ -1,5 +1,5 @@
 # Pozyx-Python-library
-The Python library to work with the pozyx indoor positioning system
+The unofficial release of the Python library (Beta version) to work with the pozyx indoor positioning system
 
 This library requires Python 3. A Python 2 version will be made available separately.
 
