@@ -5,8 +5,8 @@ This library requires Python 3. A Python 2 version will be made available separa
 
 ### Prerequisites:
 * Download and install Python 3, on Windows, make your life easier and make sure Python is in your PATH. A recommended install is therefore the [Anaconda Suite](https://www.continuum.io/downloads) by Continuum.
-* Install the PySerial package. If you have pip installed, you can do this by writing `pip install pyserial` in your command line interface (cmd on Windows).
-* **Windows only** install [ST's virtual COM driver](http://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-stm32102.html)
+* Install the PySerial package. If you have pip installed, you can do this by writing `pip install pyserial` in your command line interface (cmd on Windows). Pip is automatically installed if you installed the Anaconda Suite.
+* **Windows only** install [ST's virtual COM driver](http://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-stm32102.html). Be careful, this puts the actual installer in your Program Files, so you'll have to go to the STMicroElectronics folder in your Program Files and install the right installer there (if on Windows 10, use the Windows 8 installer)
 
 ### Installing this package.
 As it's not yet available on PyPi, you will have to install the library from source. This is, however, very easy.
