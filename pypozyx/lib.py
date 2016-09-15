@@ -563,7 +563,7 @@ class PozyxLib(PozyxCore):
     def saveConfiguration(self, save_type, registers, remote_id=None):
         if not dataCheck(registers):
             registers = Data(registers)
-        assert save_type == POZYX_FLASH_REGS or save_type == POZYX_FLASH_ANCHOR_IDS or save_type == POZYX_FLASH_NETWORK or save_type == POZYX_FLASH_ALL, 'saveConfiguration: invalid type'
+        assert save_type == POZYX_FLASH_REGS or save_type == POZYX_FLASH_ANCHOR_IDS or save_type == POZYX_FLASH_NETWORK, 'saveConfiguration: invalid type'
         assert save_type == POZYX_FLASH_REGS or len(
             registers) == 0, 'saveConfiguration: #regs > 0 and not a reg save'
         assert save_type != POZYX_FLASH_REGS or len(
@@ -582,6 +582,15 @@ class PozyxLib(PozyxCore):
             # give the remote device some time to save to flash memory
             time.sleep(POZYX_DELAY_FLASH)
         return status
+
+    def saveRegisters(self, registers, remote_id=None):
+        self.saveConfiguration(POZYX_FLASH_REGS, registers, remote_id)
+
+    def saveAnchorIds(self, remote_id=None):
+        self.saveConfiguration(POZYX_FLASH_ANCHOR_IDS, Data([]), remote_id)
+
+    def saveNetwork(self, remote_id=None):
+        self.saveConfiguration(POZYX_FLASH_NETWORK, Data([]), remote_id)
 
     def clearConfiguration(self, remote_id=None):
         self.getInterruptStatus(SingleRegister())
