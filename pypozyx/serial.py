@@ -11,6 +11,18 @@ import time
 
 class PozyxSerial(PozyxLib):
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self,exc_type,exc_value,traceback):
+        count = 0
+        while (self.ser.is_open and count < 100):
+            self.ser.close()
+            count += 1
+        if self.ser.is_open:
+            print("ERROR: Serial port failed to close")
+            return POZYX_FAILURE
+
     def __init__(self, port, baudrate=115200, timeout=0.2, mode=MODE_POLLING, print_output=False):
         self.print_output = print_output
         self.ser = serial.Serial(port, baudrate, timeout=timeout)
