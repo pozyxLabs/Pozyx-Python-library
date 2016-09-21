@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+"""
+
+"""
+
 from pypozyx.definitions.constants import *
 from pypozyx.definitions.registers import *
 
@@ -96,10 +101,14 @@ class PozyxSerial(PozyxLib):
             data.load_bytes(r[2:])
         return int(r[0:2], 16)
 
-    def waitForFlag(self, interrupt_flag, timeout_s, interrupt=SingleRegister()):
+    def waitForFlag(self, interrupt_flag, timeout_s, interrupt=None):
+        if interrupt is None:
+            interrupt = SingleRegister()
         return self.waitForFlag_safe(interrupt_flag, timeout_s, interrupt)
 
-    def waitForFlag_safe(self, interrupt_flag, timeout_s, interrupt=SingleRegister()):
+    def waitForFlag_safe(self, interrupt_flag, timeout_s, interrupt=None):
+        if interrupt is None:
+            interrupt = SingleRegister()
         start = time.time()
         while(time.time() - start < timeout_s):
             time.sleep(POZYX_DELAY_POLLING)

@@ -1,4 +1,7 @@
-# POZYX REGISTERS
+#!/usr/bin/env python
+"""
+
+"""
 
 # Status registers
 POZYX_WHO_AM_I = 0x0   # Returns the constant value 0x43.

@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+"""
+
+"""
+
 import time
 
 from pypozyx.definitions.registers import *

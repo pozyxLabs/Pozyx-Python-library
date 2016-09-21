@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+"""
+
+"""
+
 from pypozyx.structures.byte_structure import ByteStructure
 from pypozyx.structures.generic import XYZ
 

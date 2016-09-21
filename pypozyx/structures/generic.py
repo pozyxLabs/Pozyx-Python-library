@@ -1,33 +1,109 @@
+#!/usr/bin/env python
+"""
+pypozyx.structures.generic - introduces generic data structures derived from ByteStructure
+
+Generic Structures
+==================
+
+As the name implies, contains generic structures whose specific use is up to the
+user. You should use SingleRegister where applicable when reading/writing
+a single register, and use Data for larger data structures.
+
+Structures contained
+--------------------
+Data
+    THE generic data structure, a powerful way of constructing arbitrarily
+    formed packed data structures
+XYZ
+    A generic XYZ data structure that is used in much 3D sensor data
+SingleRegister
+    Data resembling a single register. Can choose size and whether signed.
+UniformData
+    A variation on Data with all data being a uniform format. Questionably useful.
+
+The use of Data
+---------------
+Data creates a packed data structure with size and format that is entirely the user's choice.
+The format follows the one used in struct, where b is a byte, h is a 2-byte int, and
+i is a default-sized integer, and f is a float. In capitals, these are signed.
+So, to create a custom construct consisting of 4 uint16 and a single int, the
+following code can be used.
+
+  >>> d = Data([0] * 5, 'HHHHi')
+
+or
+
+  >>> data_format = 'HHHHi'
+  >>> d = Data([0] * len(data_format), data_format)
+"""
+
 import struct
 
 from pypozyx.structures.byte_structure import ByteStructure
 
 
 def is_reg_readable(reg):
+    """Returns whether a Pozyx register is readable."""
     if (reg >= 0x00 and reg < 0x07) or (reg >= 0x10 and reg < 0x12) or (reg >= 0x15 and reg < 0x21) or (reg >= 0x22 and reg < 0x24) or (reg >= 0x27 and reg < 0x2B) or (reg >= 0x30 and reg < 0x48) or (reg >= 0x50 and reg < 0x89):
         return True
     return False
 
 
 def is_reg_writable(reg):
+    """Returns whether a Pozyx register is writeable."""
     if (reg >= 0x10 and reg < 0x12) or (reg >= 0x15 and reg < 0x21) or (reg >= 0x22 and reg < 0x24) or (reg >= 0x27 and reg < 0x2B) or (reg >= 0x30 and reg < 0x3C) or (reg >= 0x85 and reg < 0x89):
         return True
     return False
 
 
 def is_functioncall(reg):
+    """Returns whether a Pozyx register is a Pozyx function."""
     if (reg >= 0xB0 and reg < 0xBC) or (reg >= 0xC0 and reg < 0xC9):
         return True
     return False
 
 
 def dataCheck(data):
+    """Returns whether an object is part of the ByteStructure-derived classes or not.
+
+    The function checks the base classes of the passed data object. This function enables
+    many library functions to be passed along its data as either an int/list or the properly
+    intended data structure. For example, the following code will result in the
+    same behaviour::
+
+      >>> p.setCoordinates([0, 0, 0])
+      >>> # or
+      >>> coords =  Coordinates()
+      >>> p.setCoordinates(coords)
+
+    AND
+
+      >>> p.setNetworkId(0x6000)
+      >>> # or
+      >>> n = NetworkID(0x6000)
+      >>> p.setNetworkId(n)
+
+    Note that this only works for functions where you change one of the Pozyx's
+    settings. When reading data from the Pozyx, you have to pass along the correct
+    data structure.
+
+    Using dataCheck
+    ---------------
+    You might want to use this in your own function, as it makes it more robust
+    to whether an int or list gets sent as a parameter to your function, or a
+    ByteStructure-like object. If so, you can perform::
+
+      >>> if not dataCheck(sample): # assume a is an int but you want it to be a SingleRegister
+      >>>     sample = SingleRegister(sample)
+
+    """
     if not(Data in type(data).__bases__ or ByteStructure in type(data).__bases__ or Data is type(data) or XYZ in type(data).__bases__):
         return False
     return True
 
 
 class XYZ(ByteStructure):
+    """Generic XYZ data structure consisting of 3 integers."""
     physical_convert = 1
 
     byte_size = 12

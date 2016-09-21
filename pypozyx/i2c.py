@@ -1,5 +1,7 @@
-# I2C POZYX IMPLEMENTATION
-# Not implemented yet
+#!/usr/bin/env python
+"""
+
+"""
 
 from pypozyx.lib import PozyxLib
 from pypozyx.definitions.constants import *

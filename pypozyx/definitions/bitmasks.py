@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+"""
+
+"""
+
 # Bit mask for POZYX_ST_RESULT
 POZYX_ST_RESULT_ACC = 0x01
 POZYX_ST_RESULT_MAGN = 0x02

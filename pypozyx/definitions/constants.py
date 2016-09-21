@@ -1,4 +1,7 @@
-# TODO: Check the Arduino definitions whether these are correct and accurate...
+#!/usr/bin/env python
+"""
+
+"""
 
 POZYX_ANCHOR = 0x00
 POZYX_TAG = 0x20

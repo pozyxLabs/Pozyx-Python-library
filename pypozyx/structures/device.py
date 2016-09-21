@@ -1,3 +1,21 @@
+#!/usr/bin/env python
+"""
+pypozyx.structures.device - contains various classes representing device data
+
+Structures contained
+--------------------
+DeviceCoordinates
+    consists of a device's ID, flag, and coordinates
+DeviceRange
+    consists of a range measurements timestamp, distance, and RSS
+NetworkID
+    container for a device's ID. Prints in 0xID format.
+DeviceList
+    container for a list of IDs. Can be initialized through size and/or IDs.
+UWBSettings
+    contains all of the UWB settings: channel, bitrate, prf, plen, and gain.
+"""
+
 from pypozyx.structures.byte_structure import ByteStructure
 from pypozyx.structures.sensor_data import Coordinates
 from pypozyx.structures.generic import Data
@@ -102,10 +120,6 @@ class DeviceList(Data):
             self.data[i] = data[i]
 
 
-# TODO: change UWB settings initialization to not contain data but the parameters.
-# data was a lazy step. can always init empty and then load data
-# TODO: Think more about UWB settings and whether to make data not like the struct but
-# more like the data? Or make this abstraction in the set and get still?
 class UWBSettings(ByteStructure):
     byte_size = 7
     data_format = 'BBBBf'
