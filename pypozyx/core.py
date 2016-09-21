@@ -1,12 +1,8 @@
-from pypozyx.definitions.registers import *
-from pypozyx.definitions.constants import *
+from pypozyx.definitions.registers import POZYX_TX_DATA, POZYX_TX_SEND, POZYX_RX_DATA, POZYX_INT_STATUS, POZYX_RX_NETWORK_ID
+from pypozyx.definitions.constants import POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT, MAX_BUF_SIZE, MAX_SERIAL_SIZE
 from pypozyx.definitions.bitmasks import POZYX_INT_STATUS_ERR, POZYX_INT_STATUS_FUNC
 
 from pypozyx.structures.generic import Data, is_functioncall, is_reg_readable, is_reg_writable, SingleRegister
-
-import time
-
-# CORE TEMPLATES + CORE FUNCTIONS
 
 
 class PozyxCore():

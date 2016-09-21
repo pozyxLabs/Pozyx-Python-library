@@ -11,22 +11,29 @@ import time
 
 class PozyxSerial(PozyxLib):
 
-    def __init__(self, port, baudrate=115200, timeout=0.2, mode=MODE_POLLING, print_output=False):
+    def __init__(self, port, baudrate=115200, timeout=0.1, mode=MODE_POLLING, print_output=False):
         self.print_output = print_output
-        self.ser = serial.Serial(port, baudrate, timeout=timeout)
+        try:
+            self.ser = serial.Serial(port, baudrate, timeout=timeout)
+        except:
+            print("Couldn't connect with Pozyx, wrong/busy serial port.")
+            raise SystemExit
         self._mode = mode
 
         time.sleep(0.25)
 
         regs = Data([0, 0, 0])
         if self.regRead(POZYX_WHO_AM_I, regs) == POZYX_FAILURE:
-            return POZYX_FAILURE
+            print("Connected to Pozyx, but couldn't read serial data.")
+            raise SystemExit
 
         self._hw_version = regs[1]
         self._sw_version = regs[2]
 
         if regs[0] != 0x43:
-            return POZYX_FAILURE
+            print("WHO AM I returned 0x%0.2x, something is wrong with Pozyx." %
+                  regs[0])
+            raise SystemExit
 
     def regWrite(self, address, data):
         data.load_hex_string()

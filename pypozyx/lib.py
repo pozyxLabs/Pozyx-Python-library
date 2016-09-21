@@ -1,3 +1,5 @@
+import time
+
 from pypozyx.definitions.registers import *
 from pypozyx.definitions.constants import *
 from pypozyx.definitions.bitmasks import *
@@ -7,8 +9,6 @@ from pypozyx.core import PozyxCore
 from pypozyx.structures.generic import Data, SingleRegister, dataCheck
 from pypozyx.structures.device import *
 from pypozyx.structures.sensor_data import *
-
-import time
 
 
 class PozyxLib(PozyxCore):
@@ -166,7 +166,7 @@ class PozyxLib(PozyxCore):
     def getTemperature_c(self, temperature, remote_id=None):
         status = self.getRead(
             POZYX_TEMPERATURE, temperature, remote_id)
-        temperature[0] = data[0] / POZYX_TEMP_DIV_CELSIUS
+        temperature[0] = temperature[0] / POZYX_TEMP_DIV_CELSIUS
         return status
 
     def getDeviceListSize(self, device_list_size, remote_id=None):
@@ -244,7 +244,7 @@ class PozyxLib(PozyxCore):
         self.useFunction(
             POZYX_DEVICES_GETIDS, params, devices, remote_id)
 
-    def getAnchorIds(self, anchors, size, remote_id=None):
+    def getAnchorIds(self, anchors, remote_id=None):
         assert len(anchors) > 0 and len(
             anchors) <= 20, 'getAnchorIds: size not in range'
         list_size = SingleRegister()
@@ -279,7 +279,7 @@ class PozyxLib(PozyxCore):
         status = self.getDeviceListSize(list_size, remote_id)
         if list_size[0] < len(tags) or status == POZYX_FAILURE:
             return POZYX_FAILURE
-        devices = DeviceList(list_size=list_size)
+        devices = DeviceList(list_size=list_size[0])
         status = self.useFunction(
             POZYX_DEVICES_GETIDS, Data([]), devices, remote_id)
 
@@ -337,8 +337,8 @@ class PozyxLib(PozyxCore):
 
     def setUWBSettings(self, UWB_settings, remote_id=None):
         if not dataCheck(UWB_settings):
-            UWB_settings = UWBSettings(UWB_settings[0], UWB_settings[1], UWB_settings[
-                                       2], UWB_settings[3], UWB_settings[4])
+            UWB_settings = UWBSettings(UWB_settings[0], UWB_settings[1],
+                                       UWB_settings[2], UWB_settings[3], UWB_settings[4])
         gain = Data([UWB_settings.gain_db], 'f')
         UWB = Data([UWB_settings.channel, UWB_settings.bitrate +
                     (UWB_settings.prf >> 6), UWB_settings.plen])
@@ -424,7 +424,7 @@ class PozyxLib(PozyxCore):
 
     def setLed(self, led_num, state, remote_id=None):
         assert led_num >= 1 and led_num <= 4, 'setLed: led number %i not in range 1-4' % led_num
-        assert state == True or state == False, 'setLed: wrong state'
+        assert state is True or state is False, 'setLed: wrong state'
 
         params = Data([0x1 << (led_num - 1 + 4) |
                        ((state << led_num - 1) % 256)])
@@ -542,6 +542,8 @@ class PozyxLib(PozyxCore):
         return status
 
     def clearDevices(self, remote_id=None):
+        """
+        """
         return self.useFunction(POZYX_DEVICES_CLEAR, remote_id=remote_id)
 
     def addDevice(self, device_coordinates, remote_id=None):
@@ -553,10 +555,6 @@ class PozyxLib(PozyxCore):
 
     def resetSystem(self, remote_id=None):
         self.useFunction(POZYX_RESET_SYS, remote_id=remote_id)
-
-    # not implemented, will only be useful with I2C Python.
-    def configInterruptPin(self, pin, mode, bActiveHigh, bLatch, remote_id=None):
-        pass
 
     # FLASH functions
 
@@ -621,7 +619,6 @@ class PozyxLib(PozyxCore):
         details = Data([0] * 20)
         if self.useFunction(POZYX_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
             return POZYX_FAILURE
-        # no return on bad status here, inconsistent
         byte_num = regAddress / 8
         bit_num = regAddress % 8
-        return (details[i] >> bit_num) & 0x1
+        return (details[byte_num] >> bit_num) & 0x1

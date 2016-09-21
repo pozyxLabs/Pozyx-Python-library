@@ -9,6 +9,7 @@ if not remote:
     remote_id = None
 
 destination_id = 0x1000
+# distance that separates the amount of LEDs lighting up.
 range_step_mm = 1000
 
 

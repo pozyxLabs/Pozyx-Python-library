@@ -8,10 +8,11 @@ remote = True
 remote_id = 0x1000
 if not remote:
     remote_id = None
-# data for worst
+# necessary data for calibration
 num_anchors = 4
 anchor_ids = [0x605D, 0x2000, 0x6044, 0x6639]
 heights = [1920, 2025, 1330, 1510]
+# manual calibration
 anchors_x = [0, -10, 3999, 4060]
 anchors_y = [0, 3950, 0, 3945]
 # for 2.5D
