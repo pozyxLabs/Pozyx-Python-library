@@ -146,6 +146,9 @@ class Data(ByteStructure):
         self.data_format = data_format
         self.set_packed_size()
 
+    def load(self, data, convert=1):
+        self.data = data
+
 # definitely unused in favor of Data
 
 
@@ -158,6 +161,9 @@ class UniformData(ByteStructure):
         self.data_length = len(data)
         self.byte_size = data_size * data_length
         self.data_format = format_type * data_length
+
+    def load(self, data, convert=1):
+        self.data = data
 
 
 class SingleRegister(Data):
@@ -172,3 +178,6 @@ class SingleRegister(Data):
         if signed == 1:
             data_format = data_format.capitalize()
         Data.__init__(self, [value], data_format)
+
+    def load(self, data, convert=1):
+        self.data = data
