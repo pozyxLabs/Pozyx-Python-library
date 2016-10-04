@@ -816,9 +816,7 @@ class PozyxLib(PozyxCore):
 
         params = Data([0, list_size[0]])
 
-        self.getDevice
-
-        self.useFunction(
+        return self.useFunction(
             POZYX_DEVICES_GETIDS, params, devices, remote_id)
 
     def getAnchorIds(self, anchors, remote_id=None):
@@ -1048,7 +1046,7 @@ class PozyxLib(PozyxCore):
                                        UWB_settings[2], UWB_settings[3], UWB_settings[4])
         gain = Data([UWB_settings.gain_db], 'f')
         UWB = Data([UWB_settings.channel, UWB_settings.bitrate +
-                    (UWB_settings.prf >> 6), UWB_settings.plen])
+                    (UWB_settings.prf << 6), UWB_settings.plen])
         status = self.setWrite(POZYX_UWB_CHANNEL, UWB, remote_id,
                                2 * POZYX_DELAY_LOCAL_WRITE, 2 * POZYX_DELAY_REMOTE_WRITE)
         if status == POZYX_FAILURE:
@@ -1443,10 +1441,10 @@ class PozyxLib(PozyxCore):
         """
         assert discovery_type == POZYX_DISCOVERY_TAGS_ONLY or discovery_type == POZYX_DISCOVERY_ANCHORS_ONLY or discovery_type == POZYX_DISCOVERY_ALL_DEVICES, 'doDiscovery: wrong type of discovery'
         assert slots > 1 and slots < 10, 'doDiscovery: number of slots %i out of range' % slots
-        assert slot_duration > 5, 'doDiscovery: slot duration too short'
+        assert int(slot_duration*1000) > 5, 'doDiscovery: slot duration too short'
 
         self.getInterruptStatus(SingleRegister())
-        params = Data([discovery_type, slots, slot_duration])
+        params = Data([discovery_type, slots, int(slot_duration*1000)])
 
         status = self.useFunction(
             POZYX_DEVICES_DISCOVER, params, remote_id=remote_id)
