@@ -78,7 +78,7 @@ class PozyxCore():
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
 
-        Examples:
+        Example usage:
             >>> whoami = SingleRegister()
             >>> self.getRead(POZYX_WHO_AM_I, whoami)
             >>> print(whoami)
@@ -104,7 +104,7 @@ class PozyxCore():
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
 
-        Examples:
+        Example usage:
             >>> self.useFunction(POZYX_DEVICES_CLEAR)
         """
         if params is None:
@@ -134,7 +134,7 @@ class PozyxCore():
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
 
-        Examples:
+        Example usage:
             >>> leds = SingleRegister(0xFF)
             >>> self.setWrite(POZYX_LED_CTRL, leds)
         """

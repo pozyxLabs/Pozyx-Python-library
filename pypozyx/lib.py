@@ -28,7 +28,7 @@ class PozyxLib(PozyxCore):
 
     Unlike the Arduino library, this isn't divided into parts such as 'device functions',
     'system functions', etc, but will be in the future. For now, the Arduino library should
-    work as a great reference.  
+    work as a great reference.
     """
 
     def __init__(self):
