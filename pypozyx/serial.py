@@ -105,14 +105,3 @@ class PozyxSerial(PozyxLib):
         if interrupt is None:
             interrupt = SingleRegister()
         return self.waitForFlag_safe(interrupt_flag, timeout_s, interrupt)
-
-    def waitForFlag_safe(self, interrupt_flag, timeout_s, interrupt=None):
-        if interrupt is None:
-            interrupt = SingleRegister()
-        start = time.time()
-        while(time.time() - start < timeout_s):
-            time.sleep(POZYX_DELAY_POLLING)
-            status = self.regRead(POZYX_INT_STATUS, interrupt)
-            if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
-                return True
-        return False

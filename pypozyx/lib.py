@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-
-"""
+"""pypozyx.lib - Contains core and extended Pozyx user functionality through the PozyxLib class."""
 
 import time
 
@@ -17,90 +15,24 @@ from pypozyx.structures.sensor_data import *
 
 
 class PozyxLib(PozyxCore):
+    """PozyxLib
+
+    PozyxLib
+    ========
+
+    Implements the functionality users expect from Pozyx, using the methods from PozyxCore
+    to communicate and interface with Pozyx both locally and remotely.
+    This does not limit itself to positioning, ranging, and reading the sensor data of
+    the various Pozyx sensors, but also features an assortment of troubleshooting functions,
+    abstractions of frequently used registers, UWB settings, etc.
+
+    Unlike the Arduino library, this isn't divided into parts such as 'device functions',
+    'system functions', etc, but will be in the future. For now, the Arduino library should
+    work as a great reference.  
+    """
 
     def __init__(self):
         pass
-
-    def getRead(self, address, data, remote_id=None):
-        """
-        Reads Pozyx register data either locally or remotely.
-
-        Args:
-            address: The register address
-            data: A ByteStructure-derived object that is the container of the read data.
-
-        Kwargs:
-            remote_id: Remote ID for remote read.
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-
-        Examples:
-            >>> whoami = SingleRegister()
-            >>> self.getRead(POZYX_WHO_AM_I, whoami)
-            >>> print(whoami)
-            67
-        """
-        if remote_id is None:
-            return self.regRead(address, data)
-        else:
-            return self.remoteRegRead(remote_id, address, data)
-
-    def useFunction(self, function, params=None, data=None, remote_id=None):
-        """
-        Activates a Pozyx register function either locally or remotely.
-
-        Args:
-            address: The function address
-
-        Kwargs:
-            params: A ByteStructure-derived object that contains the parameters for the function.
-            data: A ByteStructure-derived object that is the container of the read data.
-            remote_id: Remote ID for remote read.
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-
-        Examples:
-            >>> self.useFunction(POZYX_DEVICES_CLEAR)
-        """
-        if params is None:
-            params = Data([])
-        if data is None:
-            data = Data([])
-        if remote_id is None:
-            status = self.regFunction(function, params, data)
-        else:
-            status = self.remoteRegFunction(remote_id, function, params, data)
-        return status
-
-    def setWrite(self, address, data, remote_id=None, local_delay=POZYX_DELAY_LOCAL_WRITE, remote_delay=POZYX_DELAY_REMOTE_WRITE):
-        """
-        Writes data to Pozyx registers either locally or remotely.
-
-        Args:
-            address: The register address
-            data: A ByteStructure-derived object that contains the data to be written.
-
-        Kwargs:
-            remote_id: Remote ID for remote read.
-            local_delay: Delay after a local write
-            remote_delay: Delay after a remote write
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-
-        Examples:
-            >>> leds = SingleRegister(0xFF)
-            >>> self.setWrite(POZYX_LED_CTRL, leds)
-        """
-        if remote_id is None:
-            status = self.regWrite(address, data)
-            time.sleep(local_delay)
-        else:
-            status = self.remoteRegWrite(remote_id, address, data)
-            time.sleep(remote_delay)
-        return status
 
     def getWhoAmI(self, whoami, remote_id=None):
         """
@@ -310,7 +242,7 @@ class PozyxLib(PozyxCore):
         Obtains the Pozyx's network ID.
 
         Args:
-            network_id: Container for the read data.  NetworkID() or SingleRegister(size=2) or Data([0],'H').
+            network_id: Container for the read data.  NetworkID() or SingleRegister(size=2) or Data([0], 'H').
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -454,7 +386,7 @@ class PozyxLib(PozyxCore):
 
     def getPressure_Pa(self, pressure, remote_id=None):
         """
-        Obtain the Pozyx's pressure sensor data in Pa (pascal).
+        Obtain the Pozyx's pressure sensor data in Pa(pascal).
 
         Args:
             pressure: Container for the read data. Data([0], 'f').
@@ -486,7 +418,7 @@ class PozyxLib(PozyxCore):
 
     def getMagnetic_uT(self, magnetic, remote_id=None):
         """
-        Obtain the Pozyx's magnetic sensor data in uT (microtesla).
+        Obtain the Pozyx's magnetic sensor data in uT(microtesla).
 
         Args:
             magnetic: Container for the read data. Magnetic().
@@ -501,7 +433,7 @@ class PozyxLib(PozyxCore):
 
     def getAngularVelocity_dps(self, angular_vel, remote_id=None):
         """
-        Obtain the Pozyx's angular velocity sensor data in dps (degrees per second).
+        Obtain the Pozyx's angular velocity sensor data in dps(degrees per second).
 
         Args:
             angular_vel: Container for the read data. AngularVelocity().
@@ -516,7 +448,7 @@ class PozyxLib(PozyxCore):
 
     def getEulerAngles_deg(self, euler_angles, remote_id=None):
         """
-        Obtain the Pozyx's euler angles sensor data in degrees (heading, roll, pitch).
+        Obtain the Pozyx's euler angles sensor data in degrees(heading, roll, pitch).
 
         Args:
             euler_angles: Container for the read data. EulerAngles().
@@ -576,7 +508,7 @@ class PozyxLib(PozyxCore):
 
     def getTemperature_c(self, temperature, remote_id=None):
         """
-        Obtain the Pozyx's temperature sensor data in C (celsius).
+        Obtain the Pozyx's temperature sensor data in C(celsius).
 
         Args:
             temperature: Container for the read data. Data([0], 'f').
@@ -685,7 +617,7 @@ class PozyxLib(PozyxCore):
 
     def getGPIO(self, gpio_num, value, remote_id=None):
         """
-        Obtain the Pozyx's value of the selected GPIO pin, being either HIGH or LOW (physically 3.3V or 0V).
+        Obtain the Pozyx's value of the selected GPIO pin, being either HIGH or LOW(physically 3.3V or 0V).
 
         Args:
             gpio_num: GPIO pin number, 1 to 4.
@@ -749,7 +681,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             anchors: Container for the read data. DeviceList(list_size=size)
-            or Data([0]*size, 'H'*size).
+            or Data([0] * size, 'H' * size).
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -761,11 +693,11 @@ class PozyxLib(PozyxCore):
             getAnchorIds, getTagIds, getDeviceIds
 
         Example usage:
-            >>> list_size = SingleRegister()
-            >>> self.getNumberOfAnchors(list_size)
-            >>> anchor_list = DeviceList(list_size=list_size[0])
-            >>> self.getPositioningAnchorIds(anchor_list)
-            >>> print(anchor_list)
+            >> > list_size = SingleRegister()
+            >> > self.getNumberOfAnchors(list_size)
+            >> > anchor_list = DeviceList(list_size=list_size[0])
+            >> > self.getPositioningAnchorIds(anchor_list)
+            >> > print(anchor_list)
             '0x6720, 0x6811, 0x6891'
         """
         assert len(anchors) > 0 and len(
@@ -786,7 +718,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             devices: Container for the read data. DeviceList(list_size=size)
-            or Data([0]*size, 'H'*size).
+            or Data([0] * size, 'H' * size).
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -798,11 +730,11 @@ class PozyxLib(PozyxCore):
             getAnchorIds, getTagIds, getPositioningAnchorIds
 
         Example usage:
-            >>> list_size = SingleRegister()
-            >>> self.getDeviceListSize(list_size)
-            >>> device_list = DeviceList(list_size=list_size[0])
-            >>> self.getDeviceIds(device_list)
-            >>> print(device_list)
+            >> > list_size = SingleRegister()
+            >> > self.getDeviceListSize(list_size)
+            >> > device_list = DeviceList(list_size=list_size[0])
+            >> > self.getDeviceIds(device_list)
+            >> > print(device_list)
             '0x60A0, 0x6070, 0x6891'
         """
         assert len(devices) > 0 and len(
@@ -971,7 +903,7 @@ class PozyxLib(PozyxCore):
 
     def setUpdateInterval(self, ms, remote_id=None):
         """
-        Set the Pozyx's update interval in ms (milliseconds).
+        Set the Pozyx's update interval in ms(milliseconds).
 
         Args:
             ms: Update interval in ms. integer ms or SingleRegister(ms, size=2)
@@ -1161,7 +1093,7 @@ class PozyxLib(PozyxCore):
 
     def setConfigGPIO(self, gpio_num, mode, pull, remote_id=None):
         """
-        Set the Pozyx's selected GPIO pin configuration (mode and pull).
+        Set the Pozyx's selected GPIO pin configuration(mode and pull).
 
         Args:
             gpio_num: GPIO pin number, 1 to 4.
@@ -1249,7 +1181,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             gpio_num: GPIO pin number, 1 to 4
-            value: GPIO output value, either HIGH (1) or LOW (0). Physically, 3.3V or 0V. integer value or SingleRegister(value).
+            value: GPIO output value, either HIGH(1) or LOW(0). Physically, 3.3V or 0V. integer value or SingleRegister(value).
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -1315,7 +1247,7 @@ class PozyxLib(PozyxCore):
 
         This is pretty straightforward, the range information consists of the following:
             - the timestamp of the range measurement.
-            - the distance between the local/remote tag and the destination
+            - the distance between the local / remote tag and the destination
             - the RSS, which indicates the signal strength between origin and destination.
 
         While in the Arduino library doRemoteRanging is used for remote ranging, this function
@@ -1323,7 +1255,7 @@ class PozyxLib(PozyxCore):
         the destination is on the same UWB settings as this, and to pass a DeviceRange object
         for the device_range parameter.
 
-        For an in-action example, check the "Ready to range" tutorial on the Pozyx homepage (www.pozyx.io),
+        For an in-action example, check the "Ready to range" tutorial on the Pozyx homepage(www.pozyx.io),
         and the ready_to_range.py example found in this library's tutorial folder.
 
         Args:
@@ -1369,11 +1301,10 @@ class PozyxLib(PozyxCore):
             - are you using a Coordinates object for your position?
             - if you perform getDeviceListSize and subsequently getDeviceIds, are these your anchors?
 
-
         While in the Arduino library doRemotePositioning is used for remote ranging, this function
         follows the library's convention to add remote_id as a keyword argument.
 
-        For an in-action example, check the "Ready to localize" tutorial on the Pozyx homepage (www.pozyx.io),
+        For an in-action example, check the "Ready to localize" tutorial on the Pozyx homepage(www.pozyx.io),
         and the ready_to_localize.py example found in this library's tutorial folder.
 
         Args:
@@ -1441,10 +1372,11 @@ class PozyxLib(PozyxCore):
         """
         assert discovery_type == POZYX_DISCOVERY_TAGS_ONLY or discovery_type == POZYX_DISCOVERY_ANCHORS_ONLY or discovery_type == POZYX_DISCOVERY_ALL_DEVICES, 'doDiscovery: wrong type of discovery'
         assert slots > 1 and slots < 10, 'doDiscovery: number of slots %i out of range' % slots
-        assert int(slot_duration*1000) > 5, 'doDiscovery: slot duration too short'
+        assert int(slot_duration *
+                   1000) > 5, 'doDiscovery: slot duration too short'
 
         self.getInterruptStatus(SingleRegister())
-        params = Data([discovery_type, slots, int(slot_duration*1000)])
+        params = Data([discovery_type, slots, int(slot_duration * 1000)])
 
         status = self.useFunction(
             POZYX_DEVICES_DISCOVER, params, remote_id=remote_id)
@@ -1612,7 +1544,7 @@ class PozyxLib(PozyxCore):
 
         This means that upon reset, the Pozyx will use these saved values instead of the default values.
         This is especially practical when changing UWB settings of an entire network, making it unnecessary
-        to re-set these when resetting or repowering a device.
+        to re - set these when resetting or repowering a device.
 
         DISCLAIMER: Make sure to not abuse this function in your code, as the flash memory only has a finite
         number of writecycles available, adhere to the Arduino's mentality in using flash memory.
