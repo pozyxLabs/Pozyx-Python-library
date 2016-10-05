@@ -1467,7 +1467,6 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        DeviceCoordinates()
         if not dataCheck(device_coordinates):
             device_coordinates = DeviceCoordinates(device_coordinates[0], device_coordinates[
                 1], Coordinates(device_coordinates[2], device_coordinates[3], device_coordinates[4]))

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-
-"""
+"""pypozyx.definitions.bitmasks - contains all bitmasks used in Pozyx functionality, such as interrupt flags."""
 
 # Bit mask for POZYX_ST_RESULT
 POZYX_ST_RESULT_ACC = 0x01
@@ -27,11 +25,6 @@ POZYX_INT_MASK_FUNC = 0x10
 POZYX_INT_MASK_TDMA = 0x40
 POZYX_INT_MASK_PIN = 0x80
 POZYX_INT_MASK_ALL = 0x1F
-
-# Bit mask for POZYX_POS_ALG
-POZYX_POS_ALG_UWB_ONLY = 0x00
-POZYX_POS_ALG_TRACKING = 0x01
-POZYX_POS_ALG_LS = 0x02
 
 # Bit mask for POZYX_RANGE_PROTOCOL
 POZYX_RANGE_PROTOCOL_SDS_TWR = 0x00

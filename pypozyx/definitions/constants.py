@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-
-"""
+"""pypozyx.definitions.constants - contains all Pozyx constants, such as error definitions, delays, physical convertions."""
 
 POZYX_ANCHOR = 0x00
 POZYX_TAG = 0x20
@@ -58,6 +56,11 @@ POZYX_ANCHOR_SEL_AUTO = 1
 POZYX_DISCOVERY_ANCHORS_ONLY = 0
 POZYX_DISCOVERY_TAGS_ONLY = 1
 POZYX_DISCOVERY_ALL_DEVICES = 2
+
+# positioning algorithm options
+POZYX_POS_ALG_UWB_ONLY = 0
+POZYX_POS_ALG_TRACKING = 1
+POZYX_POS_ALG_LS = 2
 
 # how to intercept pozyx events: by polling or by interrupts
 MODE_POLLING = 0

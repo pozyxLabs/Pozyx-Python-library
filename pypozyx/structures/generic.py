@@ -103,13 +103,18 @@ def dataCheck(data):
 
 
 class XYZ(ByteStructure):
-    """Generic XYZ data structure consisting of 3 integers."""
+    """
+    Generic XYZ data structure consisting of 3 integers x, y, and z.
+
+    Not recommended to use in practice, as relevant sensor data classes are derived from this.
+    """
     physical_convert = 1
 
     byte_size = 12
     data_format = 'iii'
 
     def __init__(self, x=0, y=0, z=0):
+        """Initializes the XYZ or XYZ-derived object."""
         self.x = x
         self.y = y
         self.z = z
@@ -138,8 +143,34 @@ class XYZ(ByteStructure):
 
 
 class Data(ByteStructure):
+    """Data allows the user to define arbitrary data structures to use with Pozyx.
 
-    def __init__(self, data, data_format=None):
+    The Leatherman of ByteStructure-derived classes, Data allows you to create your own
+    library-compatible packed data structures. Also for empty data, this is used.
+
+    The use of Data
+    ---------------
+    Data creates a packed data structure with size and format that is entirely the user's choice.
+    The format follows the one used in struct, where b is a byte, h is a 2-byte int, and
+    i is a default-sized integer, and f is a float. In capitals, these are signed.
+    So, to create a custom construct consisting of 4 uint16 and a single int, the
+    following code can be used.
+
+      >>> d = Data([0] * 5, 'HHHHi')
+
+    or
+
+      >>> data_format = 'HHHHi'
+      >>> d = Data([0] * len(data_format), data_format)
+
+    Kwargs:
+        data: Data contained in the data structure. When no data_format is passed, these are assumed UInt8 values.
+        data_format: Custom data format for the data passed.
+    """
+
+    def __init__(self, data=None, data_format=None):
+        if data is None:
+            data = []
         self.data = data
         if data_format == None:
             data_format = 'B' * len(data)
@@ -149,33 +180,29 @@ class Data(ByteStructure):
     def load(self, data, convert=1):
         self.data = data
 
-# definitely unused in favor of Data
-
-
-class UniformData(ByteStructure):
-
-    def __init__(self, data=[], format_type='b', data_size=1):
-        self.data = data
-        self.format_type = format_type
-        self.data_size = data_size
-        self.data_length = len(data)
-        self.byte_size = data_size * data_length
-        self.data_format = format_type * data_length
-
-    def load(self, data, convert=1):
-        self.data = data
-
 
 class SingleRegister(Data):
+    """
+    SingleRegister is container for the data from a single Pozyx register.
 
-    def __init__(self, value=0, size=1, signed=1):
+    By default, this represents a UInt8 register. Used for both reading and writing.
+    The size and whether the data is a 'signed' integer are both changeable by the
+    user using the size and signed keyword arguments.
+
+    Kwargs:
+        value: Value of the register.
+        size: Size of the register. 1, 2, or 4. Default 0.
+        signed: Whether the data is signed. unsigned by default.
+    """
+
+    def __init__(self, value=0, size=1, signed=0):
         if size == 1:
             data_format = 'b'
         elif size == 2:
             data_format = 'h'
         elif size == 4:
             data_format = 'i'
-        if signed == 1:
+        if signed == 0:
             data_format = data_format.capitalize()
         Data.__init__(self, [value], data_format)
 
