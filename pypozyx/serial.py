@@ -52,7 +52,6 @@ class PozyxSerial(PozyxLib):
         except:
             print("Couldn't connect with Pozyx, wrong/busy serial port.")
             raise SystemExit
-        self._mode = mode
 
         time.sleep(0.25)
 
