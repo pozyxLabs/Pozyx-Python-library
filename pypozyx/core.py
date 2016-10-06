@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """pypozyx.core - core Pozyx interface and inter-Pozyx communication functionality through the PozyxCore class"""
+from time import sleep, time
 
 from pypozyx.definitions.registers import POZYX_TX_DATA, POZYX_TX_SEND, POZYX_RX_DATA, POZYX_INT_STATUS, POZYX_RX_NETWORK_ID
 from pypozyx.definitions.constants import POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT, MAX_BUF_SIZE, MAX_SERIAL_SIZE, POZYX_DELAY_POLLING, POZYX_DELAY_LOCAL_WRITE, POZYX_DELAY_REMOTE_WRITE
@@ -140,15 +141,15 @@ class PozyxCore():
         """
         if remote_id is None:
             status = self.regWrite(address, data)
-            time.sleep(local_delay)
+            sleep(local_delay)
         else:
             status = self.remoteRegWrite(remote_id, address, data)
-            time.sleep(remote_delay)
+            sleep(remote_delay)
         return status
 
     # wait for flag functions
 
-    def waitForFlag(self, interrupt_flag, timeout_ms, interrupt=None):
+    def waitForFlag(self, interrupt_flag, timeout_s, interrupt=None):
         """
         Checks the interrupt register for given flag until encountered/past the timeout time.
 
@@ -157,13 +158,13 @@ class PozyxCore():
         raise NotImplementedError(
             'You need to override this function in your derived interface!')
 
-    def waitForFlag_safe(self, interrupt_flag, timeout_ms, interrupt=None):
+    def waitForFlag_safe(self, interrupt_flag, timeout_s, interrupt=None):
         """
         Performs waitForFlag in polling mode.
 
         Args:
             interrupt_flag: Flag of interrupt type to check the interrupt register against.
-            timeout_ms: duration to wait for the interrupt
+            timeout_s: duration to wait for the interrupt in seconds.
 
         Kwags:
             interrupt: Container for the interrupt status register data.
@@ -173,15 +174,15 @@ class PozyxCore():
         """
         if interrupt is None:
             interrupt = SingleRegister()
-        start = time.time()
-        while(time.time() - start < timeout_s):
-            time.sleep(POZYX_DELAY_POLLING)
+        start = time()
+        while(time() - start < timeout_s):
+            sleep(POZYX_DELAY_POLLING)
             status = self.regRead(POZYX_INT_STATUS, interrupt)
             if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
                 return True
         return False
 
-    def checkForFlag(self, interrupt_flag, timeout_ms, interrupt=None):
+    def checkForFlag(self, interrupt_flag, timeout_s, interrupt=None):
         """Performs waitForFlag_safe and checks against errors or timeouts.
 
         This abstracts the waitForFlag status check routine commonly encountered
@@ -190,7 +191,7 @@ class PozyxCore():
 
         Args:
             interrupt_flag: Flag of interrupt type to check the interrupt register against.
-            timeout_ms: duration to wait for the interrupt
+            timeout_s: duration to wait for the interrupt in seconds
 
         Kwags:
             interrupt: Container for the interrupt status register data.
@@ -200,7 +201,7 @@ class PozyxCore():
         """
         if interrupt is None:
             interrupt = SingleRegister()
-        if self.waitForFlag_safe(interrupt_flag | POZYX_INT_STATUS_ERR, timeout_ms, interrupt):
+        if self.waitForFlag_safe(interrupt_flag | POZYX_INT_STATUS_ERR, timeout_s, interrupt):
             if (interrupt[0] & POZYX_INT_STATUS_ERR) == POZYX_INT_STATUS_ERR:
                 return POZYX_FAILURE
             else:

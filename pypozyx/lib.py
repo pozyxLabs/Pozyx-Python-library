@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """pypozyx.lib - Contains core and extended Pozyx user functionality through the PozyxLib class."""
 
-import time
+from time import sleep
 
 from pypozyx.definitions.registers import *
 from pypozyx.definitions.constants import *
@@ -1070,7 +1070,7 @@ class PozyxLib(PozyxCore):
             0] <= 12, 'setSensorMode: mode %i not in range (0-12)' % sensor_mode
         status = self.setWrite(POZYX_INT_MASK, sensor_mode, remote_id)
         # legacy delay?
-        time.sleep(POZYX_DELAY_MODE_CHANGE)
+        sleep(POZYX_DELAY_MODE_CHANGE)
         return status
 
     def setCoordinates(self, coordinates, remote_id=None):
@@ -1382,12 +1382,12 @@ class PozyxLib(PozyxCore):
             POZYX_DEVICES_DISCOVER, params, remote_id=remote_id)
         if status == POZYX_FAILURE:
             return status
-        timeout_ms = slot_duration * (slots + 20)
+        timeout_s = slot_duration * (slots + 20)
         if remote_id is None:
-            return self.checkForFlag(POZYX_INT_STATUS_FUNC, timeout_ms)
+            return self.checkForFlag(POZYX_INT_STATUS_FUNC, timeout_s)
         else:
             # give the remote device some time to perform its discovery.
-            time.sleep(timeout_ms)
+            sleep(timeout_s)
         return status
 
     def doAnchorCalibration(self, dimension, num_measurements, anchors, heights=None, remote_id=None):
@@ -1438,8 +1438,8 @@ class PozyxLib(PozyxCore):
         else:
             # give the remote device some time to perform calibration
             # has to be thoroughly tested
-            time.sleep(POZYX_DELAY_CALIBRATION *
-                       len(anchors) * num_measurements / 20)
+            sleep(POZYX_DELAY_CALIBRATION *
+                  len(anchors) * num_measurements / 20)
         return status
 
     def clearDevices(self, remote_id=None):
@@ -1534,7 +1534,7 @@ class PozyxLib(PozyxCore):
             return self.checkForFlag(POZYX_INT_STATUS_FUNC, POZYX_DELAY_FLASH)
         else:
             # give the remote device some time to save to flash memory
-            time.sleep(POZYX_DELAY_FLASH)
+            sleep(POZYX_DELAY_FLASH)
         return status
 
     def saveRegisters(self, registers, remote_id=None):
@@ -1611,7 +1611,7 @@ class PozyxLib(PozyxCore):
             return self.checkForFlag(POZYX_INT_STATUS_FUNC, POZYX_DELAY_FLASH)
         else:
             # give the remote device some time to clear the flash memory
-            time.sleep(POZYX_DELAY_FLASH)
+            sleep(POZYX_DELAY_FLASH)
         return status
 
     def getNumRegistersSaved(self, remote_id=None):

@@ -193,9 +193,12 @@ class SingleRegister(Data):
         value: Value of the register.
         size: Size of the register. 1, 2, or 4. Default 0.
         signed: Whether the data is signed. unsigned by default.
+        print_hex: How to print the register output. Hex by default. Special options are 'hex' and 'bin'
+            other things, such as 'dec', will return decimal output.
     """
 
-    def __init__(self, value=0, size=1, signed=0):
+    def __init__(self, value=0, size=1, signed=0, print_style='hex'):
+        self.print_style = print_style
         if size == 1:
             data_format = 'b'
         elif size == 2:
@@ -208,3 +211,11 @@ class SingleRegister(Data):
 
     def load(self, data, convert=1):
         self.data = data
+
+    def __str__(self):
+        if self.print_style is 'hex':
+            return hex(self.data[0]).capitalize()
+        elif self.print_style is 'bin':
+            return bin(self.data[0])
+        else:
+            return str(self.data[0])

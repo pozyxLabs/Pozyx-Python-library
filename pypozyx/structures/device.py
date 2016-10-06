@@ -232,7 +232,7 @@ class UWBSettings(ByteStructure):
 
     def parse_bitrate(self):
         """Parses the bitrate to be humanly readable."""
-        bitrates = {0: '110kbit/s', 1: '850kbit/s', 2: '6.8Mbit/s'}
+        bitrates = {0: '110kbit/s', 1: '850kbit/s', 2: '6.81Mbit/s'}
         try:
             return bitrates[self.bitrate]
         except:
