@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-
-"""
+"""pypozyx.serial - contains the serial interface with Pozyx through PozyxSerial."""
 
 from pypozyx.definitions.constants import *
 from pypozyx.definitions.registers import *
@@ -15,15 +13,45 @@ import time
 
 
 class PozyxSerial(PozyxLib):
+    """
+    PozyxSerial
+    ===========
 
-    def __init__(self, port, baudrate=115200, timeout=0.1, mode=MODE_POLLING, print_output=False):
+    This class provides the Pozyx Serial interface, and opens and locks the serial
+    port to use with Pozyx. All functionality from PozyxLib and PozyxCore is included.
+
+    Args:
+        port: string name of the serial port. On UNIX this will be '/dev/ttyACMX', on
+            Windows this will be 'COMX', with X a random number.
+
+    Kwargs:
+        baudrate: the baudrate of the serial port. Default value is 115200.
+        timeout: timeout for the serial port communication in seconds. Default is 0.1s or 100ms.
+        print_output: boolean for debugging purposes. If set to True,
+
+    Example usage:
+        >>> pozyx = PozyxSerial('COMX') # Windows
+        >>> pozyx = PozyxSerial('/dev/ttyACMX', print_output=True) # Linux and OSX. Also puts debug output on.
+
+    Finding the serial port
+    =======================
+    Finding the serial port can be easily done with the following code:
+        >>> import serial.tools.list_ports
+        >>> print serial.tools.list_ports.comports()[0]
+
+    Putting one and two together, automating the correct port selection with one Pozyx attached:
+        >>> import serial.tools.list_ports
+        >>> pozyx = PozyxSerial(serial.tools.list_ports.comports()[0])
+    """
+
+    def __init__(self, port, baudrate=115200, timeout=0.1, print_output=False):
+        """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
         try:
             self.ser = serial.Serial(port, baudrate, timeout=timeout)
         except:
             print("Couldn't connect with Pozyx, wrong/busy serial port.")
             raise SystemExit
-        self._mode = mode
 
         time.sleep(0.25)
 
@@ -41,6 +69,16 @@ class PozyxSerial(PozyxLib):
             raise SystemExit
 
     def regWrite(self, address, data):
+        """
+        Writes data to the Pozyx registers, starting at a register address, if registers are writable.
+
+        Args:
+            address: Register address to start writing at.
+            data: Data to write to the Pozyx registers. Has to be ByteStructure-derived object.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
         data.load_hex_string()
         index = 0
         runs = int(data.byte_size / MAX_SERIAL_SIZE)
@@ -61,6 +99,15 @@ class PozyxSerial(PozyxLib):
         return POZYX_SUCCESS
 
     def serialExchange(self, s):
+        """
+        Auxiliary. Performs a serial write to and read from the Pozyx.
+
+        Args:
+            s: Serial message to send to the Pozyx
+        Returns:
+            Serial message the Pozyx returns, stripped from 'D,' at its start
+                and NL+CR at the end.
+        """
         self.ser.write(s.encode())
         response = self.ser.readline().decode()
         if self.print_output:
@@ -72,6 +119,16 @@ class PozyxSerial(PozyxLib):
         raise EnvironmentError
 
     def regRead(self, address, data):
+        """
+        Reads data from the Pozyx registers, starting at a register address, if registers are readable.
+
+        Args:
+            address: Register address to start writing at.
+            data: Data to write to the Pozyx registers. Has to be ByteStructure-derived object.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
         runs = int(data.byte_size / MAX_SERIAL_SIZE)
         r = ''
         for i in range(runs):
@@ -91,6 +148,17 @@ class PozyxSerial(PozyxLib):
         return POZYX_SUCCESS
 
     def regFunction(self, address, params, data):
+        """
+        Performs a register function on the Pozyx, if the address is a register function.
+
+        Args:
+            address: Register function address of function to perform.
+            params: Parameters for the register function. Has to be ByteStructure-derived object.
+            data: Container for the data the register function returns. Has to be ByteStructure-derived object.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
         params.load_hex_string()
         s = 'F,%0.2x,%s,%i\r' % (address, params.byte_data, data.byte_size + 1)
         try:
@@ -102,17 +170,21 @@ class PozyxSerial(PozyxLib):
         return int(r[0:2], 16)
 
     def waitForFlag(self, interrupt_flag, timeout_s, interrupt=None):
+        """
+        Waits for a certain interrupt flag to be triggered, indicating that that type of interrupt
+        occured.
+
+        Args:
+            interrupt_flag: Flag indicating interrupt type.
+            timeout_s: time in seconds that POZYX_INT_STATUS will be checked for the flag before returning
+                POZYX_TIMEOUT.
+
+        Kwargs:
+            interrupt: Container for the POZYX_INT_STATUS data. For debugging purposes.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
         if interrupt is None:
             interrupt = SingleRegister()
         return self.waitForFlag_safe(interrupt_flag, timeout_s, interrupt)
-
-    def waitForFlag_safe(self, interrupt_flag, timeout_s, interrupt=None):
-        if interrupt is None:
-            interrupt = SingleRegister()
-        start = time.time()
-        while(time.time() - start < timeout_s):
-            time.sleep(POZYX_DELAY_POLLING)
-            status = self.regRead(POZYX_INT_STATUS, interrupt)
-            if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
-                return True
-        return False

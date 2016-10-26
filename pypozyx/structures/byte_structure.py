@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" pypozyx.structures.byte_structure - Implements the ByteStructure class"""
+""" pypozyx.structures.byte_structure - contains the ByteStructure class, thank you struct."""
 
 import struct
 
@@ -80,11 +80,13 @@ class ByteStructure():
             print("Trying to change data with invalid new values (use int or list)")
 
     def load(self, data, convert=1):
+        """Loads data in its relevant class components."""
         raise NotImplementedError(
             'load(data) should be customised for every derived structure')
 
     # what is this doing here?
     def update_data(self):
+        """Updates the class's data when one of its components has changed."""
         pass
 
     # Python Data Object functionality.
@@ -98,6 +100,7 @@ class ByteStructure():
         return len(self.data)
 
     def __str__(self):
+        """Returns a string that should be tailored to each ByteStructure-derived class."""
         s = ''
         for i in range(len(self.data)):
             if i > 0:
