@@ -1429,7 +1429,7 @@ class PozyxLib(PozyxCore):
 
         self.getInterruptStatus(SingleRegister())
         params = Data([dimension, num_measurements] +
-                      anchors.data, 'BB' + anchors.byte_data)
+                      anchors.data, 'BB' + anchors.data_format)
         status = self.useFunction(
             POZYX_DEVICES_CALIBRATE, params, remote_id=remote_id)
 

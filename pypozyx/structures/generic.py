@@ -107,6 +107,9 @@ class XYZ(ByteStructure):
     Generic XYZ data structure consisting of 3 integers x, y, and z.
 
     Not recommended to use in practice, as relevant sensor data classes are derived from this.
+
+    If deriving this, don't forget to implement your own update_data function, or data will
+    be [x, y, z] consistently instead of [..., x, y, z, ...]. 
     """
     physical_convert = 1
 
