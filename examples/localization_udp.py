@@ -19,7 +19,7 @@ from pypozyx import *
 usb_port = '/dev/ttyACM0'
 
 manual_calibration = True
-remote = True
+remote = False
 remote_id = 0x1000
 if not remote:
     remote_id = None
@@ -77,12 +77,12 @@ class LocalizationUDP():
         status = self.pozyx.doPositioning(
             position, POZYX_2_5D, height, remote_id=remote_id)
         if status == POZYX_SUCCESS:
-            self.publishPosition(pos)
+            self.publishPosition(position)
 
     def publishPosition(self, pos):
         """Publishes the position over the socket."""
         data_format = struct.Struct(">iii")
-        data = data_format.pack(pos.x, pos.y, pos.z)
+        data = data_format.pack(int(pos.x), int(pos.y), int(pos.z))
         self.socket.sendto(data, (ip, network_port))
 
     def setAnchorsManual(self):
