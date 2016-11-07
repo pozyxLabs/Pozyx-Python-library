@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 """
-ready_to_localize.py - Tutorial intended to show how to perform positioning with Pozyx.
+localization_udp.py - Example of using an UDP socket to publish localization results on localhost.
 
-It is planned to make a tutorial on the Pozyx site as well just like there is now
-one for the Arduino, but their operation is very similar.
-You can find the Arduino tutorial here:
-    https://www.pozyx.io/Documentation/Tutorials/ready_to_localize
+This allows other programs on your computer to open a UDP socket and parse the positioning output
+for its own purposes.
+
+The positioning code is identical to the Ready to Localize example, the added value here
+lies in the __init__, where the socket is added, and publishPosition function.
+
+You can customize the socket in __init__ to use other communication protocols.
 """
+import socket
+import struct
 from time import sleep
 from pypozyx import *
 
-port = '/dev/ttyACM0'
+
+usb_port = '/dev/ttyACM0'
 
 manual_calibration = True
 remote = True
@@ -27,8 +33,12 @@ anchors_y = [0, 3950, 0, 3945]
 # for 2.5D
 height = 1000
 
+# for networking
+ip = "127.0.0.1"  # localhost
+network_port = 8888
 
-class ReadyToLocalize():
+
+class LocalizationUDP():
     """Continuously calls the Pozyx positioning function and prints its position."""
 
     def __init__(self, port):
@@ -37,6 +47,8 @@ class ReadyToLocalize():
         except:
             print('ERROR: Unable to connect to Pozyx, wrong port')
             raise SystemExit
+
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         self.setup()
         while True:
@@ -60,16 +72,18 @@ class ReadyToLocalize():
         self.printCalibrationResult()
 
     def loop(self):
-        """Performs positioning and prints the results."""
+        """Performs positioning and publishes the results over the socket."""
         position = Coordinates()
         status = self.pozyx.doPositioning(
             position, POZYX_2_5D, height, remote_id=remote_id)
         if status == POZYX_SUCCESS:
-            self.printCoordinates(position)
+            self.publishPosition(pos)
 
-    def printCoordinates(self, pos):
-        """Prints the coordinates in a human-readable way."""
-        print("x(mm): {pos.x}, y(mm): {pos.y}, z(mm): {pos.z}".format(pos=pos))
+    def publishPosition(self, pos):
+        """Publishes the position over the socket."""
+        data_format = struct.Struct(">iii")
+        data = data_format.pack(pos.x, pos.y, pos.z)
+        self.socket.sendto(data, (ip, network_port))
 
     def setAnchorsManual(self):
         """Adds the manually measured anchors to the Pozyx's device list one for one."""
@@ -80,7 +94,7 @@ class ReadyToLocalize():
             status = self.pozyx.addDevice(anchor, remote_id)
 
     def printCalibrationResult(self):
-        """Prints the anchor calibration results in a human-readable way."""
+        """Prints the anchor calibration results in a human - readable way."""
         list_size = SingleRegister()
 
         status = self.pozyx.getDeviceListSize(list_size, remote_id)
@@ -101,4 +115,4 @@ class ReadyToLocalize():
             print("ANCHOR,0x%0.4x,%s" % (device_list[i], str(anchor)))
 
 if __name__ == "__main__":
-    r = ReadyToLocalize(port)
+    l = LocalizationUDP(usb_port)

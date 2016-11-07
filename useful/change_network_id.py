@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+"""change_network_id.py - Changes a local/remote device's network ID."""
 from pypozyx import *
 from pypozyx.definitions.registers import *
 # remote_id = 0x6000

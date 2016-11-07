@@ -1,7 +1,10 @@
 #!/usr/bin/env python
-"""set_same_settings - sets all wanted devices on the same settings as the tag.
+"""set_same_settings.py - sets all wanted devices on the same settings as the tag.
 
-This script discovers all the anchors on the given network and sets the UWB settings of the anchors whose IDs are set at the top. It can also save to flash if so desired.
+This script discovers all the devices in the environment and sets the UWB settings
+of the devices whose IDs match the included ones.
+
+It can also save to flash if so desired.
 """
 from pypozyx import *
 from pypozyx.definitions.registers import POZYX_UWB_CHANNEL, POZYX_UWB_RATES, POZYX_UWB_PLEN, POZYX_UWB_GAIN
@@ -54,18 +57,21 @@ class SetSameUWBSettings:
                         # will continue when UWB settings have been correctly
                         # set
                         while not self.pozyx.setUWBSettings(uwb_settings):
-                            print("Not able to set UWB settings %s on local device" % str(self.uwb_settings))
+                            print("Not able to set UWB settings %s on local device" % str(
+                                self.uwb_settings))
                             fails += 1
                             if fails == self.max_fails:
                                 print("Skipping this settings")
                                 break
                         uwb_check = UWBSettings()
                         self.pozyx.getUWBSettings(uwb_check)
-                        print("Set UWB settings %s on local device" % str(uwb_check))
+                        print("Set UWB settings %s on local device" %
+                              str(uwb_check))
                         self.change_settings(self.discover_devices())
         # reset the UWB settings of the local tag to the necessary one
         while not self.pozyx.setUWBSettings(self.uwb_settings):
-            print("Not able to set UWB settings %s on local device" % str(self.uwb_settings))
+            print("Not able to set UWB settings %s on local device" %
+                  str(self.uwb_settings))
         if save_to_flash:
             self.save_settings()
         print('DONE!')
@@ -88,27 +94,28 @@ class SetSameUWBSettings:
             # beware not to get stuck in endless loop.
             return self.discover_devices()
 
-
     def change_settings(self, device_ids):
         """Changes the device's UWB settings"""
         for device_id in device_ids:
             if device_id in self.devices and device_id not in self.encountered:
                 while not self.pozyx.setUWBSettings(self.uwb_settings, device_id):
-                    print("Not able to set UWB settings on device 0x%0.4x" % device_id)
+                    print("Not able to set UWB settings on device 0x%0.4x" %
+                          device_id)
                 self.encountered.append(device)
-                print("Successfully set UWB settings on device 0x%0.4x" % device_id)
+                print("Successfully set UWB settings on device 0x%0.4x" %
+                      device_id)
 
     def save_settings(self):
         """Saves the UWB settings to flash on all devices"""
         # set the UWB settings to the desired one
         self.pozyx.setUWBSettings(self.uwb_settings)
-        registers = [POZYX_UWB_CHANNEL, POZYX_UWB_RATES, POZYX_UWB_PLEN, POZYX_UWB_GAIN]
+        registers = [POZYX_UWB_CHANNEL, POZYX_UWB_RATES,
+                     POZYX_UWB_PLEN, POZYX_UWB_GAIN]
         for device_id in self.devices:
             while not self.pozyx.saveRegisters(registers, device_id):
-                print("Not able to save UWB settings on device 0x%0.4x" % device_id)
+                print("Not able to save UWB settings on device 0x%0.4x" %
+                      device_id)
             print("Successfully saved UWB settings on device 0x%0.4x" % device_id)
-
-
 
 
 if __name__ == "__main__":

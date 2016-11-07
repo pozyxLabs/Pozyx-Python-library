@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+"""
+ready_to_range.py - Tutorial intended to show how to perform ranging between two Pozyx devices.
+
+It is planned to make a tutorial on the Pozyx site as well just like there is now
+one for the Arduino, but their operation is very similar.
+You can find the Arduino tutorial here:
+    https://www.pozyx.io/Documentation/Tutorials/ready_to_range
+"""
 from pypozyx import *
 
 port = '/dev/ttyACM0'
