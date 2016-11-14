@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """pypozyx.serial - contains the serial interface with Pozyx through PozyxSerial."""
 
-from pypozyx.definitions.constants import *
-from pypozyx.definitions.registers import *
-
-from pypozyx.lib import PozyxLib
-
-from pypozyx.structures.generic import Data, SingleRegister
-
 import serial
 import time
+
+from pypozyx.definitions.constants import *
+from pypozyx.definitions.registers import *
+from pypozyx.lib import PozyxLib
+from pypozyx.structures.generic import Data, SingleRegister
+
+
 
 
 class PozyxSerial(PozyxLib):

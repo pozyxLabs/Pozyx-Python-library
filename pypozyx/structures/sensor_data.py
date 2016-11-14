@@ -87,6 +87,7 @@ class PositionError(XYZ):
     Useful in these functions:
         getPositionError
     """
+    physical_convert = 1
     byte_size = 12
     data_format = 'hhhhhh'
 
@@ -96,12 +97,20 @@ class PositionError(XYZ):
         self.xy = xy
         self.xz = xz
         self.yz = yz
+        self.data = [x, y, z, xy, xz, yz]
 
     def load(self, data):
         XYZ.load(self, data[0:3])
-        self.xy = data[3]
-        self.xz = data[4]
-        self.yz = data[5]
+        self.xy = data[3] / physical_convert
+        self.xz = data[4] / physical_convert
+        self.yz = data[5] / physical_convert
+
+    def update_data(self):
+        try:
+            if self.data != [self.x, self.y, self.z, self.xy, self.xz, self.yz]:
+                self.data = [self.x, self.y, self.z, self.xy, self.xz, self.yz]
+        except:
+            return
 
     def __str__(self):
         return 'X: {self.x}, Y: {self.y}, Z: {self.z}, XY: {self.xy}, XZ: {self.xz}, YZ: {self.yz}'.format(self=self)
