@@ -1,4 +1,11 @@
-# POZYX REGISTERS
+#!/usr/bin/env python
+"""
+pypozyx.definitions.registers - contains all register definitions used in Pozyx.
+
+It shouldn't be necessary to use these in basic applications as the library functions
+should provide a lot of functionality already, but for advanced users looking to
+implement their own low-level functionality, these might be very useful.
+"""
 
 # Status registers
 POZYX_WHO_AM_I = 0x0   # Returns the constant value 0x43.

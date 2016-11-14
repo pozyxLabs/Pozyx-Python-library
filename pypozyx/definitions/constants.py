@@ -1,4 +1,5 @@
-# TODO: Check the Arduino definitions whether these are correct and accurate...
+#!/usr/bin/env python
+"""pypozyx.definitions.constants - contains all Pozyx constants, such as error definitions, delays, physical convertions."""
 
 POZYX_ANCHOR = 0x00
 POZYX_TAG = 0x20
@@ -31,6 +32,8 @@ POZYX_INT_PIN1 = 0x1
 
 POZYX_LED_CTRL_LEDRX = 0x10
 POZYX_LED_CTRL_LEDTX = 0x20
+POZYX_LED_ON = True
+POZYX_LED_OFF = False
 
 POZYX_ANCHOR_MODE = 0
 POZYX_TAG_MODE = 1
@@ -53,6 +56,11 @@ POZYX_ANCHOR_SEL_AUTO = 1
 POZYX_DISCOVERY_ANCHORS_ONLY = 0
 POZYX_DISCOVERY_TAGS_ONLY = 1
 POZYX_DISCOVERY_ALL_DEVICES = 2
+
+# positioning algorithm options
+POZYX_POS_ALG_UWB_ONLY = 0
+POZYX_POS_ALG_TRACKING = 1
+POZYX_POS_ALG_LS = 2
 
 # how to intercept pozyx events: by polling or by interrupts
 MODE_POLLING = 0

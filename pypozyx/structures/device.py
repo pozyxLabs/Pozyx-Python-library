@@ -1,3 +1,21 @@
+#!/usr/bin/env python
+"""
+pypozyx.structures.device - contains various classes representing device data
+
+Structures contained
+--------------------
+DeviceCoordinates
+    consists of a device's ID, flag, and coordinates
+DeviceRange
+    consists of a range measurements timestamp, distance, and RSS
+NetworkID
+    container for a device's ID. Prints in 0xID format.
+DeviceList
+    container for a list of IDs. Can be initialized through size and/or IDs.
+UWBSettings
+    contains all of the UWB settings: channel, bitrate, prf, plen, and gain.
+"""
+
 from pypozyx.structures.byte_structure import ByteStructure
 from pypozyx.structures.sensor_data import Coordinates
 from pypozyx.structures.generic import Data
@@ -5,10 +23,24 @@ from pypozyx.definitions.constants import *
 
 
 class DeviceCoordinates(ByteStructure):
+    """
+    Container for both reading and writing device coordinates from and to Pozyx.
+
+    The keyword arguments are at once its properties.
+
+    Kwargs:
+        network_id: Network ID of the device
+        flag: Type of the device. Tag or anchor.
+        pos: Coordinates of the device. Coordinates().
+
+    Useful for the following functions:
+        addDevice, getDeviceCoordinates
+    """
     byte_size = 15
     data_format = 'HBiii'
 
     def __init__(self, network_id=0, flag=0, pos=Coordinates()):
+        """Initializes the DeviceCoordinates object."""
         self.network_id = network_id
         self.flag = flag
         self.pos = pos
@@ -34,10 +66,24 @@ class DeviceCoordinates(ByteStructure):
 
 
 class DeviceRange(ByteStructure):
+    """
+    Container for the device range data, resulting from a range measurement.
+
+    The keyword arguments are at once its properties.
+
+    Kwargs:
+        timestamp: Timestamp of the range measurement
+        distance: Distance measured by the device.
+        RSS: Signal strength during the ranging measurement.
+
+    Useful for the following functions:
+        doRanging, getDeviceRangeInfo
+    """
     byte_size = 10
     data_format = 'IIh'
 
     def __init__(self, timestamp=0, distance=0, RSS=0):
+        """Initializes the DeviceRange object."""
         self.timestamp = timestamp
         self.distance = distance
         self.RSS = RSS
@@ -61,8 +107,18 @@ class DeviceRange(ByteStructure):
 
 
 class NetworkID(Data):
+    """
+    Container for a device's network ID.
 
-    def __init__(self, network_id):
+    Kwargs:
+        network_id: The network ID of the device.
+
+    Useful for the following functions:
+        getNetworkId, setNetworkId
+    """
+
+    def __init__(self, network_id=0):
+        """Initializes the NetworkID object."""
         Data.__init__(self, [network_id], 'H')
         self.id = network_id
 
@@ -82,8 +138,25 @@ class NetworkID(Data):
 
 
 class DeviceList(Data):
+    """
+    Container for a list of device IDs.
+
+    Using list_size is recommended when having just used getDeviceListSize, while ids
+    is recommended when one knows the IDs. When using one, the other automatically
+    gets its respective value. Therefore, only use on of both.
+
+    Note also that DeviceList(list_size=1) is the same as NetworkID().
+
+    Kwargs:
+        ids: Array of known or unknown device IDs. Empty by default.
+        list_size: Size of the device list.
+
+    Useful for the following functions:
+        getAnchorIds, getTagIds, getDeviceIds, setPositioningAnchorIds.
+    """
 
     def __init__(self, ids=[], list_size=0):
+        """Initializes the DeviceList object with either IDs or its size."""
         if list_size != 0 and ids == []:
             Data.__init__(self, [0] * list_size, 'H' * list_size)
         else:
@@ -102,15 +175,35 @@ class DeviceList(Data):
             self.data[i] = data[i]
 
 
-# TODO: change UWB settings initialization to not contain data but the parameters.
-# data was a lazy step. can always init empty and then load data
-# TODO: Think more about UWB settings and whether to make data not like the struct but
-# more like the data? Or make this abstraction in the set and get still?
 class UWBSettings(ByteStructure):
+    """
+    Container for a device's UWB settings.
+
+    Its keyword arguments are at once its properties.
+
+    It also provides parsing functions for all its respective properties,
+    which means this doesn't need to be done by users. These functions are
+    parse_prf, parse_plen and parse_bitrate.
+
+    You can also directly print the UWB settings, resulting in the following
+    example output:
+    "CH: 1, bitrate: 850kbit/s, prf: 16MHz, plen: 1024 symbols, gain: 15.0dB"
+
+    Kwargs:
+        channel: UWB channel of the device. See POZYX_UWB_CHANNEL.
+        bitrate: Bitrate of the UWB commmunication. See POZYX_UWB_RATES.
+        prf: Pulse repeat frequency of the UWB. See POZYX_UWB_RATES.
+        plen: Preamble length of the UWB packets. See POZYX_UWB_PLEN.
+        gain_db: Gain of the UWB transceiver, a float value. See POZYX_UWB_GAIN.
+
+    Useful for the following functions:
+        getUWBSettings, setUWBSettings
+    """
     byte_size = 7
     data_format = 'BBBBf'
 
     def __init__(self, channel=0, bitrate=0, prf=0, plen=0, gain_db=0):
+        """Initializes the UWB settings."""
         self.channel = channel
         self.bitrate = bitrate
         self.prf = prf
@@ -138,13 +231,15 @@ class UWBSettings(ByteStructure):
             return
 
     def parse_bitrate(self):
-        bitrates = {0: '110kbit/s', 1: '850kbit/s', 2: '6.8Mbit/s'}
+        """Parses the bitrate to be humanly readable."""
+        bitrates = {0: '110kbit/s', 1: '850kbit/s', 2: '6.81Mbit/s'}
         try:
             return bitrates[self.bitrate]
         except:
             return 'invalid bitrate'
 
     def parse_prf(self):
+        """Parses the pulse repetition frequency to be humanly readable."""
         prfs = {1: '16 MHz', 2: '64 MHz'}
         try:
             return prfs[self.prf]
@@ -152,6 +247,7 @@ class UWBSettings(ByteStructure):
             return 'invalid pulse repetitions frequency (PRF)'
 
     def parse_plen(self):
+        """Parses the preamble length to be humanly readable."""
         plens = {0x0C: '4096 symbols', 0x28: '2048 symbols', 0x18: '1536 symbols', 0x08: '1024 symbols',
                  0x34: '512 symbols', 0x24: '256 symbols', 0x14: '128 symbols', 0x04: '64 symbols'}
         try:

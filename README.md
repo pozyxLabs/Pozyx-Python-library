@@ -1,12 +1,12 @@
 # Pozyx-Python-library
 The unofficial release of the Python library (Beta version) to work with the pozyx indoor positioning system
 
-This library requires Python 3. A Python 2 version will be made available separately.
+This library works with both Python 2 and 3.
 
 ### Prerequisites:
-* Download and install Python 3, on Windows, make your life easier and make sure Python is in your PATH. A recommended install is therefore the [Anaconda Suite](https://www.continuum.io/downloads) by Continuum.
-* Install the PySerial package. If you have pip installed, you can do this by writing `pip install pyserial` in your command line interface (cmd on Windows). Pip is automatically installed if you installed the Anaconda Suite.
-* **Windows only** install [ST's virtual COM driver](http://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-stm32102.html). Be careful, this puts the actual installer in your Program Files, so you'll have to go to the STMicroElectronics folder in your Program Files and install the right installer there (if on Windows 10, use the Windows 8 installer)
+* Download and install Python. On Windows, make your life easier and make sure Python is in your PATH. A recommended install is therefore the [Anaconda Suite](https://www.continuum.io/downloads) by Continuum.
+* Install the PySerial package. If you have pip installed, you can do this by writing `pip install pyserial` in your command line interface (cmd on Windows).
+* **Windows only** install [ST's virtual COM driver](http://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-stm32102.html)
 
 ### Installing this package.
 As it's not yet available on PyPi, you will have to install the library from source. This is, however, very easy.
@@ -40,6 +40,6 @@ You might notice the current lack of documentation and examples that use this li
 whoami = SingleRegister()
 pozyx.regRead(POZYX_WHO_AM_I, whoami) # which is pozyx.getWhoAmI(whoami)
 ```
-* `SingleRegister(value=0, size=1, signed=1)` is basically an instance `Data([0], 'B')`, which functions as a single uint8_t. If you want to make your custom data, for a single register you can adapt the size and signed parameters, and for larger data structures you can use your own data formats. `Data([0]*3, 'BHI')`, for example, creates a structure of 1 uint8_t, uint16_t and uint32_t. Writing and reading data using this example as a parameter will automatically read/write 7 bytes worth of data. To specify your own data formats, check the [struct package documentation](https://docs.python.org/3.5/library/struct.html#format-characters).
+* `SingleRegister(value=0, size=1, signed=1)` is basically an instance `Data([0], 'B')`, which functions as a single uint8_t. If you want to make your custom data, for a single register you can adapt the size and signed parameters, and for larger data structures you can use your own data formats. `Data([0]*3, 'BHI')`, for example, creates a structure of 1 uint8_t, uint16_t and uint32_t. Writing and reading data using this example as a parameter will automatically read/write 7 bytes worth of data. To specify your own data formats, check the [struct package documentation for Python 3](https://docs.python.org/3.5/library/struct.html#format-characters) or [Python 2](https://docs.python.org/2/library/struct.html).
  
 * Examples and tutorials source code will be put on the [Pozyx website](http://pozyx.io/) eventually, but will also appear as source code on GitHub.
