@@ -7,9 +7,9 @@ remote_id = None
 if remote:
     remote_id = 0x6F5E
 
-port = '/dev/ttyACM3'
+port = '/dev/ttyACM1'
 
-new_id = 0x6000
+new_id = 0x6406
 
 
 class SetNetworkID():
