@@ -399,7 +399,7 @@ class PozyxCore():
         if dataCheck(destination):
             destination = destination[0]  # see what I did there.
         params = Data([destination, 0x06], 'HB')
-        status = self.regFunction(POZYX_TX_SEND, params, [])
+        status = self.regFunction(POZYX_TX_SEND, params, Data([]))
         return status
 
     def sendData(self, destination, data):

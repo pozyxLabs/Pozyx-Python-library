@@ -1170,9 +1170,9 @@ class PozyxLib(PozyxCore):
         assert mode[0] == POZYX_ANCHOR_SEL_MANUAL or mode[
             0] == POZYX_ANCHOR_SEL_AUTO, 'setSelectionOfAnchors: wrong mode'
         assert nr_anchors[0] > 2 and nr_anchors[
-            0] <= 16, 'setSelectionOfAnchors: num anchors %i not in range 3-16' % nr_anchors
+            0] <= 16, 'setSelectionOfAnchors: num anchors %i not in range 3-16' % nr_anchors[0]
 
-        params = Data([(mode << 7) + nr_anchors])
+        params = Data([(mode[0] << 7) + nr_anchors[0]])
         return self.setWrite(POZYX_POS_NUM_ANCHORS, params, remote_id)
 
     def setGPIO(self, gpio_num, value, remote_id=None):
