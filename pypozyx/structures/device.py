@@ -208,7 +208,7 @@ class UWBSettings(ByteStructure):
         self.bitrate = bitrate
         self.prf = prf
         self.plen = plen
-        self.gain_db = gain_db
+        self.gain_db = float(gain_db)
         self.data = [self.channel, self.bitrate,
                      self.prf, self.plen, self.gain_db]
 
@@ -217,7 +217,7 @@ class UWBSettings(ByteStructure):
         self.bitrate = data[1] & 0x3F
         self.prf = (data[1] & 0xC0) >> 6
         self.plen = data[2]
-        self.gain_db = data[3] / 2
+        self.gain_db = float(data[3]) / 2
         self.data = [self.channel, self.bitrate,
                      self.prf, self.plen, self.gain_db]
 

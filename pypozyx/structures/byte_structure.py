@@ -4,7 +4,7 @@
 import struct
 
 
-class ByteStructure():
+class ByteStructure(object):
     """
     The ByteStructure class is the base class that all custom structs inherit
     their basic functionality from. It implements the low-level functionality

@@ -5,7 +5,7 @@ setup(
     name='pypozyx',
     packages=['pypozyx', 'pypozyx.definitions',
               'pypozyx.structures', 'pypozyx.tests'],
-    version='0.1.0',
+    version='0.2.0',
     description='Python library for Pozyx',
     author='Laurent Van Acker',
     author_email='laurent@pozyx.io',
@@ -13,7 +13,7 @@ setup(
     download_url='www.pozyx.io',
     keywords=['pozyx', 'serial', 'positioning', 'localisation'],
     classifiers=[
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python',
         'Development Status :: 4 - Beta',
         'Intended audience :: End Users/Developers',
         'Operating System :: OS independent',
@@ -24,6 +24,6 @@ setup(
     Pozyx Python library, used to interface with the Pozyx without need of an arduino.
     Currently supports USB (serial), planned I2C support.
 
-    This version requires Python 3 or later. A Python 2 version is available separately.
+    Both Python 2 and 3 are supported.
     """
 )

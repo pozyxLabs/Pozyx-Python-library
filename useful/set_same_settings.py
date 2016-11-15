@@ -101,7 +101,7 @@ class SetSameUWBSettings:
                 while not self.pozyx.setUWBSettings(self.uwb_settings, device_id):
                     print("Not able to set UWB settings on device 0x%0.4x" %
                           device_id)
-                self.encountered.append(device)
+                self.encountered.append(device_id)
                 print("Successfully set UWB settings on device 0x%0.4x" %
                       device_id)
 

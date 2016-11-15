@@ -1,15 +1,14 @@
-#!/usr/bin/env python
-"""pypozyx.serial - contains the serial interface with Pozyx through PozyxSerial."""
 
-import serial
-import time
+"""pypozyx.pozyx_serial - contains the serial interface with Pozyx through PozyxSerial."""
+
+
+from time import sleep
+from serial import Serial
 
 from pypozyx.definitions.constants import *
 from pypozyx.definitions.registers import *
 from pypozyx.lib import PozyxLib
 from pypozyx.structures.generic import Data, SingleRegister
-
-
 
 
 class PozyxSerial(PozyxLib):
@@ -48,12 +47,13 @@ class PozyxSerial(PozyxLib):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
         try:
-            self.ser = serial.Serial(port, baudrate, timeout=timeout)
+            self.ser = Serial(port, baudrate, timeout=timeout)
         except:
-            print("Couldn't connect with Pozyx, wrong/busy serial port.")
+            print(
+                "Couldn't connect with Pozyx, wrong/busy serial port, or pySerial not installed.")
             raise SystemExit
 
-        time.sleep(0.25)
+        sleep(0.25)
 
         regs = Data([0, 0, 0])
         if self.regRead(POZYX_WHO_AM_I, regs) == POZYX_FAILURE:
