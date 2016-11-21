@@ -109,7 +109,7 @@ class XYZ(ByteStructure):
     Not recommended to use in practice, as relevant sensor data classes are derived from this.
 
     If deriving this, don't forget to implement your own update_data function, or data will
-    be [x, y, z] consistently instead of [..., x, y, z, ...]. 
+    be [x, y, z] consistently instead of [..., x, y, z, ...].
     """
     physical_convert = 1
 
@@ -175,7 +175,7 @@ class Data(ByteStructure):
         if data is None:
             data = []
         self.data = data
-        if data_format == None:
+        if data_format is None:
             data_format = 'B' * len(data)
         self.data_format = data_format
         self.set_packed_size()

@@ -1285,7 +1285,7 @@ class PozyxLib(PozyxCore):
             return status
         return POZYX_FAILURE
 
-    def doPositioning(self, position, dimension=POZYX_2_5D, height=Data([0], 'i'), algorithm=POZYX_POS_ALG_UWB_ONLY, remote_id=None):
+    def doPositioning(self, position, dimension=POZYX_3D, height=Data([0], 'i'), algorithm=POZYX_POS_ALG_UWB_ONLY, remote_id=None):
         """
         Performs positioning with the Pozyx. This is probably why you're using Pozyx.
 

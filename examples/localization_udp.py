@@ -13,8 +13,8 @@ You can customize the socket in __init__ to use other communication protocols.
 import socket
 import struct
 from time import sleep
-from pypozyx import *
 
+from pypozyx import *
 
 usb_port = '/dev/ttyACM0'
 
@@ -34,6 +34,7 @@ anchors_y = [0, 3950, 0, 3945]
 height = 1000
 
 # for networking
+send_as_bytes = True
 ip = "127.0.0.1"  # localhost
 network_port = 8888
 
@@ -77,13 +78,21 @@ class LocalizationUDP():
         status = self.pozyx.doPositioning(
             position, POZYX_2_5D, height, remote_id=remote_id)
         if status == POZYX_SUCCESS:
-            self.publishPosition(position)
+            if send_as_bytes:
+                self.publishPositionBytes(position)
+            else:
+                self.publishPositionString(position)
 
-    def publishPosition(self, pos):
+    def publishPositionBytes(self, pos):
         """Publishes the position over the socket."""
         data_format = struct.Struct(">iii")
         data = data_format.pack(int(pos.x), int(pos.y), int(pos.z))
         self.socket.sendto(data, (ip, network_port))
+
+    def publishPositionString(self, pos):
+        """Publishes the ID and position as a string \"POS ID X Y Z\" """
+        s = "P %i %i %i" % (int(pos.x), int(pos.y), int(pos.z))
+        self.socket.sendto(s, (ip, network_port))
 
     def setAnchorsManual(self):
         """Adds the manually measured anchors to the Pozyx's device list one for one."""
