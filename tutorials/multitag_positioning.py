@@ -35,6 +35,8 @@ class MultitagPositioning():
             print('ERROR: Unable to connect to Pozyx, wrong port')
             raise SystemExit
 
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
         self.setup()
         while True:
             self.loop()
