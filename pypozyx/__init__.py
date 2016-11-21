@@ -87,7 +87,7 @@ switch at some point.
 
 """
 
-from pypozyx.pozyx_serial import PozyxSerial
+from pypozyx.pozyx_serial import PozyxSerial, list_serial_ports
 
 from pypozyx.definitions.constants import *
 from pypozyx.structures.generic import *
