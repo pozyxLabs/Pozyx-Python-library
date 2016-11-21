@@ -5,11 +5,17 @@
 from time import sleep
 from serial import Serial
 
+from serial.tools.list_ports import comports
 from pypozyx.definitions.constants import *
 from pypozyx.definitions.registers import *
 from pypozyx.lib import PozyxLib
 from pypozyx.structures.generic import Data, SingleRegister
 
+
+def list_serial_ports():
+    ports = comports()
+    for port in ports:
+        print(port)
 
 class PozyxSerial(PozyxLib):
     """
