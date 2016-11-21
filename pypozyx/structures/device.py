@@ -202,7 +202,7 @@ class UWBSettings(ByteStructure):
     byte_size = 7
     data_format = 'BBBBf'
 
-    def __init__(self, channel=0, bitrate=0, prf=0, plen=0, gain_db=0):
+    def __init__(self, channel=0, bitrate=0, prf=0, plen=0, gain_db=0.0):
         """Initializes the UWB settings."""
         self.channel = channel
         self.bitrate = bitrate
