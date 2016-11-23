@@ -1285,7 +1285,7 @@ class PozyxLib(PozyxCore):
             return status
         return POZYX_FAILURE
 
-    def doPositioning(self, position, dimension=POZYX_2_5D, height=Data([0], 'i'), algorithm=POZYX_POS_ALG_UWB_ONLY, remote_id=None):
+    def doPositioning(self, position, dimension=POZYX_3D, height=Data([0], 'i'), algorithm=POZYX_POS_ALG_UWB_ONLY, remote_id=None):
         """
         Performs positioning with the Pozyx. This is probably why you're using Pozyx.
 
@@ -1650,3 +1650,32 @@ class PozyxLib(PozyxCore):
         byte_num = regAddress / 8
         bit_num = regAddress % 8
         return (details[byte_num] >> bit_num) & 0x1
+
+    def configureAnchors(self, anchor_list, save_to_flash=False, anchor_select=POZYX_ANCHOR_SEL_AUTO, remote_id=None):
+        """
+        Configures a set of anchors as the relevant anchors on a device
+
+        Args:
+            anchor_list: Python list of either DeviceCoordinates or [ID, flag, x, y, z]
+
+        Kwargs:
+            save_to_flash: Whether to save the device list to the Pozyx's flash memory
+            anchor_select: How to select the anchors in positioning
+            remote_id: Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        status = POZYX_SUCCESS
+        status &= self.clearDevices(remote_id)
+
+        for anchor in anchor_list:
+            if anchor.flag != 0x1:
+                print("ID 0x%0.4x added as tag, is this intentional?" % remote_id)
+            status &= self.addDevice(anchor, remote_id)
+
+        self.setSelectionOfAnchors(anchor_select, len(anchor_list), remote_id)
+        if save_to_flash:
+            status &= self.saveNetwork(remote_id)
+            status &= self.saveRegisters([POZYX_POS_NUM_ANCHORS], remote_id)
+        return status
