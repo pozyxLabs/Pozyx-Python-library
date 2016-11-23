@@ -3,19 +3,26 @@
 
 
 from time import sleep
-from serial import Serial
 
-from serial.tools.list_ports import comports
 from pypozyx.definitions.constants import *
 from pypozyx.definitions.registers import *
 from pypozyx.lib import PozyxLib
 from pypozyx.structures.generic import Data, SingleRegister
+from serial import Serial
+from serial.tools.list_ports import comports
 
 
 def list_serial_ports():
+    """Prints the open serial ports line per line"""
     ports = comports()
     for port in ports:
         print(port)
+
+
+def get_serial_ports():
+    """Returns the open serial ports"""
+    return comports()
+
 
 class PozyxSerial(PozyxLib):
     """
