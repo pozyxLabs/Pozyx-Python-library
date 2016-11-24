@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 """pypozyx.structures.sensor_data - Contains container classes for data from the Pozyx's many sensors."""
 
+from pypozyx.definitions.constants import *
 from pypozyx.structures.byte_structure import ByteStructure
 from pypozyx.structures.generic import XYZ
-
-from pypozyx.definitions.constants import *
 
 
 class Coordinates(XYZ):
@@ -71,9 +70,9 @@ class LinearAcceleration(XYZ):
 
     def load(self, data, convert=1):
         if convert:
-            self.x = float(data[0]) / physical_convert
-            self.y = float(data[1]) / physical_convert
-            self.z = float(data[2]) / physical_convert
+            self.x = float(data[0]) / self.physical_convert
+            self.y = float(data[1]) / self.physical_convert
+            self.z = float(data[2]) / self.physical_convert
         else:
             self.x = float(data[0])
             self.y = float(data[1])
@@ -101,9 +100,9 @@ class PositionError(XYZ):
 
     def load(self, data):
         XYZ.load(self, data[0:3])
-        self.xy = data[3] / physical_convert
-        self.xz = data[4] / physical_convert
-        self.yz = data[5] / physical_convert
+        self.xy = data[3] / self.physical_convert
+        self.xz = data[4] / self.physical_convert
+        self.yz = data[5] / self.physical_convert
 
     def update_data(self):
         try:
