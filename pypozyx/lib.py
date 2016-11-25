@@ -885,10 +885,11 @@ class PozyxLib(PozyxCore):
         return self.useFunction(POZYX_DEVICE_GETRANGEINFO, device_id, device_range, remote_id)
 
     def getDeviceCirInfo(self, cir_buffer, data_length, cir, remote_id=None):
-                """
+        """
         Obtain the CIR information of the device .
         Args:
-            cir_buffer: CIR buffer offset. This value indicates where the offset inside the CIR buffer to start reading the the data bytes. Possible values range between 0 and 1015.
+            cir_buffer: CIR buffer offset. This value indicates where the offset inside the CIR
+                         buffer to start reading the the data bytes. Possible values range between 0 and 1015.
                         Type: uint16_t
             data_length : Data length. The number of coefficients to read from the CIR buffer. Possible values range between 1 and 49.
         Kwargs:
@@ -898,10 +899,7 @@ class PozyxLib(PozyxCore):
         #     device_id = NetworkID(device_id)
         # assert device_id[0] != 0, 'getDeviceRangeInfo: device ID = 0'
         params = Data([cir_buffer, data_length])
-
         return self.useFunction(POZYX_CIR_DATA, params, cir, remote_id)
-
-
 
     def setInterruptMask(self, mask, remote_id=None):
         """
