@@ -175,6 +175,7 @@ class DeviceList(Data):
             self.data[i] = data[i]
 
 
+
 class UWBSettings(ByteStructure):
     """
     Container for a device's UWB settings.
