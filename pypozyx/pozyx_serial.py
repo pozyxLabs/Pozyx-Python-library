@@ -59,6 +59,7 @@ class PozyxSerial(PozyxLib):
     def __init__(self, port, baudrate=115200, timeout=0.1, print_output=False):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
+
         try:
             self.ser = Serial(port, baudrate, timeout=timeout)
         except:
@@ -174,6 +175,8 @@ class PozyxSerial(PozyxLib):
         """
         params.load_hex_string()
         s = 'F,%0.2x,%s,%i\r' % (address, params.byte_data, data.byte_size + 1)
+        import ipdb
+        ipdb.set_trace()
         try:
             r = self.serialExchange(s)
         except:

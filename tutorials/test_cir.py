@@ -13,7 +13,7 @@ from pypozyx.definitions.registers import *
 
 
 
-port = '/dev/ttyACM1'                # COM port of the Pozyx device
+port = '/dev/ttyACM4'                # COM port of the Pozyx device
 
 remote_id = 0x605D           # the network ID of the remote device
 remote = False               # whether to use the given remote device for ranging
@@ -28,13 +28,23 @@ p = PozyxSerial(port)
 
 
 
-param = Data([0x0000,49],'Hi')
+param = Data([0x0000,0x0000,49],'HHI')
 
 
 
-data_format = ['i']*98
+data_format = ['i']*99
 data_format = ''.join(data_format)
-cir = Data([],data_format)
+cir = Data([0]*99,data_format)
+
+print p.regFunction(POZYX_CIR_DATA, param, cir)
 
 
-p.useFunction(POZYX_CIR_DATA, params, cir, remote_id)
+r=DeviceRange()
+#p.useFunction(POZYX_DEVICE_GETRANGEINFO,Data([0x6830],'H'),r,None)
+p.regFunction(POZYX_DEVICE_GETRANGEINFO,Data([0x6830],'H'),r)
+
+# class cirparam(ByteStructure):
+#     byte_size = 12
+#     data_format = 'III'
+
+#     def __init__(self, timestamp=0, distance=0, RSS=0):
