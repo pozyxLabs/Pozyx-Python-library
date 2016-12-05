@@ -222,3 +222,45 @@ class SingleRegister(Data):
             return bin(self.data[0])
         else:
             return str(self.data[0])
+
+
+
+class Buffer(Data):
+    """
+    Buffer is container for the data from a Pozyx buffer.
+
+    By default, this represents a UInt8 register. Used for both reading and writing.
+    The size and whether the data is a 'signed' integer are both changeable by the
+    user using the size and signed keyword arguments.
+
+    Kwargs:
+        value: list of values of the buffer.
+        size: Size of each data of the buffer. 1, 2, or 4. Default 0.
+        signed: Whether the data is signed. unsigned by default.
+        print_hex: How to print the register output. Hex by default. Special options are 'hex' and 'bin'
+            other things, such as 'dec', will return decimal output.
+    """
+
+    def __init__(self, value=[0], size=1, signed=0, print_style='hex'):
+        self.print_style = print_style
+        if size == 1:
+            data_format = 'b'
+        elif size == 2:
+            data_format = 'h'
+        elif size == 4:
+            data_format = 'i'
+        if signed == 0:
+            data_format = data_format.capitalize()
+        extend_data_format = ''.join([data_format]*len(value))
+        Data.__init__(self, value, extend_data_format)
+
+    def load(self, data, convert=1):
+        self.data = data
+
+    def __str__(self):
+        if self.print_style is 'hex':
+            return str([hex(d).capitalize() for d in self.data])
+        elif self.print_style is 'bin':
+            return str([bin(d) for d in self.data])
+        else:
+            return str([d for d in self.data])
