@@ -175,8 +175,7 @@ class PozyxSerial(PozyxLib):
         """
         params.load_hex_string()
         s = 'F,%0.2x,%s,%i\r' % (address, params.byte_data, data.byte_size + 1)
-        import ipdb
-        ipdb.set_trace()
+
         try:
             r = self.serialExchange(s)
         except:
