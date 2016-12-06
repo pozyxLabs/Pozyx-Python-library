@@ -264,3 +264,8 @@ class Buffer(Data):
             return str([bin(d) for d in self.data])
         else:
             return str([d for d in self.data])
+
+    def fill(self,offset,values):
+        if not isinstance(values,list):
+            values = [values]
+        self.data[offset:offset+len(values)] = values
