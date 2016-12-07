@@ -51,14 +51,14 @@ class ReadyToRange():
         return status
 
 if __name__ == "__main__":
-    port = 'COM1'                # COM port of the Pozyx device
+    port = '/dev/ttyACM0'                # COM port of the Pozyx device
 
     remote_id = 0x605D           # the network ID of the remote device
     remote = False               # whether to use the given remote device for ranging
     if not remote:
         remote_id = None
 
-    destination_id = 0x1000      # network ID of the ranging destination
+    destination_id = 0x6830      # network ID of the ranging destination
     range_step_mm = 1000         # distance that separates the amount of LEDs lighting up.
 
     pozyx = PozyxSerial(port)
