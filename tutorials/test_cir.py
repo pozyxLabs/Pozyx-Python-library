@@ -34,10 +34,11 @@ destination_id = 0x6830      # network ID of the ranging destination
 range_step_mm = 1000         # distance that separates the amount of LEDs lighting up.
 
 
-device_range = DeviceRange()
-status = p.doRanging(destination_id, device_range, remote_id)
+# device_range = DeviceRange()
+# status = p.doRanging(destination_id, device_range, remote_id)
+status=1
 if status:
-    print device_range.data
+    # print device_range.data
     cira=np.array([])
 
     rangeoffset = range(600,1015,49)
@@ -46,6 +47,8 @@ if status:
         Buff = Buffer([0]*96,size=2,signed=1)
         # 49 = data length
         p.getDeviceCirData(k,49,Buff)
+        import ipdb
+        ipdb.set_trace()
         cont = np.array(Buff.data)
         cir = cont[0::2] + 1j*cont[1::2]
         cira = np.append(cira,cir)
