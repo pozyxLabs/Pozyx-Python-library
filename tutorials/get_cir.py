@@ -14,7 +14,7 @@ from pypozyx import *
 from pypozyx.definitions.registers import *
 
 
-port = '/dev/ttyACM0'
+port = '/dev/ttyACM1'
 p = PozyxSerial(port)
 
 remote_id = 0x6830           # the network ID of the remote device
@@ -31,7 +31,7 @@ status = p.doRanging(destination_id, device_range, remote_id)
 if status:
     list_offset = range(0, 1015, 49)
     data_length = 49
-    cir_buffer = Buffer([0] * 96 * len(list_offset), size=2, signed=1)
+    cir_buffer = Buffer([0] * 98 * len(list_offset), size=2, signed=1)
     status_cir = p.getDeviceCir(list_offset, data_length, cir_buffer, remote_id)
     if status_cir:
         try:
