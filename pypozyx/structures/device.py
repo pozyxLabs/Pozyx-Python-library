@@ -16,10 +16,10 @@ UWBSettings
     contains all of the UWB settings: channel, bitrate, prf, plen, and gain.
 """
 
-from pypozyx.structures.byte_structure import ByteStructure
-from pypozyx.structures.sensor_data import Coordinates
-from pypozyx.structures.generic import Data
 from pypozyx.definitions.constants import *
+from pypozyx.structures.byte_structure import ByteStructure
+from pypozyx.structures.generic import Data
+from pypozyx.structures.sensor_data import Coordinates
 
 
 class DeviceCoordinates(ByteStructure):
@@ -103,7 +103,7 @@ class DeviceRange(ByteStructure):
             return
 
     def __str__(self):
-        return '{self.timestamp}ms, {self.distance}mm, {self.RSS}dB'.format(self=self)
+        return '{self.timestamp}ms, {self.distance}mm, {self.RSS}dBm'.format(self=self)
 
 
 class NetworkID(Data):

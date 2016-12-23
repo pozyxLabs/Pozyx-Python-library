@@ -4,20 +4,16 @@ The unofficial release of the Python library (Beta version) to work with the poz
 This library works with both Python 2 and 3.
 
 ### Prerequisites:
-* Download and install Python. On Windows, make your life easier and make sure Python is in your PATH. A recommended install is therefore the [Anaconda Suite](https://www.continuum.io/downloads) by Continuum.
+* Download and install Python. On Windows, make your life easier and make sure Python is in your PATH. A recommended install is therefore the [Anaconda Suite](https://www.continuum.io/downloads) by Continuum. If you're going to follow the tutorials, you'll need to install Python 3 for the python-osc support.
 * Install the PySerial package. If you have pip installed, you can do this by writing `pip install pyserial` in your command line interface (cmd on Windows).
 * **Windows only** install [ST's virtual COM driver](http://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-stm32102.html)
 
 ### Installing this package.
-As it's not yet available on PyPi, you will have to install the library from source. This is, however, very easy.
+As it's not yet available on PyPi, you will have to install the library from source like this:
 * Download the library as a zip file, or clone it in a folder.
 * After changing your command window's working directory to the extracted/cloned folder, perform `python setup.py install`
 
-Ta-da! PyPozyx is now installed.
-
- 
-### Is it really?
-Yes! It definitely should be. Not convinced? If you followed all the steps correctly, and know which port your Pozyx is on, the following code should work:
+PyPozyx is now installed. To check whether it is: if you followed all the steps correctly, and know which port your Pozyx is on, the following code should work:
 
 ```python
 from pypozyx import *
@@ -27,19 +23,21 @@ p = PozyxSerial(port)
 If your port is correct and the serial connection to the Pozyx isn't used by other software, this will run without any errors.
 
 #### But! How do I know what port my Pozyx is on?
-You can use existing software to directly monitor and interface with the Pozyx serially, but then again, why did you install this library? You can see the COM ports on your system easily using Python with:
-`python -c "import serial.tools.list_ports;print(serial.tools.list_ports.comports()[0])"`
-The ``[0]`` index lists the first detected COM port. If you have multiple serial devices attached, such as Arduino, you can use a higher index until you find the "Pozyx Virtual ComPort in FS Mode" descriptor.
+You can see the COM ports on your system easily using Python with:
+`python -c "from pypozyx import *;list_serial_ports()"`
 
 
 ### Documentation and examples
-You might notice the current lack of documentation and examples that use this library! This is being worked on! For now, these pointers and pages should be very helpful:
-* All functions that exist in the Arduino library, also exist in the Python library under the same name and functionality, so most of the [Arduino Library Documentation](https://www.pozyx.io/Documentation/Datasheet/arduino) is transformable to this. The difference however, is that you don't ever again need to pass along the length of the data you're reading/writing. This is taken care of by the library:
+You can find the Python tutorials on our site. You probably got here from [the getting started page](https://www.pozyx.io/Documentation/Tutorials/getting_started/Python)
+
+There is currently a lack of documentation, unlike for the Arduino library. For now, these pointers and pages should be helpful:
+* All functions that exist in the Arduino library, also exist in the Python library under the same name and functionality, so most of the [Arduino Library Documentation](https://www.pozyx.io/Documentation/Datasheet/arduino) is transformable to this. The major difference is that you don't ever again need to pass along the length of the data you're reading/writing. This is taken care of by the library:
 * The Data and SingleRegister classes take care of this. eg. to read out the WhoAmI register, appending to the test code above.    
 ```python
 whoami = SingleRegister()
 pozyx.regRead(POZYX_WHO_AM_I, whoami) # which is pozyx.getWhoAmI(whoami)
 ```
 * `SingleRegister(value=0, size=1, signed=1)` is basically an instance `Data([0], 'B')`, which functions as a single uint8_t. If you want to make your custom data, for a single register you can adapt the size and signed parameters, and for larger data structures you can use your own data formats. `Data([0]*3, 'BHI')`, for example, creates a structure of 1 uint8_t, uint16_t and uint32_t. Writing and reading data using this example as a parameter will automatically read/write 7 bytes worth of data. To specify your own data formats, check the [struct package documentation for Python 3](https://docs.python.org/3.5/library/struct.html#format-characters) or [Python 2](https://docs.python.org/2/library/struct.html).
- 
-* Examples and tutorials source code will be put on the [Pozyx website](http://pozyx.io/) eventually, but will also appear as source code on GitHub.
+
+
+More usage examples can be found in the useful and examples folders of the repository.

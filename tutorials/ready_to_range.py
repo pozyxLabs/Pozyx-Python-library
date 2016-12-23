@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 """
-ready_to_range.py - Tutorial intended to show how to perform ranging between two Pozyx devices.
+The Pozyx ready to range tutorial (c) Pozyx Labs
+Please read the tutorial that accompanies this sketch: https://www.pozyx.io/Documentation/Tutorials/ready_to_range/Python
 
-It is planned to make a tutorial on the Pozyx site as well just like there is now
-one for the Arduino, but their operation is very similar.
-You can find the Arduino tutorial here:
-    https://www.pozyx.io/Documentation/Tutorials/ready_to_range
+This demo requires two Pozyx devices and one Arduino. It demonstrates the ranging capabilities and the functionality to
+to remotely control a Pozyx device. Place one of the Pozyx shields on the Arduino and upload this sketch. Move around
+with the other Pozyx device.
+
+This demo measures the range between the two devices. The closer the devices are to each other, the more LEDs will
+light up on both devices.
 """
 from pypozyx import *
 
 
-class ReadyToRange():
+class ReadyToRange(object):
     """Continuously performs ranging between the Pozyx and a destination and sets their LEDs"""
 
     def __init__(self, pozyx, destination_id, range_step_mm=1000, remote_id=None):
@@ -21,9 +24,20 @@ class ReadyToRange():
 
     def setup(self):
         """Sets up both the ranging and destination Pozyx's LED configuration"""
-        print("------------POZYX RANGING V1.0 - -----------\nNOTES: \n - Change the parameters: \n\tdestination_id(target device)\n\trange_step(mm)\n- Approach target device to see range and\nled control\n- -----------POZYX RANGING V1.0 ------------\nSTART Ranging: ")
-        led_config = 0x0
+        print("------------POZYX RANGING V1.0 - -----------")
+        print("NOTES: ")
+        print(" - Change the parameters: ")
+        print("\tdestination_id(target device)")
+        print("\trange_step(mm)")
+        print()
+        print("- Approach target device to see range and")
+        print("led control")
+        print("- -----------POZYX RANGING V1.0 ------------")
+        print()
+        print("START Ranging: ")
+
         # make sure the local/remote pozyx system has no control over the LEDs.
+        led_config = 0x0
         self.pozyx.setLedConfig(led_config, self.remote_id)
         # do the same for the destination.
         self.pozyx.setLedConfig(led_config, self.destination_id)
@@ -34,7 +48,8 @@ class ReadyToRange():
         status = self.pozyx.doRanging(self.destination_id, device_range, self.remote_id)
         if status == POZYX_SUCCESS:
             print(device_range)
-            self.ledControl(device_range.distance)
+            if self.ledControl(device_range.distance) == POZYX_FAILURE:
+                print("ERROR: setting (remote) leds")
         else:
             print("ERROR: ranging")
 
@@ -51,14 +66,14 @@ class ReadyToRange():
         return status
 
 if __name__ == "__main__":
-    port = 'COM1'                # COM port of the Pozyx device
+    port = 'COM12'                # COM port of the Pozyx device
 
     remote_id = 0x605D           # the network ID of the remote device
     remote = False               # whether to use the given remote device for ranging
     if not remote:
         remote_id = None
 
-    destination_id = 0x1000      # network ID of the ranging destination
+    destination_id = 0x6069      # network ID of the ranging destination
     range_step_mm = 1000         # distance that separates the amount of LEDs lighting up.
 
     pozyx = PozyxSerial(port)

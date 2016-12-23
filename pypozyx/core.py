@@ -2,11 +2,20 @@
 """pypozyx.core - core Pozyx interface and inter-Pozyx communication functionality through the PozyxCore class"""
 from time import sleep, time
 
-from pypozyx.definitions.registers import POZYX_TX_DATA, POZYX_TX_SEND, POZYX_RX_DATA, POZYX_INT_STATUS, POZYX_RX_NETWORK_ID
-from pypozyx.definitions.constants import POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT, MAX_BUF_SIZE, MAX_SERIAL_SIZE, POZYX_DELAY_POLLING, POZYX_DELAY_LOCAL_WRITE, POZYX_DELAY_REMOTE_WRITE
-from pypozyx.definitions.bitmasks import POZYX_INT_STATUS_ERR, POZYX_INT_STATUS_FUNC
-
-from pypozyx.structures.generic import Data, is_functioncall, is_reg_readable, is_reg_writable, SingleRegister, dataCheck
+from pypozyx.definitions.bitmasks import (POZYX_INT_STATUS_ERR,
+                                          POZYX_INT_STATUS_FUNC)
+from pypozyx.definitions.constants import (MAX_BUF_SIZE, MAX_SERIAL_SIZE,
+                                           POZYX_DELAY_LOCAL_WRITE,
+                                           POZYX_DELAY_POLLING,
+                                           POZYX_DELAY_REMOTE_WRITE,
+                                           POZYX_FAILURE, POZYX_SUCCESS,
+                                           POZYX_TIMEOUT)
+from pypozyx.definitions.registers import (POZYX_INT_STATUS, POZYX_RX_DATA,
+                                           POZYX_RX_NETWORK_ID, POZYX_TX_DATA,
+                                           POZYX_TX_SEND)
+from pypozyx.structures.generic import (Data, SingleRegister, dataCheck,
+                                        is_functioncall, is_reg_readable,
+                                        is_reg_writable)
 
 
 class PozyxCore():
@@ -336,6 +345,7 @@ class PozyxCore():
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
         """
+        print(data.byte_size)
         if data.byte_size > MAX_BUF_SIZE:
             return POZYX_FAILURE
 

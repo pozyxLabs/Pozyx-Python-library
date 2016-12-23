@@ -2,6 +2,7 @@
 """change_network_id.py - Changes a local/remote device's network ID."""
 from pypozyx import *
 from pypozyx.definitions.registers import *
+
 # remote_id = 0x6000
 
 remote = False
@@ -9,9 +10,9 @@ remote_id = None
 if remote:
     remote_id = 0x6F5E
 
-port = '/dev/ttyACM1'
+port = get_serial_ports()[0].device
 
-new_id = 0x6406
+new_id = 0xA004
 
 
 class SetNetworkID():

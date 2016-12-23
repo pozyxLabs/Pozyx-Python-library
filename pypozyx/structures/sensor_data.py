@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 """pypozyx.structures.sensor_data - Contains container classes for data from the Pozyx's many sensors."""
 
+from pypozyx.definitions.constants import *
 from pypozyx.structures.byte_structure import ByteStructure
 from pypozyx.structures.generic import XYZ
-
-from pypozyx.definitions.constants import *
 
 
 class Coordinates(XYZ):
@@ -71,9 +70,9 @@ class LinearAcceleration(XYZ):
 
     def load(self, data, convert=1):
         if convert:
-            self.x = float(data[0]) / physical_convert
-            self.y = float(data[1]) / physical_convert
-            self.z = float(data[2]) / physical_convert
+            self.x = float(data[0]) / self.physical_convert
+            self.y = float(data[1]) / self.physical_convert
+            self.z = float(data[2]) / self.physical_convert
         else:
             self.x = float(data[0])
             self.y = float(data[1])
@@ -101,9 +100,9 @@ class PositionError(XYZ):
 
     def load(self, data):
         XYZ.load(self, data[0:3])
-        self.xy = data[3] / physical_convert
-        self.xz = data[4] / physical_convert
-        self.yz = data[5] / physical_convert
+        self.xy = data[3] / self.physical_convert
+        self.xz = data[4] / self.physical_convert
+        self.yz = data[5] / self.physical_convert
 
     def update_data(self):
         try:
@@ -211,7 +210,7 @@ class SensorData(ByteStructure):
         - quaternion : Quaternion
         - linear_acceleration: LinearAcceleration
         - gravity_vector: LinearAcceleration
-        - temperature: UInt8
+        - temperature: Int8
 
     Useful in these functions:
         getAllSensorData
@@ -235,22 +234,49 @@ class SensorData(ByteStructure):
         self.gravity_vector = LinearAcceleration(data[20], data[21], data[22])
         self.temperature = data[23]
 
-    def load(self, data):
-        self.pressure = float(data[0]) / POZYX_PRESS_DIV_PA
-        self.acceleration.load(data[1:4])
-        self.magnetic.load(data[4:7])
-        self.angular_vel.load(data[7:10])
-        self.euler_angles.load(data[10:13])
-        self.quaternion.load(data[13:17])
-        self.linear_acceleration.load(data[17:20])
-        self.gravity_vector.load(data[20:23])
-        self.temperature = int(data[23] / POZYX_TEMP_DIV_CELSIUS)
+    def load(self, data, convert=1):
+        self.data = data
+        if convert == 1:
+            self.pressure = float(data[0]) / POZYX_PRESS_DIV_PA
+            self.temperature = int(data[23] / POZYX_TEMP_DIV_CELSIUS)
+        else:
+            self.pressure = float(data[0])
+            self.temperature = int(data[23])
+
+        self.acceleration.load(data[1:4], convert)
+        self.magnetic.load(data[4:7], convert)
+        self.angular_vel.load(data[7:10], convert)
+        self.euler_angles.load(data[10:13], convert)
+        self.quaternion.load(data[13:17], convert)
+        self.linear_acceleration.load(data[17:20], convert)
+        self.gravity_vector.load(data[20:23], convert)
 
     def update_data(self):
-        # all the others are datastructures that take care of themselves.
-        try:
-            if self.data[0] != self.pressure or self.data[23] != self.temperature:
-                self.data[0] = self.pressure
-                self.data[23] = self.temperature
-        except:
-            return
+        """Not used so data remains the raw unformatted data"""
+        pass
+
+
+class RawSensorData(SensorData):
+    """Container for raw sensor data
+
+    This includes, in order, with respective structure:
+        - pressure : float
+        - acceleration : Acceleration
+        - magnetic : Magnetic
+        - angular_vel : AngularVelocity
+        - euler_angles : EulerAngles
+        - quaternion : Quaternion
+        - linear_acceleration: LinearAcceleration
+        - gravity_vector: LinearAcceleration
+        - temperature: Int8
+
+    Useful in these functions:
+        getRawSensorData
+    """
+
+    def __init__(self, data=[0] * 24):
+        """Initializes the RawSensorData object"""
+        XYZ.__init__(self, data)
+
+    def load(self, data, convert=0):
+        SensorData.load(self, data, convert=0)
