@@ -179,6 +179,7 @@ class Data(ByteStructure):
             data_format = 'B' * len(data)
         self.data_format = data_format
         self.set_packed_size()
+        self.byte_data = '00' * self.byte_size
 
     def load(self, data, convert=1):
         self.data = data

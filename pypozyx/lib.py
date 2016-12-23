@@ -3,14 +3,12 @@
 
 from time import sleep
 
-from pypozyx.definitions.registers import *
-from pypozyx.definitions.constants import *
-from pypozyx.definitions.bitmasks import *
-
 from pypozyx.core import PozyxCore
-
-from pypozyx.structures.generic import Data, SingleRegister, dataCheck
+from pypozyx.definitions.bitmasks import *
+from pypozyx.definitions.constants import *
+from pypozyx.definitions.registers import *
 from pypozyx.structures.device import *
+from pypozyx.structures.generic import Data, SingleRegister, dataCheck
 from pypozyx.structures.sensor_data import *
 
 
@@ -374,7 +372,7 @@ class PozyxLib(PozyxCore):
         Obtains all the Pozyx's sensor data in their default units.
 
         Args:
-            sensor_data: Container for the read data. SensorData().
+            sensor_data: Container for the read data. SensorData() or RawSensorData().
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -1530,11 +1528,8 @@ class PozyxLib(PozyxCore):
         if status == POZYX_FAILURE:
             print("Error saving to flash memory")
             return status
-        if remote_id is None:
-            return self.checkForFlag(POZYX_INT_STATUS_FUNC, POZYX_DELAY_FLASH)
-        else:
-            # give the remote device some time to save to flash memory
-            sleep(POZYX_DELAY_FLASH)
+        # give the device some time to save to flash memory
+        sleep(POZYX_DELAY_FLASH)
         return status
 
     def saveRegisters(self, registers, remote_id=None):

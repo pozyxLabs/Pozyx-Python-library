@@ -1,7 +1,4 @@
-
 """pypozyx.pozyx_serial - contains the serial interface with Pozyx through PozyxSerial."""
-
-
 from time import sleep
 
 from pypozyx.definitions.constants import *
@@ -56,11 +53,11 @@ class PozyxSerial(PozyxLib):
         >>> pozyx = PozyxSerial(serial.tools.list_ports.comports()[0])
     """
 
-    def __init__(self, port, baudrate=115200, timeout=0.1, print_output=False):
+    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
         try:
-            self.ser = Serial(port, baudrate, timeout=timeout)
+            self.ser = Serial(port, baudrate, timeout=timeout, write_timeout=write_timeout)
         except:
             print(
                 "Couldn't connect with Pozyx, wrong/busy serial port, or pySerial not installed.")
