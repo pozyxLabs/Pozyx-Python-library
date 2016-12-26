@@ -11,17 +11,26 @@ finds all devices on all settings.
 from pypozyx import *
 
 
-def configure_anchor_list(pozyx):
-    """Configures the tags with the anchors"""
-    for tag in tags:
-        pozyx.configureAnchors(anchors, remote_id=tag)
-        pozyx.saveNetwork(remote_id=tag)
+class MultiDeviceListCongifuration(object):
 
+    def __init__(self, pozyx, tags=[None]):
+        self.pozyx = pozyx
+        self.tags = tags
 
-def read_anchor_list(pozyx):
-    """Reads the anchor list the device is configured with"""
-    for tag in tags:
-        print("TAG ID: 0x%0.4x" % tag)
+    def configure_anchor_list(self, anchors):
+        """Configures the tags with the anchors"""
+        for tag in self.tags:
+            pozyx.configureAnchors(anchors, remote_id=tag)
+            pozyx.saveNetwork(remote_id=tag)
+
+    def read_anchor_list(self):
+        """Reads the anchor list the device is configured with"""
+        for tag in self.tags:
+            if tag is None:
+                print("LOCAL TAG")
+            else:
+                print("TAG ID: 0x%0.4x" % tag)
+            self.pozyx.printDeviceList(tag)
 
 
 if __name__ == '__main__':
@@ -43,7 +52,10 @@ if __name__ == '__main__':
                DeviceCoordinates(0x0004, 1, Coordinates(1000, 1000, 0))]
 
     pozyx = PozyxSerial(port)
+
+    d = MultiDeviceListConfiguration(pozyx, tags)
+
     if configure:
-        configure_anchor_list(pozyx)
+        d.configure_anchor_list(anchors)
     else:
-        read_anchor_list(pozyx)
+        d.read_anchor_list(pozyx)
