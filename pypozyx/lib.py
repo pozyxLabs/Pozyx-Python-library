@@ -1583,12 +1583,27 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         self.saveConfiguration(POZYX_FLASH_NETWORK, remote_id=remote_id)
+        self.saveRegisters([POZYX_POS_NUM_ANCHORS], remote_id)
+
+    def saveUWBSettings(self, remote_id=None):
+        """
+        Saves the Pozyx's UWB settings to its flash memory.
+
+        This means that upon a reset, the Pozyx will still have the same configured UWB settings.
+        As of writing, POZYX_UWB_GAIN is not savable yet.
+
+        Kwargs:
+            remote_id: Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        registers = [POZYX_UWB_CHANNEL, POZYX_UWB_RATES, POZYX_UWB_PLEN, POZYX_UWB_GAIN]
+        self.saveRegisters(registers, remote_id)
 
     def clearConfiguration(self, remote_id=None):
         """
-        Saves the Pozyx's device list to its flash memory.
-
-        This means that upon a reset, the Pozyx will still have the same configured device list.
+        Clears the Pozyx's flash memory.
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -1602,11 +1617,8 @@ class PozyxLib(PozyxCore):
         if status == POZYX_FAILURE:
             print("Error clearing the flash memory")
             return status
-        if remote_id is None:
-            return self.checkForFlag(POZYX_INT_STATUS_FUNC, POZYX_DELAY_FLASH)
-        else:
-            # give the remote device some time to clear the flash memory
-            sleep(POZYX_DELAY_FLASH)
+        # give the device some time to clear the flash memory
+        sleep(POZYX_DELAY_FLASH)
         return status
 
     def getNumRegistersSaved(self, remote_id=None):
@@ -1646,7 +1658,7 @@ class PozyxLib(PozyxCore):
         bit_num = regAddress % 8
         return (details[byte_num] >> bit_num) & 0x1
 
-    def configureAnchors(self, anchor_list, save_to_flash=False, anchor_select=POZYX_ANCHOR_SEL_AUTO, remote_id=None):
+    def configureAnchors(self, anchor_list, anchor_select=POZYX_ANCHOR_SEL_AUTO, remote_id=None):
         """
         Configures a set of anchors as the relevant anchors on a device
 
@@ -1665,12 +1677,111 @@ class PozyxLib(PozyxCore):
         status &= self.clearDevices(remote_id)
 
         for anchor in anchor_list:
+            if not dataCheck(anchor):
+                anchor = DeviceCoordinates(
+                    anchor[0], anchor[1], Coordinates(anchor[2], anchor[3], anchor[4]))
             if anchor.flag != 0x1:
                 print("ID 0x%0.4x added as tag, is this intentional?" % remote_id)
             status &= self.addDevice(anchor, remote_id)
 
-        self.setSelectionOfAnchors(anchor_select, len(anchor_list), remote_id)
-        if save_to_flash:
-            status &= self.saveNetwork(remote_id)
-            status &= self.saveRegisters([POZYX_POS_NUM_ANCHORS], remote_id)
-        return status
+        return status & self.setSelectionOfAnchors(anchor_select, len(anchor_list), remote_id)
+
+    def removeDevice(self, device_id, remote_id=None):
+        """
+        Removes a device from the Pozyx's device list, keeping the rest of the list intact
+
+        Args:
+            device_id: ID that needs to be removed. NetworkID or integer.
+
+        Kwargs:
+            remote_id: Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        if dataCheck(device_id):
+            device_id = device_id[0]
+
+        status = POZYX_SUCCESS
+        list_size = SingleRegister()
+        status &= self.getDeviceListSize(list_size, remote_id)
+        device_list = DeviceList(list_size=list_size[0])
+        status &= self.getDeviceIds(device_list, remote_id)
+        if device_id not in device_list or status is POZYX_FAILURE:
+            return POZYX_FAILURE
+        devices = []
+        for id_ in device_list:
+            if id_ == device_id:
+                continue
+            coordinates = Coordinates()
+            self.getDeviceCoordinates(id_, coordinates, remote_id)
+            devices.append(DeviceCoordinates(id_, 0x1, coordinates))
+
+        anchor_select_mode = SingleRegister()
+        self.getAnchorSelectionMode(anchor_select_mode, remote_id)
+
+        self.configureAnchors(devices, anchor_select=anchor_select_mode, remote_id=remote_id)
+
+    def changeDeviceCoordinates(self, device_id, new_coordinates, remote_id=None):
+        """
+        Changes a device's coordinates in the Pozyx's device list, keeping the rest of the list intact
+
+        Args:
+            device_id: ID that needs to be removed. NetworkID or integer.
+            new_coordinates: new coordinates for the device
+
+        Kwargs:
+            remote_id: Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        if dataCheck(device_id):
+            device_id = device_id[0]
+        if not dataCheck(new_coordinates):
+            new_coordinates = Coordinates(x=new_coordinates[0], y=new_coordinates[
+                                          1], z=new_coordinates[2])
+        status = POZYX_SUCCESS
+        list_size = SingleRegister()
+        status &= self.getDeviceListSize(list_size, remote_id)
+        device_list = DeviceList(list_size=list_size[0])
+        status &= self.getDeviceIds(device_list, remote_id)
+        if device_id not in device_list or status is not POZYX_SUCCESS:
+            return POZYX_FAILURE
+        devices = []
+        for id_ in device_list:
+            if id_ == device_id:
+                devices.append(DeviceCoordinates(id_, 0x1, new_coordinates))
+                continue
+            coordinates = Coordinates()
+            self.getDeviceCoordinates(id_, coordinates, remote_id)
+            devices.append(DeviceCoordinates(id_, 0x1, coordinates))
+
+        anchor_select_mode = SingleRegister()
+        self.getAnchorSelectionMode(anchor_select_mode, remote_id)
+
+        self.configureAnchors(devices, anchor_select=anchor_select_mode, remote_id=remote_id)
+
+    def printDeviceList(self, remote_id=None):
+        """
+        Prints a Pozyx's device list.
+
+        Kwargs:
+            remote_id: Remote Pozyx ID
+
+        Returns:
+            None
+        """
+        list_size = SingleRegister()
+        status = self.getDeviceListSize(list_size, remote_id)
+        device_list = DeviceList(list_size=list_size[0])
+        status &= self.getDeviceIds(device_list, remote_id)
+
+        if status is POZYX_FAILURE:
+            print("Couldn't read device list of Pozyx")
+            return
+
+        for device_id in device_list:
+            coordinates = Coordinates()
+            self.getDeviceCoordinates(device_id, coordinates, remote_id)
+            print(DeviceCoordinates(device_id, 0x1, coordinates))

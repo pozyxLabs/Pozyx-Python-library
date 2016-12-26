@@ -44,7 +44,7 @@ class DeviceCoordinates(ByteStructure):
         self.network_id = network_id
         self.flag = flag
         self.pos = pos
-        self.data = [network_id, flag, pos.x, pos.y, pos.z]
+        self.data = [network_id, flag, int(pos.x), int(pos.y), int(pos.z)]
 
     def load(self, data):
         self.data = data
