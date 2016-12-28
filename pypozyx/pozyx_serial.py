@@ -21,6 +21,15 @@ def get_serial_ports():
     return comports()
 
 
+def get_pozyx_ports():
+    """Returns the Pozyx serial ports. Untested on UNIX"""
+    ports = get_serial_ports()
+    pozyx_ports = []
+    for port in ports:
+        if "STMicroelectronics Virtual COM Port" in port.description:
+            pozyx_ports.append(port.device)
+
+
 class PozyxSerial(PozyxLib):
     """
     PozyxSerial

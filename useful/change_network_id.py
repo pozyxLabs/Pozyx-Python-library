@@ -18,12 +18,12 @@ if __name__ == "__main__":
 
     port = get_serial_ports()[0].device
 
-    remote = False
-    remote_id = 0x6F5E
+    new_id = 0xA004         # the new network id of the pozyx device, change as desired
+    remote = False          # whether to use the remote device
+    remote_id = 0x6F5E      # the remote ID
+
     if not remote:
         remote_id = None
-
-    new_id = 0xA004
 
     pozyx = PozyxSerial(port)
     set_new_id(port, pozyx, new_id, remote_id, True)
