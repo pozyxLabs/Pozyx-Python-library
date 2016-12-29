@@ -10,7 +10,7 @@ from pypozyx import *
 from pypozyx.definitions.registers import POZYX_WHO_AM_I
 
 
-def basic_troubleshoot(pozyx, remote_id=None):
+def device_check(pozyx, remote_id=None):
 
     data = Data([0] * 5)
 
@@ -37,11 +37,11 @@ if __name__ == '__main__':
     port = get_serial_ports()[0].device
     pozyx = PozyxSerial(port)
     # use this for local devices
-    basic_troubleshoot(pozyx)
+    device_check(pozyx)
     # uncomment this for remote devices
-    # basic_troubleshoot(pozyx, 0x6000)
+    # device_check(pozyx, 0x6000)
 
     # use this for checking devices in range
     network_check_discovery(pozyx)
-    # uncomment this for checking devices in range for remote devices
+    # uncomment this for checking devices in range for remote devices.
     # network_check_discovery(pozyx, 0x6000)
