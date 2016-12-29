@@ -10,38 +10,52 @@ finds all devices on all settings.
 
 from pypozyx import *
 
-# virtual serial port of the Pozyx
-port = 'COM12'
 
+class MultiDeviceListCongifuration(object):
 
-# To configure the devicelist anew, set to True
-# To read the currently configured device list, set to False
-configure = True
+    def __init__(self, pozyx, tags=[None]):
+        self.pozyx = pozyx
+        self.tags = tags
 
-# list of IDs to configure with the anchors.
-# add None if you want to configure the local device as well.
-tags = [None]
+    def configure_anchor_list(self, anchors):
+        """Configures the tags with the anchors"""
+        for tag in self.tags:
+            pozyx.configureAnchors(anchors, remote_id=tag)
+            pozyx.saveNetwork(remote_id=tag)
 
-# list of anchors with respective coordinates for the configuration
-anchors = [DeviceCoordinates(0x0001, 1, Coordinates(0, 0, 0)),
-           DeviceCoordinates(0x0002, 1, Coordinates(1000, 0, 0)),
-           DeviceCoordinates(0x0003, 1, Coordinates(0, 1000, 0)),
-           DeviceCoordinates(0x0004, 1, Coordinates(1000, 1000, 0))]
-
-def configure_anchor_list(pozyx):
-    """Configures the tags with the anchors"""
-    for tag in tags:
-        pozyx.configureAnchors(anchors, save_to_flash=True, tag)
-
-def read_anchor_list(pozyx):
-    """Reads the anchor list the device is configured with"""
-    for tag in tags:
-        print("TAG ID: 0x%0.4x" % tag)
+    def read_anchor_list(self):
+        """Reads the anchor list the device is configured with"""
+        for tag in self.tags:
+            if tag is None:
+                print("LOCAL TAG")
+            else:
+                print("TAG ID: 0x%0.4x" % tag)
+            self.pozyx.printDeviceList(tag)
 
 
 if __name__ == '__main__':
+    # virtual serial port of the Pozyx
+    port = get_serial_ports()[0].device
+
+    # To configure the devicelist anew, set to True
+    # To read the currently configured device list, set to False
+    configure = True
+
+    # list of IDs to configure with the anchors.
+    # add None if you want to configure the local device as well.
+    tags = [None]
+
+    # list of anchors with respective coordinates for the configuration
+    anchors = [DeviceCoordinates(0x0001, 1, Coordinates(0, 0, 0)),
+               DeviceCoordinates(0x0002, 1, Coordinates(1000, 0, 0)),
+               DeviceCoordinates(0x0003, 1, Coordinates(0, 1000, 0)),
+               DeviceCoordinates(0x0004, 1, Coordinates(1000, 1000, 0))]
+
     pozyx = PozyxSerial(port)
+
+    d = MultiDeviceListConfiguration(pozyx, tags)
+
     if configure:
-        configure_anchor_list(pozyx)
+        d.configure_anchor_list(anchors)
     else:
-        read_anchor_list(pozyx)
+        d.read_anchor_list(pozyx)

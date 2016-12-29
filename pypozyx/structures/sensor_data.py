@@ -16,6 +16,12 @@ class Coordinates(XYZ):
     byte_size = 12
     data_format = 'iii'
 
+    def load(self, data, convert=0):
+        self.data = data
+        self.x = data[0]
+        self.y = data[1]
+        self.z = data[2]
+
 
 class Acceleration(XYZ):
     """
