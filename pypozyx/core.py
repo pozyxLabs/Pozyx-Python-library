@@ -345,7 +345,6 @@ class PozyxCore():
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
         """
-        print(data.byte_size)
         if data.byte_size > MAX_BUF_SIZE:
             return POZYX_FAILURE
 
@@ -385,15 +384,18 @@ class PozyxCore():
         if offset + data.byte_size > MAX_BUF_SIZE:
             return POZYX_FAILURE
 
+        # have to account for the parameter taking up a byte
+        _MAX_SERIAL_SIZE = MAX_SERIAL_SIZE - 1
+
         status = POZYX_SUCCESS
         data = Data(data.transform_to_bytes())
-        runs = int(data.byte_size / MAX_SERIAL_SIZE)
+        runs = int(data.byte_size / _MAX_SERIAL_SIZE)
         for i in range(runs):
-            params = Data([i * MAX_SERIAL_SIZE] + data[i *
-                                                       MAX_SERIAL_SIZE: (i + 1) * MAX_SERIAL_SIZE])
+            params = Data([i * _MAX_SERIAL_SIZE] + data[i *
+                                                        _MAX_SERIAL_SIZE: (i + 1) * _MAX_SERIAL_SIZE])
             status &= self.regFunction(POZYX_TX_DATA, params, Data([]))
-        params = Data([runs * MAX_SERIAL_SIZE] +
-                      data[runs * MAX_SERIAL_SIZE:])
+        params = Data([runs * _MAX_SERIAL_SIZE] +
+                      data[runs * _MAX_SERIAL_SIZE:])
         return status & self.regFunction(POZYX_TX_DATA, params, Data([]))
 
     def sendTXBufferData(self, destination):

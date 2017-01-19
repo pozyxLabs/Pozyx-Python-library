@@ -159,7 +159,7 @@ if __name__ == "__main__":
     height = 1000                      # height of device, required in 2.5D positioning
 
     pozyx = PozyxSerial(serial_port)
-    r = ReadyToLocalize(pozyx, osc_udp_client, anchors, algorithm, dimension, remote_id)
+    r = ReadyToLocalize(pozyx, osc_udp_client, anchors, algorithm, dimension, height, remote_id)
     r.setup()
     while True:
         r.loop()
