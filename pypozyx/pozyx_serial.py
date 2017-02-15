@@ -62,14 +62,19 @@ class PozyxSerial(PozyxLib):
         >>> pozyx = PozyxSerial(serial.tools.list_ports.comports()[0])
     """
 
-    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False):
+    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False, debug_trace=False):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
         try:
-            self.ser = Serial(port, baudrate, timeout=timeout, write_timeout=write_timeout)
+            self.ser = Serial(port, baudrate, timeout=timeout,
+                              write_timeout=write_timeout)
         except:
             print(
                 "Couldn't connect with Pozyx, wrong/busy serial port, or pySerial not installed.")
+            if debug_trace:
+                import traceback
+                import sys
+                traceback.print_tb(sys.exc_info()[2])
             raise SystemExit
 
         sleep(0.25)
@@ -77,6 +82,10 @@ class PozyxSerial(PozyxLib):
         regs = Data([0, 0, 0])
         if self.regRead(POZYX_WHO_AM_I, regs) == POZYX_FAILURE:
             print("Connected to Pozyx, but couldn't read serial data.")
+            if debug_trace:
+                import traceback
+                import sys
+                traceback.print_tb(sys.exc_info()[2])
             raise SystemExit
 
         self._hw_version = regs[1]
