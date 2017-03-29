@@ -32,7 +32,7 @@ POZYX_UWB_RATES = 0x1D
 POZYX_UWB_PLEN = 0x1E    # Configure the UWB preamble length.
 POZYX_UWB_GAIN = 0x1F    # Configure the power gain for the UWB transmitter
 POZYX_UWB_XTALTRIM = 0x20    # Trimming value for the uwb crystal.
-# POZYX_RANGE_PROTOCOL = 0x21    # The ranging protocol
+POZYX_RANGE_PROTOCOL = 0x21    # The ranging protocol
 # Configure the mode of operation of the pozyx device
 POZYX_OPERATION_MODE = 0x22
 POZYX_SENSORS_MODE = 0x23    # Configure the mode of operation of the sensors
