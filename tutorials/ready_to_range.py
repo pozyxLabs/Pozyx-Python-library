@@ -11,8 +11,7 @@ This demo measures the range between the two devices. The closer the devices are
 light up on both devices.
 """
 from pypozyx import *
-from pypozyx.definitions.registers import *
-from pypozyx.definitions.bitmasks import *
+
 
 class ReadyToRange(object):
     """Continuously performs ranging between the Pozyx and a destination and sets their LEDs"""
@@ -42,7 +41,6 @@ class ReadyToRange(object):
         self.pozyx.setLedConfig(led_config, self.remote_id)
         # do the same for the destination.
         self.pozyx.setLedConfig(led_config, self.destination_id)
-        self.pozyx.remoteRegWrite(self.remote_id, POZYX_RANGE_PROTOCOL, Data([POZYX_RANGE_PROTOCOL_SDS_TWR]))
 
     def loop(self):
         """Performs ranging and sets the LEDs accordingly"""
@@ -68,14 +66,14 @@ class ReadyToRange(object):
         return status
 
 if __name__ == "__main__":
-    port = 'COM34'                # COM port of the Pozyx device
+    port = 'COM12'                # COM port of the Pozyx device
 
-    remote_id = 0x6008           # the network ID of the remote device
-    remote = True               # whether to use the given remote device for ranging
+    remote_id = 0x605D           # the network ID of the remote device
+    remote = False               # whether to use the given remote device for ranging
     if not remote:
         remote_id = None
 
-    destination_id = 0x6819      # network ID of the ranging destination
+    destination_id = 0x6069      # network ID of the ranging destination
     range_step_mm = 1000         # distance that separates the amount of LEDs lighting up.
 
     pozyx = PozyxSerial(port)
