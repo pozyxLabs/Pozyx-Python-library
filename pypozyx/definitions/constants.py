@@ -59,8 +59,8 @@ POZYX_DISCOVERY_ALL_DEVICES = 2
 
 # positioning algorithm options
 POZYX_POS_ALG_UWB_ONLY = 0
-POZYX_POS_ALG_TRACKING = 1
 POZYX_POS_ALG_LS = 2
+POZYX_POS_ALG_TRACKING = 4
 
 # how to intercept pozyx events: by polling or by interrupts
 MODE_POLLING = 0

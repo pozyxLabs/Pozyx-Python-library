@@ -58,7 +58,7 @@ def is_reg_writable(reg):
 
 def is_functioncall(reg):
     """Returns whether a Pozyx register is a Pozyx function."""
-    if (reg >= 0xB0 and reg < 0xBC) or (reg >= 0xC0 and reg < 0xC9):
+    if (reg >= 0xB0 and reg <= 0xBC) or (reg >= 0xC0 and reg < 0xC9):
         return True
     return False
 

@@ -1122,7 +1122,7 @@ class PozyxLib(PozyxCore):
         """
         Set the Pozyx's positioning algorithm.
 
-        Note that currently only POZYX_POS_ALG_UWB_ONLY and POZYX_POS_ALG_LS are implemented.
+        Note that currently only POZYX_POS_ALG_UWB_ONLY, POZYX_POS_ALG_LS and POZYX_POS_ALG_TRACKING are implemented.
         The tracking algorithm is due by the end of 2016, or early 2017.
 
         Args:
@@ -1140,7 +1140,7 @@ class PozyxLib(PozyxCore):
         if not dataCheck(dimension):
             dimension = SingleRegister(dimension)
         assert algorithm[0] == POZYX_POS_ALG_UWB_ONLY or algorithm[
-            0] == POZYX_POS_ALG_LS, 'setPositionAlgorithm: wrong algorithm'
+            0] == POZYX_POS_ALG_LS or algorithm[0] == POZYX_POS_ALG_TRACKING, 'setPositionAlgorithm: wrong algorithm'
         assert dimension[0] == POZYX_3D or dimension[0] == POZYX_2D or dimension[
             0] == POZYX_2_5D, 'setPositionAlgorithm: wrong dimension'
 
@@ -1317,7 +1317,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert algorithm == POZYX_POS_ALG_UWB_ONLY or algorithm == POZYX_POS_ALG_LS, 'doPositioning: wrong algorithm'
+        assert algorithm == POZYX_POS_ALG_UWB_ONLY or algorithm == POZYX_POS_ALG_LS or algorithm == POZYX_POS_ALG_TRACKING, 'doPositioning: wrong algorithm'
         assert dimension == POZYX_3D or dimension == POZYX_2D or dimension == POZYX_2_5D, 'doPositioning: wrong dimension'
 
         alg_options = Data([dimension << 4 | algorithm])

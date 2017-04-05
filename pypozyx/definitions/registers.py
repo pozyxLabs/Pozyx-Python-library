@@ -104,6 +104,7 @@ POZYX_POS_GET_ANCHOR_IDS = 0xB8
 POZYX_FLASH_RESET = 0xB9  # Reset a portion of the configuration in flash memory
 POZYX_FLASH_SAVE = 0xBA  # Store a portion of the configuration in flash memory
 POZYX_FLASH_DETAILS = 0xBB  # Return information on what is stored in flash
+POZYX_MAX_LIN_ACC = 0xBC  # Return the max linear acceleration and reset it to 0
 
 # Device list functions
 # Get all the network IDs's of devices in the device list.
