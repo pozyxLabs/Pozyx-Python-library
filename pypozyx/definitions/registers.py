@@ -20,6 +20,7 @@ POZYX_CALIB_STATUS = 0x6   # Returns the calibration status.
 POZYX_INT_MASK = 0x10    # Indicates which interrupts are enabled.
 POZYX_INT_CONFIG = 0x11  # Configure the interrupt pin
 POZYX_CONFIG_LEDS = 0x15    # Configure the LEDs
+POZYX_POS_FILTER = 0x14    # Filter used for positioning
 POZYX_POS_ALG = 0x16    # Algorithm used for positioning
 # Configure the number of anchors and selection procedure
 POZYX_POS_NUM_ANCHORS = 0x17

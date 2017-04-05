@@ -1117,13 +1117,39 @@ class PozyxLib(PozyxCore):
         gpio_register = POZYX_CONFIG_GPIO1 + gpio_num - 1
         mask = Data([mode[0] + (pull[0] << 3)])
         return self.setWrite(gpio_register, mask, remote_id)
+    
+    def setPositionFilter(self, filter_type, strength, remote_id=None):
+        """
+        Set the Pozyx's positioning filter.
+
+        Note that currently only FILTER_TYPE_MOVINGAVERAGE, FILTER_TYPE_MOVINGMEDIAN and FILTER_TYPE_FIR are implemented.
+
+        Args:
+            strength: Positioning filter strength.
+            filter_type: Positioning filter type.
+
+        Kwargs:
+            remote_id: Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        if not dataCheck(strength):
+            strength = SingleRegister(strength)
+        if not dataCheck(type):
+            filter_type = SingleRegister(filter_type)
+        assert filter_type[0] == FILTER_TYPE_MOVINGAVERAGE or filter_type[
+            0] == FILTER_TYPE_MOVINGMEDIAN or filter_type[0] == FILTER_TYPE_FIR or filter_type[0] == FILTER_TYPE_NONE, 'setPositionFilter: wrong filter type'
+        assert strength[0] >= 0 or strength[0] < 16, 'setPositionFilter: wrong strength'
+
+        params = Data([filter_type[0] + (strength[0] << 4)])
+        return self.setWrite(POZYX_POS_FILTER, params, remote_id)
 
     def setPositionAlgorithm(self, algorithm, dimension, remote_id=None):
         """
         Set the Pozyx's positioning algorithm.
 
         Note that currently only POZYX_POS_ALG_UWB_ONLY, POZYX_POS_ALG_LS and POZYX_POS_ALG_TRACKING are implemented.
-        The tracking algorithm is due by the end of 2016, or early 2017.
 
         Args:
             algorithm: Positioning algorithm. integer algorithm or SingleRegister(algorithm).
