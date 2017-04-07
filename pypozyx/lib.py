@@ -126,7 +126,7 @@ class PozyxLib(PozyxCore):
         details = Data([0] * 20)
         if self.useFunction(POZYX_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
             return POZYX_FAILURE
-        byte_num = regAddress / 8
+        byte_num = int(regAddress / 8)
         bit_num = regAddress % 8
         return (details[byte_num] >> bit_num) & 0x1
 
@@ -802,7 +802,7 @@ class PozyxLib(PozyxCore):
         gpio_register = POZYX_CONFIG_GPIO1 + gpio_num - 1
         mask = Data([mode[0] + (pull[0] << 3)])
         return self.setWrite(gpio_register, mask, remote_id)
-    
+
     def setPositionFilter(self, filter_type, filter_strength, remote_id=None):
         """
         Set the Pozyx's positioning filter.
@@ -1465,12 +1465,6 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        details = Data([0] * 20)
-        if self.useFunction(POZYX_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
-            return POZYX_FAILURE
-        byte_num = int(regAddress / 8)
-        bit_num = regAddress % 8
-        return (details[byte_num] >> bit_num) & 0x1
         return self.useFunction(POZYX_DEVICES_CLEAR, remote_id=remote_id)
 
     def addDevice(self, device_coordinates, remote_id=None):
