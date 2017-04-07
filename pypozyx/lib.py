@@ -1118,15 +1118,15 @@ class PozyxLib(PozyxCore):
         mask = Data([mode[0] + (pull[0] << 3)])
         return self.setWrite(gpio_register, mask, remote_id)
     
-    def setPositionFilter(self, filter_type, strength, remote_id=None):
+    def setPositionFilter(self, filter_type, filter_strength, remote_id=None):
         """
         Set the Pozyx's positioning filter.
 
         Note that currently only FILTER_TYPE_MOVINGAVERAGE, FILTER_TYPE_MOVINGMEDIAN and FILTER_TYPE_FIR are implemented.
 
         Args:
-            strength: Positioning filter strength.
-            filter_type: Positioning filter type.
+            filter_type: Positioning filter type. Integer or SingleRegister.
+            filter_strength: Positioning filter strength. Integer or SingleRegister.
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -1134,15 +1134,15 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        if not dataCheck(strength):
-            strength = SingleRegister(strength)
-        if not dataCheck(type):
+        if not dataCheck(filter_strength):
+            filter_strength = SingleRegister(filter_strength)
+        if not dataCheck(filter_type):
             filter_type = SingleRegister(filter_type)
         assert filter_type[0] == FILTER_TYPE_MOVINGAVERAGE or filter_type[
             0] == FILTER_TYPE_MOVINGMEDIAN or filter_type[0] == FILTER_TYPE_FIR or filter_type[0] == FILTER_TYPE_NONE, 'setPositionFilter: wrong filter type'
-        assert strength[0] >= 0 or strength[0] < 16, 'setPositionFilter: wrong strength'
+        assert filter_strength[0] >= 0 or filter_strength[0] < 16, 'setPositionFilter: wrong strength'
 
-        params = Data([filter_type[0] + (strength[0] << 4)])
+        params = Data([filter_type[0] + (filter_strength[0] << 4)])
         return self.setWrite(POZYX_POS_FILTER, params, remote_id)
 
     def setPositionAlgorithm(self, algorithm, dimension, remote_id=None):
