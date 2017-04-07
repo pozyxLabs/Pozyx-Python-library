@@ -2,42 +2,87 @@
 """set_same_settings.py - sets all wanted devices on the same settings as the tag.
 
 This script discovers all the devices in the environment and sets the UWB settings
-of the devices whose IDs match the included ones.
-
-It can also save to flash if so desired.
+of the devices whose IDs match the included ones, saving to flash if required.
 """
+
 from pypozyx import *
 from pypozyx.definitions.registers import POZYX_UWB_CHANNEL, POZYX_UWB_RATES, POZYX_UWB_PLEN, POZYX_UWB_GAIN
 
-save_to_flash = True
-channel = 2
-bitrate = 2  # 6.81 Mb/s
-prf = 2  # 64MHz
-plen = 0x04  # 64
-gain = 15.0  # dummy value since can't be saved
-uwb_settings = UWBSettings(channel, bitrate, prf, plen, gain)
-
-devices = [0x6054, 0x6049, 0x604A]
-
 port = 'COM12'
+
+
+class PozyxDevice:
+
+    def __init__(self, id, uwb_settings):
+        self.id = id
+        self.uwb_settings = uwb_settings
+
+    def __eq__(self, other):
+        if self.id == other.id:
+            return True
+        return False
 
 
 class SetSameUWBSettings:
     """Goes through the process of setting all IDs on same UWB settings"""
 
-    def __init__(self, port, uwb_settings, devices, save_to_flash=False, max_consecutive_fails=10):
+    def __init__(self, pozyx, uwb_settings, devices, set_local=True, save_to_flash=True, slow_settings=False):
+        """"""
+        self.pozyx = pozyx
         self.uwb_settings = uwb_settings
-        self.pozyx = PozyxSerial(port)
         self.devices = devices
         self.encountered = []
 
         self.save_to_flash = save_to_flash
+        self.set_local = set_local
+        self.slow_settings = slow_settings
 
-        # refactor and work in:
-        self.max_fails = max_consecutive_fails
+    def run(self):
+        """"""
+        self.discover_on_all_settings()
+        self.set_all_to_settings()
 
-        # move this to outside or keep it inside?
-        self.discover_and_change()
+    def discover_on_all_settings(self):
+        """"""
+        channels = [1, 2, 3, 4, 5, 7]
+        bitrates = [0, 1, 2]
+        prfs = [1, 2]
+        plens = [0x04, 0x14, 0x24, 0x34, 0x08, 0x18, 0x28, 0x0C]
+        for channel in channels:
+            for bitrate in bitrates:
+                for prf in prfs:
+                    for plen in plens:
+                        self.pozyx.setUWBSettings(UWBSettings(
+                            channel, bitrate, prf, plen, 15.0))
+                        self.discover_devices_on_setting()
+
+    def discover_devices_on_setting(self):
+        """"""
+        self.pozyx.clearDevices()
+        if self.slow_settings:
+            self.pozyx.doDiscovery(
+                discovery_type=POZYX_DISCOVERY_ALL_DEVICES, slots=3, slot_duration=0.15)
+        else:
+            self.pozyx.doDiscovery(discovery_type=POZYX_DISCOVERY_ALL_DEVICES)
+
+        for device_id in self.get_device_list():
+            self.encounter_device(device_id)
+
+    def get_device_list(self):
+        """"""
+        device_list_size = SingleRegister()
+        self.pozyx.getDeviceListSize(device_list_size)
+        device_list = DeviceList(list_size=device_list_size[0])
+        self.pozyx.getDeviceIds(device_list)
+        return device_list
+
+    def encounter_device(self, device_id):
+        """"""
+        device_uwb_settings = UWBSettings()
+        self.pozyx.getUWBSettings(device_uwb_settings, device_id)
+        device = PozyxDevice(device_id, device_uwb_settings)
+        if device not in self.encountered:
+            self.encountered.append(device)
 
     def discover_and_change(self):
         """Goes over every possible UWB configuration, performs discovery and then changes the UWB settings if necessary"""
@@ -49,6 +94,8 @@ class SetSameUWBSettings:
             for bitrate in bitrates:
                 for prf in prfs:
                     for plen in plens:
+                        self.pozyx.setUWBSettings(UWBSettings(
+                            channel, bitrate, prf, plen, 15.0))
                         self.pozyx.clearDevices()
                         fails = 0
                         uwb_settings = UWBSettings(
@@ -119,4 +166,24 @@ class SetSameUWBSettings:
 
 
 if __name__ == "__main__":
-    s = SetSameUWBSettings(port, uwb_settings, devices, save_to_flash)
+    # new uwb_settings
+    uwb_settings = UWBSettings(channel=2,
+                               bitrate=2,
+                               prf=2,
+                               plen=0x04,
+                               gain_db=15.0)
+
+    # set to True if local tag needs to change settings as well.
+    set_local = True
+
+    # set to True if needed to save to flash
+    save_to_flash = True
+
+    # list of IDs to set UWB settings for. example devices = [0x6001, 0x6002,
+    # 0x6799]
+    devices = []
+
+    # pozyx
+    pozyx = PozyxSerial(get_serial_ports()[0].device)
+
+    s = SetSameUWBSettings(pozyx, uwb_settings, devices, save_to_flash)

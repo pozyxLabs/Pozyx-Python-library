@@ -8,6 +8,8 @@ from pypozyx.structures.generic import Data, SingleRegister
 from serial import Serial
 from serial.tools.list_ports import comports
 
+## \addtogroup auxiliary_serial
+# @{
 
 def list_serial_ports():
     """Prints the open serial ports line per line"""
@@ -28,6 +30,8 @@ def get_pozyx_ports():
     for port in ports:
         if "STMicroelectronics Virtual COM Port" in port.description:
             pozyx_ports.append(port.device)
+
+## @}
 
 
 class PozyxSerial(PozyxLib):
@@ -62,6 +66,8 @@ class PozyxSerial(PozyxLib):
         >>> pozyx = PozyxSerial(serial.tools.list_ports.comports()[0])
     """
 
+    ## \addtogroup core
+    # @{
     def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False, debug_trace=False):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
@@ -95,6 +101,8 @@ class PozyxSerial(PozyxLib):
             print("WHO AM I returned 0x%0.2x, something is wrong with Pozyx." %
                   regs[0])
             raise SystemExit
+
+    ## @}
 
     def regWrite(self, address, data):
         """

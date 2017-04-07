@@ -216,6 +216,15 @@ class SingleRegister(Data):
     def load(self, data, convert=1):
         self.data = data
 
+    @property
+    def value(self):
+        return self.data[0]
+
+    @value.setter
+    def value(self, new_value):
+        self.data[0] = new_value
+
+
     def __str__(self):
         if self.print_style is 'hex':
             return hex(self.data[0]).capitalize()
