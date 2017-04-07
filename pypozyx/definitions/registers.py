@@ -20,6 +20,7 @@ POZYX_CALIB_STATUS = 0x6   # Returns the calibration status.
 POZYX_INT_MASK = 0x10    # Indicates which interrupts are enabled.
 POZYX_INT_CONFIG = 0x11  # Configure the interrupt pin
 POZYX_CONFIG_LEDS = 0x15    # Configure the LEDs
+POZYX_POS_FILTER = 0x14    # Filter used for positioning
 POZYX_POS_ALG = 0x16    # Algorithm used for positioning
 # Configure the number of anchors and selection procedure
 POZYX_POS_NUM_ANCHORS = 0x17
@@ -104,6 +105,7 @@ POZYX_POS_GET_ANCHOR_IDS = 0xB8
 POZYX_FLASH_RESET = 0xB9  # Reset a portion of the configuration in flash memory
 POZYX_FLASH_SAVE = 0xBA  # Store a portion of the configuration in flash memory
 POZYX_FLASH_DETAILS = 0xBB  # Return information on what is stored in flash
+POZYX_MAX_LIN_ACC = 0xBC  # Return the max linear acceleration and reset it to 0
 
 # Device list functions
 # Get all the network IDs's of devices in the device list.
