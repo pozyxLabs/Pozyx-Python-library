@@ -59,16 +59,13 @@ POZYX_DISCOVERY_ALL_DEVICES = 2
 
 # positioning algorithm options
 POZYX_POS_ALG_UWB_ONLY = 0
-POZYX_POS_ALG_LS = 2
 POZYX_POS_ALG_TRACKING = 4
 
 # positioning filters
 FILTER_TYPE_NONE = 0
 FILTER_TYPE_FIR = 1
-FILTER_TYPE_IIR = 2
 FILTER_TYPE_MOVINGAVERAGE = 3
 FILTER_TYPE_MOVINGMEDIAN = 4
-FILTER_TYPE_MOVINGMODUS = 5
 
 # how to intercept pozyx events: by polling or by interrupts
 MODE_POLLING = 0
