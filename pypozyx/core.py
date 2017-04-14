@@ -45,8 +45,6 @@ class PozyxCore():
         """
         pass
 
-    # core Pozyx interface functions
-
     def regRead(self, address, data):
         """
         Stores the read amount of bytes equal to data's size starting at address into data.
@@ -73,152 +71,6 @@ class PozyxCore():
         """
         raise NotImplementedError(
             'You need to override this function in your derived interface!')
-
-    def getRead(self, address, data, remote_id=None):
-        """
-        Reads Pozyx register data either locally or remotely.
-
-        Args:
-            address: The register address
-            data: A ByteStructure - derived object that is the container of the read data.
-
-        Kwargs:
-            remote_id: Remote ID for remote read.
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-
-        Example usage:
-            >>> whoami = SingleRegister()
-            >>> self.getRead(POZYX_WHO_AM_I, whoami)
-            >>> print(whoami)
-            67
-        """
-        if remote_id is None:
-            return self.regRead(address, data)
-        else:
-            return self.remoteRegRead(remote_id, address, data)
-
-    def useFunction(self, function, params=None, data=None, remote_id=None):
-        """
-        Activates a Pozyx register function either locally or remotely.
-
-        Args:
-            address: The function address
-
-        Kwargs:
-            params: A ByteStructure - derived object that contains the parameters for the function.
-            data: A ByteStructure - derived object that is the container of the read data.
-            remote_id: Remote ID for remote read.
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-
-        Example usage:
-            >>> self.useFunction(POZYX_DEVICES_CLEAR)
-        """
-        if params is None:
-            params = Data([])
-        if data is None:
-            data = Data([])
-        if remote_id is None:
-            status = self.regFunction(function, params, data)
-        else:
-            status = self.remoteRegFunction(
-                remote_id, function, params, data)
-        return status
-
-    def setWrite(self, address, data, remote_id=None, local_delay=POZYX_DELAY_LOCAL_WRITE, remote_delay=POZYX_DELAY_REMOTE_WRITE):
-        """
-        Writes data to Pozyx registers either locally or remotely.
-
-        Args:
-            address: The register address
-            data: A ByteStructure - derived object that contains the data to be written.
-
-        Kwargs:
-            remote_id: Remote ID for remote read.
-            local_delay: Delay after a local write
-            remote_delay: Delay after a remote write
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-
-        Example usage:
-            >>> leds = SingleRegister(0xFF)
-            >>> self.setWrite(POZYX_LED_CTRL, leds)
-        """
-        if remote_id is None:
-            status = self.regWrite(address, data)
-            sleep(local_delay)
-        else:
-            status = self.remoteRegWrite(remote_id, address, data)
-            sleep(remote_delay)
-        return status
-
-    # wait for flag functions
-
-    def waitForFlag(self, interrupt_flag, timeout_s, interrupt=None):
-        """
-        Checks the interrupt register for given flag until encountered/past the timeout time.
-
-        This is a virtual function, be sure to implement this in your derived interface.
-        """
-        raise NotImplementedError(
-            'You need to override this function in your derived interface!')
-
-    def waitForFlag_safe(self, interrupt_flag, timeout_s, interrupt=None):
-        """
-        Performs waitForFlag in polling mode.
-
-        Args:
-            interrupt_flag: Flag of interrupt type to check the interrupt register against.
-            timeout_s: duration to wait for the interrupt in seconds.
-
-        Kwags:
-            interrupt: Container for the interrupt status register data.
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-        """
-        if interrupt is None:
-            interrupt = SingleRegister()
-        start = time()
-        while(time() - start < timeout_s):
-            sleep(POZYX_DELAY_POLLING)
-            status = self.regRead(POZYX_INT_STATUS, interrupt)
-            if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
-                return True
-        return False
-
-    def checkForFlag(self, interrupt_flag, timeout_s, interrupt=None):
-        """Performs waitForFlag_safe and checks against errors or timeouts.
-
-        This abstracts the waitForFlag status check routine commonly encountered
-        in more complex library functions and checks the given flag against
-        the error flag.
-
-        Args:
-            interrupt_flag: Flag of interrupt type to check the interrupt register against.
-            timeout_s: duration to wait for the interrupt in seconds
-
-        Kwags:
-            interrupt: Container for the interrupt status register data.
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-        """
-        if interrupt is None:
-            interrupt = SingleRegister()
-        if self.waitForFlag_safe(interrupt_flag | POZYX_INT_STATUS_ERR, timeout_s, interrupt):
-            if (interrupt[0] & POZYX_INT_STATUS_ERR) == POZYX_INT_STATUS_ERR:
-                return POZYX_FAILURE
-            else:
-                return POZYX_SUCCESS
-        else:
-            return POZYX_TIMEOUT
-
-    # core communication functions
 
     def remoteRegWrite(self, destination, address, data):
         """
@@ -335,6 +187,157 @@ class PozyxCore():
                 return POZYX_FAILURE
         return status
 
+    def waitForFlag(self, interrupt_flag, timeout_s, interrupt=None):
+        """
+        Checks the interrupt register for given flag until encountered/past the timeout time.
+
+        This is a virtual function, be sure to implement this in your derived interface.
+        """
+        raise NotImplementedError(
+            'You need to override this function in your derived interface!')
+
+    def waitForFlag_safe(self, interrupt_flag, timeout_s, interrupt=None):
+        """
+        Performs waitForFlag in polling mode.
+
+        Args:
+            interrupt_flag: Flag of interrupt type to check the interrupt register against.
+            timeout_s: duration to wait for the interrupt in seconds.
+
+        Kwags:
+            interrupt: Container for the interrupt status register data.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        if interrupt is None:
+            interrupt = SingleRegister()
+        start = time()
+        while(time() - start < timeout_s):
+            sleep(POZYX_DELAY_POLLING)
+            status = self.regRead(POZYX_INT_STATUS, interrupt)
+            if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
+                return True
+        return False
+
+    ## \addtogroup core
+    # @{
+
+    def setWrite(self, address, data, remote_id=None, local_delay=POZYX_DELAY_LOCAL_WRITE, remote_delay=POZYX_DELAY_REMOTE_WRITE):
+        """
+        Writes data to Pozyx registers either locally or remotely.
+
+        Args:
+            address: The register address
+            data: A ByteStructure - derived object that contains the data to be written.
+
+        Kwargs:
+            remote_id: Remote ID for remote read.
+            local_delay: Delay after a local write
+            remote_delay: Delay after a remote write
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+
+        Examples:
+            >>> leds = SingleRegister(0xFF)
+            >>> self.setWrite(POZYX_LED_CTRL, leds)
+        """
+        if remote_id is None:
+            status = self.regWrite(address, data)
+            sleep(local_delay)
+        else:
+            status = self.remoteRegWrite(remote_id, address, data)
+            sleep(remote_delay)
+        return status
+
+    def getRead(self, address, data, remote_id=None):
+        """
+        Reads Pozyx register data either locally or remotely.
+
+        Args:
+            address: The register address
+            data: A ByteStructure - derived object that is the container of the read data.
+
+        Kwargs:
+            remote_id: Remote ID for remote read.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+
+        Example:
+            >>> whoami = SingleRegister()
+            >>> self.getRead(POZYX_WHO_AM_I, whoami)
+            >>> print(whoami)
+            67
+        """
+        if remote_id is None:
+            return self.regRead(address, data)
+        else:
+            return self.remoteRegRead(remote_id, address, data)
+
+    def useFunction(self, function, params=None, data=None, remote_id=None):
+        """
+        Activates a Pozyx register function either locally or remotely.
+
+        Args:
+            address: The function address
+
+        Kwargs:
+            params: A ByteStructure - derived object that contains the parameters for the function.
+            data: A ByteStructure - derived object that is the container of the read data.
+            remote_id: Remote ID for remote read.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+
+        Example:
+            >>> self.useFunction(POZYX_DEVICES_CLEAR)
+        """
+        if params is None:
+            params = Data([])
+        if data is None:
+            data = Data([])
+        if remote_id is None:
+            status = self.regFunction(function, params, data)
+        else:
+            status = self.remoteRegFunction(
+                remote_id, function, params, data)
+        return status
+
+    # wait for flag functions
+
+    def checkForFlag(self, interrupt_flag, timeout_s, interrupt=None):
+        """Performs waitForFlag_safe and checks against errors or timeouts.
+
+        This abstracts the waitForFlag status check routine commonly encountered
+        in more complex library functions and checks the given flag against
+        the error flag.
+
+        Args:
+            interrupt_flag: Flag of interrupt type to check the interrupt register against.
+            timeout_s: duration to wait for the interrupt in seconds
+
+        Kwags:
+            interrupt: Container for the interrupt status register data.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        if interrupt is None:
+            interrupt = SingleRegister()
+        if self.waitForFlag_safe(interrupt_flag | POZYX_INT_STATUS_ERR, timeout_s, interrupt):
+            if (interrupt[0] & POZYX_INT_STATUS_ERR) == POZYX_INT_STATUS_ERR:
+                return POZYX_FAILURE
+            else:
+                return POZYX_SUCCESS
+        else:
+            return POZYX_TIMEOUT
+
+    ## @}
+
+    ## \addtogroup communication_functions
+
     def readRXBufferData(self, data):
         """
         Reads the device's receive buffer's data completely.
@@ -434,3 +437,5 @@ class PozyxCore():
         status &= self.writeTXBufferData(data)
         status &= self.sendTXBufferData(destination)
         return status
+
+    ## @}

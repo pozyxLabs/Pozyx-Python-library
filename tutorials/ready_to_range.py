@@ -3,9 +3,8 @@
 The Pozyx ready to range tutorial (c) Pozyx Labs
 Please read the tutorial that accompanies this sketch: https://www.pozyx.io/Documentation/Tutorials/ready_to_range/Python
 
-This demo requires two Pozyx devices and one Arduino. It demonstrates the ranging capabilities and the functionality to
-to remotely control a Pozyx device. Place one of the Pozyx shields on the Arduino and upload this sketch. Move around
-with the other Pozyx device.
+This demo requires two Pozyx devices. It demonstrates the ranging capabilities and the functionality to
+to remotely control a Pozyx device. Move around with the other Pozyx device.
 
 This demo measures the range between the two devices. The closer the devices are to each other, the more LEDs will
 light up on both devices.
@@ -16,11 +15,12 @@ from pypozyx import *
 class ReadyToRange(object):
     """Continuously performs ranging between the Pozyx and a destination and sets their LEDs"""
 
-    def __init__(self, pozyx, destination_id, range_step_mm=1000, remote_id=None):
+    def __init__(self, pozyx, destination_id, range_step_mm=1000, protocol=POZYX_RANGE_PROTOCOL_FAST, remote_id=None):
         self.pozyx = pozyx
         self.destination_id = destination_id
         self.range_step_mm = range_step_mm
         self.remote_id = remote_id
+        self.protocol = protocol
 
     def setup(self):
         """Sets up both the ranging and destination Pozyx's LED configuration"""
@@ -41,6 +41,8 @@ class ReadyToRange(object):
         self.pozyx.setLedConfig(led_config, self.remote_id)
         # do the same for the destination.
         self.pozyx.setLedConfig(led_config, self.destination_id)
+        # set the ranging protocol
+        self.pozyx.setRangingProtocol(self.protocol)
 
     def loop(self):
         """Performs ranging and sets the LEDs accordingly"""
@@ -76,8 +78,10 @@ if __name__ == "__main__":
     destination_id = 0x6069      # network ID of the ranging destination
     range_step_mm = 1000         # distance that separates the amount of LEDs lighting up.
 
+    ranging_protocol = POZYX_RANGE_PROTOCOL_PRECISION # the ranging protocol
+
     pozyx = PozyxSerial(port)
-    r = ReadyToRange(pozyx, destination_id, range_step_mm, remote_id)
+    r = ReadyToRange(pozyx, destination_id, range_step_mm, ranging_protocol, remote_id)
     r.setup()
     while True:
         r.loop()

@@ -7,12 +7,7 @@ from pypozyx.structures.generic import XYZ
 
 
 class Coordinates(XYZ):
-    """
-    Container for coordinates in x, y, and z (in mm).
-
-    Useful in these functions:
-        getCoordinates, setCoordinates
-    """
+    """Container for coordinates in x, y, and z (in mm)."""
     byte_size = 12
     data_format = 'iii'
 
@@ -24,12 +19,7 @@ class Coordinates(XYZ):
 
 
 class Acceleration(XYZ):
-    """
-    Container for acceleration in x, y, and z (in mg).
-
-    Useful in these functions:
-        getAcceleration_mg
-    """
+    """Container for acceleration in x, y, and z (in mg)."""
     physical_convert = POZYX_ACCEL_DIV_MG
 
     byte_size = 6
@@ -37,12 +27,7 @@ class Acceleration(XYZ):
 
 
 class Magnetic(XYZ):
-    """
-    Container for coordinates in x, y, and z (in uT).
-
-    Useful in these functions:
-        getMagnetic_uT
-    """
+    """Container for coordinates in x, y, and z (in uT)."""
     physical_convert = POZYX_MAG_DIV_UT
 
     byte_size = 6
@@ -50,12 +35,7 @@ class Magnetic(XYZ):
 
 
 class AngularVelocity(XYZ):
-    """
-    Container for angular velocity in x, y, and z (in dps).
-
-    Useful in these functions:
-        getAngularVelocity_dps
-    """
+    """Container for angular velocity in x, y, and z (in dps)."""
     physical_convert = POZYX_GYRO_DIV_DPS
 
     byte_size = 6
@@ -63,12 +43,7 @@ class AngularVelocity(XYZ):
 
 
 class LinearAcceleration(XYZ):
-    """
-    Container for linear acceleration in x, y, and z (in mg), as floats.
-
-    Useful in these functions:
-        getLinearAcceleration_mg
-    """
+    """Container for linear acceleration in x, y, and z (in mg), as floats."""
     physical_convert = POZYX_ACCEL_DIV_MG
 
     byte_size = 6
@@ -86,12 +61,7 @@ class LinearAcceleration(XYZ):
 
 
 class PositionError(XYZ):
-    """
-    Container for position error in x, y, z, xy, xz, and yz (in mm).
-
-    Useful in these functions:
-        getPositionError
-    """
+    """Container for position error in x, y, z, xy, xz, and yz (in mm)."""
     physical_convert = 1
     byte_size = 12
     data_format = 'hhhhhh'
@@ -122,12 +92,7 @@ class PositionError(XYZ):
 
 
 class Quaternion(XYZ):
-    """
-    Container for quaternion data in x, y, z and w.
-
-    Useful in these functions:
-        getQuaternion
-    """
+    """Container for quaternion data in x, y, z and w."""
     physical_convert = POZYX_QUAT_DIV
 
     byte_size = 8
@@ -161,12 +126,7 @@ class Quaternion(XYZ):
 
 
 class EulerAngles(ByteStructure):
-    """
-    Container for euler angles as heading, roll, and pitch (in degrees).
-
-    Useful in these functions:
-        getEulerAngles_deg
-    """
+    """Container for euler angles as heading, roll, and pitch (in degrees)."""
     physical_convert = POZYX_EULER_DIV_DEG
 
     byte_size = 6
@@ -217,9 +177,6 @@ class SensorData(ByteStructure):
         - linear_acceleration: LinearAcceleration
         - gravity_vector: LinearAcceleration
         - temperature: Int8
-
-    Useful in these functions:
-        getAllSensorData
     """
     byte_size = 49  # 4 + 6 + 6 + 6 + 6 + 8 + 6 + 6 + 1
 
@@ -275,9 +232,6 @@ class RawSensorData(SensorData):
         - linear_acceleration: LinearAcceleration
         - gravity_vector: LinearAcceleration
         - temperature: Int8
-
-    Useful in these functions:
-        getRawSensorData
     """
 
     def __init__(self, data=[0] * 24):
