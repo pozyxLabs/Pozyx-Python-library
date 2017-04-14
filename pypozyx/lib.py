@@ -547,6 +547,40 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(POZYX_POS_INTERVAL, ms, remote_id)
 
+    def getRangingProtocol(self, protocol, remote_id=None):
+        """
+        Obtains the Pozyx's ranging protocol
+
+        Args:
+            protocol: Container for the read protocol data. SingleRegister or Data([0])
+
+        Kwargs:
+            remote_id: Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        return self.getRead(POZYX_RANGE_PROTOCOL, protocol, remote_id)
+
+    def setRangingProtocol(self, protocol, remote_id=None):
+        """
+        Set the Pozyx's ranging protocol.
+
+        Args:
+            protocol: the new ranging protocol. See POZYX_RANGE_PROTOCOL register. integer or SingleRegister(protocol)
+
+        Kwargs:
+            remote_id: Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        if not dataCheck(protocol):
+            protocol = SingleRegister(protocol)
+        assert protocol[0] >= 0 and protocol[0] <=2, 'setRangingProtocol: wrong protocol %i' % protocol[0]
+
+        return self.setWrite(POZYX_RANGE_PROTOCOL, protocol, remote_id)
+
     def getPositionAlgorithm(self, algorithm, remote_id=None):
         """
         Obtains the Pozyx's positioning algorithm.
@@ -735,26 +769,6 @@ class PozyxLib(PozyxCore):
         assert ms[0] > 100 and ms[
             0] <= 600000, 'setUpdateInterval: ms not 100<ms<60000'
         return self.setWrite(POZYX_POS_INTERVAL, ms, remote_id)
-
-    def setOperationMode(self, mode, remote_id=None):
-        """
-        Set the Pozyx's operation mode.
-
-        Args:
-            mode: New operation mode. See POZYX_OPERATION_MODE register. integer mode or SingleRegister(mode).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-        """
-        if not dataCheck(mode):
-            mode = SingleRegister(mode)
-        assert mode[0] == POZYX_ANCHOR_MODE or mode[
-            0] == POZYX_TAG_MODE, 'setOperationMode: wrong mode'
-
-        return self.setWrite(POZYX_OPERATION_MODE, mode, remote_id)
 
     def setCoordinates(self, coordinates, remote_id=None):
         """
