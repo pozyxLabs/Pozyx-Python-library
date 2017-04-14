@@ -126,7 +126,7 @@ class PozyxLib(PozyxCore):
         details = Data([0] * 20)
         if self.useFunction(POZYX_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
             return POZYX_FAILURE
-        byte_num = int(regAddress / 8)
+        byte_num = regAddress / 8
         bit_num = regAddress % 8
         return (details[byte_num] >> bit_num) & 0x1
 
@@ -681,7 +681,7 @@ class PozyxLib(PozyxCore):
         See Also:
             getAnchorIds, getTagIds, getDeviceIds
 
-        Example usage:
+        Example:
             >> > list_size = SingleRegister()
             >> > self.getNumberOfAnchors(list_size)
             >> > anchor_list = DeviceList(list_size=list_size[0])
@@ -1232,7 +1232,7 @@ class PozyxLib(PozyxCore):
         See Also:
             getAnchorIds, getTagIds, getPositioningAnchorIds
 
-        Example usage:
+        Example:
             >> > list_size = SingleRegister()
             >> > self.getDeviceListSize(list_size)
             >> > device_list = DeviceList(list_size=list_size[0])

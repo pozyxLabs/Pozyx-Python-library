@@ -32,15 +32,19 @@ class DeviceCoordinates(ByteStructure):
         network_id: Network ID of the device
         flag: Type of the device. Tag or anchor.
         pos: Coordinates of the device. Coordinates().
-
-    Useful for the following functions:
-        addDevice, getDeviceCoordinates
     """
     byte_size = 15
     data_format = 'HBiii'
 
     def __init__(self, network_id=0, flag=0, pos=Coordinates()):
-        """Initializes the DeviceCoordinates object."""
+        """
+        Initializes the DeviceCoordinates object.
+
+        Kwargs:
+            network_id: Network ID of the device
+            flag: Type of the device. Tag or anchor.
+            pos: Coordinates of the device. Coordinates().
+        """
         self.network_id = network_id
         self.flag = flag
         self.pos = pos
@@ -75,9 +79,6 @@ class DeviceRange(ByteStructure):
         timestamp: Timestamp of the range measurement
         distance: Distance measured by the device.
         RSS: Signal strength during the ranging measurement.
-
-    Useful for the following functions:
-        doRanging, getDeviceRangeInfo
     """
     byte_size = 10
     data_format = 'IIh'
@@ -112,9 +113,6 @@ class NetworkID(Data):
 
     Kwargs:
         network_id: The network ID of the device.
-
-    Useful for the following functions:
-        getNetworkId, setNetworkId
     """
 
     def __init__(self, network_id=0):
@@ -150,9 +148,6 @@ class DeviceList(Data):
     Kwargs:
         ids: Array of known or unknown device IDs. Empty by default.
         list_size: Size of the device list.
-
-    Useful for the following functions:
-        getAnchorIds, getTagIds, getDeviceIds, setPositioningAnchorIds.
     """
 
     def __init__(self, ids=[], list_size=0):
@@ -195,9 +190,6 @@ class UWBSettings(ByteStructure):
         prf: Pulse repeat frequency of the UWB. See POZYX_UWB_RATES.
         plen: Preamble length of the UWB packets. See POZYX_UWB_PLEN.
         gain_db: Gain of the UWB transceiver, a float value. See POZYX_UWB_GAIN.
-
-    Useful for the following functions:
-        getUWBSettings, setUWBSettings
     """
     byte_size = 7
     data_format = 'BBBBf'

@@ -4,6 +4,8 @@
 This script discovers all the devices in the environment and sets the UWB settings
 of the devices whose IDs match the included ones, saving to flash if required.
 """
+# CURRENTLY IN DEV, WON'T WORK
+raise NotImplementedError
 
 from pypozyx import *
 from pypozyx.definitions.registers import POZYX_UWB_CHANNEL, POZYX_UWB_RATES, POZYX_UWB_PLEN, POZYX_UWB_GAIN
@@ -83,6 +85,9 @@ class SetSameUWBSettings:
         device = PozyxDevice(device_id, device_uwb_settings)
         if device not in self.encountered:
             self.encountered.append(device)
+
+    def set_all_devices(self):
+        pass
 
     def discover_and_change(self):
         """Goes over every possible UWB configuration, performs discovery and then changes the UWB settings if necessary"""
