@@ -42,7 +42,7 @@ class ReadyToRange(object):
         # do the same for the destination.
         self.pozyx.setLedConfig(led_config, self.destination_id)
         # set the ranging protocol
-        self.pozyx.setRangingProtocol(self.protocol)
+        self.pozyx.setRangingProtocol(self.protocol, self.remote_id)
 
     def loop(self):
         """Performs ranging and sets the LEDs accordingly"""
