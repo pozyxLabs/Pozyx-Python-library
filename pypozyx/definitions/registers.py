@@ -54,6 +54,7 @@ POZYX_POS_ERR_XZ = 0x44    # estimated covariance of xz
 POZYX_POS_ERR_YZ = 0x46    # estimated covariance of yz
 
 # Sensor data
+POZYX_MAX_LIN_ACC = 0x4E  # Return the max linear acceleration and reset it to 0
 POZYX_PRESSURE = 0x50    # Pressure data in mPa
 POZYX_ACCEL_X = 0x54    # Accelerometer data (in mg)
 POZYX_ACCEL_Y = 0x56
@@ -105,7 +106,6 @@ POZYX_POS_GET_ANCHOR_IDS = 0xB8
 POZYX_FLASH_RESET = 0xB9  # Reset a portion of the configuration in flash memory
 POZYX_FLASH_SAVE = 0xBA  # Store a portion of the configuration in flash memory
 POZYX_FLASH_DETAILS = 0xBB  # Return information on what is stored in flash
-POZYX_MAX_LIN_ACC = 0xBC  # Return the max linear acceleration and reset it to 0
 
 # Device list functions
 # Get all the network IDs's of devices in the device list.
