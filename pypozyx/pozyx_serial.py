@@ -6,6 +6,8 @@ from pypozyx.definitions.registers import *
 from pypozyx.lib import PozyxLib
 from pypozyx.structures.generic import Data, SingleRegister
 from serial import Serial
+# serial_for_url is needed for tcp socket support
+from serial import serial_for_url
 from serial.tools.list_ports import comports
 
 ## \addtogroup auxiliary_serial
@@ -68,12 +70,19 @@ class PozyxSerial(PozyxLib):
 
     ## \addtogroup core
     # @{
-    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False, debug_trace=False):
+    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False, debug_trace=False, tcp=False, ip="127.0.0.1"):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
         try:
-            self.ser = Serial(port, baudrate, timeout=timeout,
-                              write_timeout=write_timeout)
+            # adding TCP support
+            if tcp == True:
+                # socket constructor
+                url="socket://" + ip + ":" + port
+                print(url)
+                self.ser = serial_for_url(url=url)
+            else:
+                self.ser = Serial(port, baudrate, timeout=timeout,
+                                   write_timeout=write_timeout)
         except:
             print(
                 "Couldn't connect with Pozyx, wrong/busy serial port, or pySerial not installed.")
