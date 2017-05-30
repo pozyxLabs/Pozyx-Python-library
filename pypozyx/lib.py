@@ -1192,7 +1192,7 @@ class PozyxLib(PozyxCore):
         Obtain the Pozyx's temperature sensor data in C(celsius).
 
         Args:
-            temperature: Container for the read data. Data([0], 'f').
+            temperature: Container for the read data. Data([0], 'b').
 
         Kwargs:
             remote_id: Remote Pozyx ID.
