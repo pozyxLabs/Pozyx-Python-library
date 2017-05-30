@@ -1070,7 +1070,7 @@ class PozyxLib(PozyxCore):
         Obtain the Pozyx's pressure sensor data in Pa(pascal).
 
         Args:
-            pressure: Container for the read data. Data([0], 'f').
+            pressure: Container for the read data. Data([0], 'I').
 
         Kwargs:
             remote_id: Remote Pozyx ID.
