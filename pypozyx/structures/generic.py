@@ -44,14 +44,14 @@ from pypozyx.structures.byte_structure import ByteStructure
 
 def is_reg_readable(reg):
     """Returns whether a Pozyx register is readable."""
-    if (reg >= 0x00 and reg < 0x07) or (reg >= 0x10 and reg < 0x12) or (reg >= 0x15 and reg < 0x22) or (reg >= 0x22 and reg < 0x24) or (reg >= 0x27 and reg < 0x2B) or (reg >= 0x30 and reg < 0x48) or (reg >= 0x4E and reg < 0x89):
+    if (reg >= 0x00 and reg < 0x07) or (reg >= 0x10 and reg < 0x12) or (reg >= 0x14 and reg < 0x22) or (reg >= 0x22 and reg < 0x24) or (reg >= 0x27 and reg < 0x2B) or (reg >= 0x30 and reg < 0x48) or (reg >= 0x4E and reg < 0x89):
         return True
     return False
 
 
 def is_reg_writable(reg):
     """Returns whether a Pozyx register is writeable."""
-    if (reg >= 0x10 and reg < 0x12) or (reg >= 0x15 and reg < 0x22) or (reg >= 0x22 and reg < 0x24) or (reg >= 0x27 and reg < 0x2B) or (reg >= 0x30 and reg < 0x3C) or (reg >= 0x85 and reg < 0x89):
+    if (reg >= 0x10 and reg < 0x12) or (reg >= 0x14 and reg < 0x22) or (reg >= 0x22 and reg < 0x24) or (reg >= 0x27 and reg < 0x2B) or (reg >= 0x30 and reg < 0x3C) or (reg >= 0x85 and reg < 0x89):
         return True
     return False
 
