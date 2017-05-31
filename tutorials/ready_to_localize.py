@@ -30,14 +30,14 @@ class ReadyToLocalize(object):
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
-        print("------------POZYX POSITIONING V1.0 -------------")
+        print("------------POZYX POSITIONING V1.1 -------------")
         print("NOTES: ")
         print("- No parameters required.")
         print()
         print("- System will auto start configuration")
         print()
         print("- System will auto start positioning")
-        print("------------POZYX POSITIONING V1.0 --------------")
+        print("------------POZYX POSITIONING V1.1 --------------")
         print()
         print("START Ranging: ")
         self.pozyx.clearDevices(self.remote_id)

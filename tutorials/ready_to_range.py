@@ -24,7 +24,7 @@ class ReadyToRange(object):
 
     def setup(self):
         """Sets up both the ranging and destination Pozyx's LED configuration"""
-        print("------------POZYX RANGING V1.0 - -----------")
+        print("------------POZYX RANGING V1.1 -------------")
         print("NOTES: ")
         print(" - Change the parameters: ")
         print("\tdestination_id(target device)")
@@ -32,7 +32,7 @@ class ReadyToRange(object):
         print()
         print("- Approach target device to see range and")
         print("led control")
-        print("- -----------POZYX RANGING V1.0 ------------")
+        print("- -----------POZYX RANGING V1.1 ------------")
         print()
         print("START Ranging: ")
 
