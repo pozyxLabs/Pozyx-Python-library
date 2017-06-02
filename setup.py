@@ -14,11 +14,11 @@ setup(
     keywords=['pozyx', 'serial', 'positioning', 'localisation'],
     classifiers=[
         'Programming Language :: Python',
-        'Development Status :: 5 - Release',
-        'Intended audience :: End Users/Developers',
-        'Operating System :: OS independent',
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: End Users/Desktop',
+        'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Positioning :: Pozyx',
+        'Topic :: Scientific/Engineering',
     ],
     long_description="""\
     Pozyx Python library, used to interface with the Pozyx without need of an arduino.
