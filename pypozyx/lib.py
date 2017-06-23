@@ -1511,8 +1511,9 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        self.saveConfiguration(POZYX_FLASH_NETWORK, remote_id=remote_id)
-        self.saveRegisters([POZYX_POS_NUM_ANCHORS], remote_id)
+        status = self.saveConfiguration(POZYX_FLASH_NETWORK, remote_id=remote_id)
+        status &= self.saveRegisters([POZYX_POS_NUM_ANCHORS], remote_id=remote_id)
+        return status
 
     def configureAnchors(self, anchor_list, anchor_select=POZYX_ANCHOR_SEL_AUTO, remote_id=None):
         """
