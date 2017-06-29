@@ -1632,6 +1632,11 @@ class PozyxLib(PozyxCore):
         """
         list_size = SingleRegister()
         status = self.getDeviceListSize(list_size, remote_id)
+        
+        if list_size[0] == 0:
+            print("No devices were found")
+            return
+        
         device_list = DeviceList(list_size=list_size[0])
         status &= self.getDeviceIds(device_list, remote_id)
 
