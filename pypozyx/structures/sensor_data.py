@@ -168,7 +168,7 @@ class SensorData(ByteStructure):
     Container for all sensor data.
 
     This includes, in order, with respective structure:
-        - pressure : float
+        - pressure : UInt32
         - acceleration : Acceleration
         - magnetic : Magnetic
         - angular_vel : AngularVelocity
@@ -180,8 +180,8 @@ class SensorData(ByteStructure):
     """
     byte_size = 49  # 4 + 6 + 6 + 6 + 6 + 8 + 6 + 6 + 1
 
-    # 'I' + 'h'*3 + 'h'*3 + 'h'*3 + 'h'*3 + 'f'*4 + 'h'*3 + 'h'*3 + 'B'
-    data_format = 'fhhhhhhhhhhhhhhhhhhhhhhB'
+    # 'I' + 'h'*3 + 'h'*3 + 'h'*3 + 'h'*3 + 'f'*4 + 'h'*3 + 'h'*3 + 'b'
+    data_format = 'Ihhhhhhhhhhhhhhhhhhhhhhb'
 
     def __init__(self, data=[0] * 24):
         """Initializes the SensorData object."""
@@ -223,7 +223,7 @@ class RawSensorData(SensorData):
     """Container for raw sensor data
 
     This includes, in order, with respective structure:
-        - pressure : float
+        - pressure : UInt32
         - acceleration : Acceleration
         - magnetic : Magnetic
         - angular_vel : AngularVelocity
