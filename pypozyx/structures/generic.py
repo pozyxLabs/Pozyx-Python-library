@@ -195,7 +195,7 @@ class SingleRegister(Data):
 
     Kwargs:
         value: Value of the register.
-        size: Size of the register. 1, 2, or 4. Default 0.
+        size: Size of the register. 1, 2, or 4. Default 1.
         signed: Whether the data is signed. unsigned by default.
         print_hex: How to print the register output. Hex by default. Special options are 'hex' and 'bin'
             other things, such as 'dec', will return decimal output.
