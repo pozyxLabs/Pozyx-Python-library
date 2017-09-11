@@ -95,8 +95,8 @@ class ReadyToLocalize(object):
         status = self.pozyx.clearDevices(self.remote_id)
         for anchor in self.anchors:
             status &= self.pozyx.addDevice(anchor, self.remote_id)
-        if len(anchors) > 4:
-            status &= self.pozyx.setSelectionOfAnchors(POZYX_ANCHOR_SEL_AUTO, len(anchors))
+        if len(self.anchors) > 4:
+            status &= self.pozyx.setSelectionOfAnchors(POZYX_ANCHOR_SEL_AUTO, len(self.anchors))
         return status
 
     def printPublishConfigurationResult(self):
