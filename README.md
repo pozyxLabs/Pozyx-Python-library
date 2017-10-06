@@ -6,7 +6,7 @@ This library works with both Python 2 and 3.
 ### Prerequisites:
 * Download and install Python. On Windows, make your life easier and make sure Python is in your PATH. A recommended install is therefore the [Anaconda Suite](https://www.continuum.io/downloads) by Continuum. If you're going to follow the tutorials, you'll need to install Python 3 for the python-osc support.
 * Install the PySerial package. If you have pip installed, you can do this by writing `pip install pyserial` in your command line interface (cmd on Windows).
-* **Windows only** install [ST's virtual COM driver](http://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-stm32102.html)
+* **Windows only** install [ST's virtual COM driver](http://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-stm32102.html). After running this installer, please run the correct driver package for your system, located in "C:\Program Files (x86)\STMicroelectronics\Software\Virtual comport driver". Choose Win7 if you run Windows 7 or older. Choose Win8 for Windows 8 or newer. Run "dpinst_amd64.exe" on a 64-bit system, "dpinst_x86.exe"on a 32-bit system.
 
 ### Installing this package.
 As it's not yet available on PyPi, you will have to install the library from source like this:
