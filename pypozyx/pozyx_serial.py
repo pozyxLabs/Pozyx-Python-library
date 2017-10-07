@@ -6,10 +6,24 @@ from pypozyx.definitions.registers import *
 from pypozyx.lib import PozyxLib
 from pypozyx.structures.generic import Data, SingleRegister
 from serial import Serial
+# os is used to get the wlan0 ip address
+import os
+# serial_for_url is needed for tcp socket support
+from serial import serial_for_url
+# weakref is used for retrieve all instances of pozyx devices
+import weakref
+# RLock based locking for multithread operations
+import threading
 from serial.tools.list_ports import comports
 
 ## \addtogroup auxiliary_serial
 # @{
+
+def get_wlan0_ip():
+    """Return the wlan0 ip used for the TCP bridge"""
+    import os
+    ip_wlan0 = os.popen('ip addr show wlan0 | grep "\<inet\>" | awk \'{ print $2   }\' | awk -F "/" \'{ print $1   }\'').read().strip()
+    return ip_wlan0
 
 def list_serial_ports():
     """Prints the open serial ports line per line"""
@@ -66,14 +80,28 @@ class PozyxSerial(PozyxLib):
         >>> pozyx = PozyxSerial(serial.tools.list_ports.comports()[0])
     """
 
+    # builds a list of all pozyx devices used in one script
+    instances = []
+
     ## \addtogroup core
     # @{
-    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False, debug_trace=False):
+    def __init__(self, port=9001, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False, debug_trace=False, tcp=False, ip=get_wlan0_ip()):
         """Initializes the PozyxSerial object. See above for details."""
+        self.__class__.instances.append(weakref.proxy(self))
         self.print_output = print_output
+        self.baudrate = baudrate
+        self.ip = ip
+        self.port = port
+        self.url = "socket://" + self.ip + ":" + self.port
+        # threading lock for the serial exchange
+        self.rlock = threading.RLock()
         try:
-            self.ser = Serial(port, baudrate, timeout=timeout,
-                              write_timeout=write_timeout)
+            # adding TCP support
+            if tcp == True:
+                self.ser = serial_for_url(url=self.url, baudrate=self.baudrate, )
+            else:
+                self.ser = Serial(port, baudrate, timeout=timeout,
+                                   write_timeout=write_timeout)
         except:
             print(
                 "Couldn't connect with Pozyx, wrong/busy serial port, or pySerial not installed.")
@@ -144,8 +172,14 @@ class PozyxSerial(PozyxLib):
             Serial message the Pozyx returns, stripped from 'D,' at its start
                 and NL+CR at the end.
         """
+        self.rlock.acquire()
         self.ser.write(s.encode())
+        self.rlock.release()
+
+        self.rlock.aqcuire()
         response = self.ser.readline().decode()
+        self.rlock.release()
+
         if self.print_output:
             print('The response to %s is %s.' % (s.strip(), response.strip()))
         if len(response) == 0:
