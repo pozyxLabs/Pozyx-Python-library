@@ -2,7 +2,7 @@
 """pypozyx.lib - Contains core and extended Pozyx user functionality through the PozyxLib class."""
 
 from time import sleep
-
+from math import sqrt,pow
 from pypozyx.core import PozyxCore
 from pypozyx.definitions.bitmasks import *
 from pypozyx.definitions.constants import *
@@ -1155,7 +1155,15 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_QUAT_W, quaternion, remote_id)
+        res = self.getRead(POZYX_QUAT_W, quaternion, remote_id)
+        if res == POZYX_SUCCESS:
+            # Normalize quaternion
+            sum = sqrt(pow(quaternion.x,2)+ pow(quaternion.y,2) + pow(quaternion.z,2) + pow(quaternion.w,2))
+            quaternion.x/=sum
+            quaternion.y/=sum
+            quaternion.z/=sum
+            quaternion.w/=sum
+        return res
 
     def getLinearAcceleration_mg(self, linear_acceleration, remote_id=None):
         """
