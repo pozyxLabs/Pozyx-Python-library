@@ -99,7 +99,7 @@ class PozyxCore():
         status = self.regFunction(POZYX_TX_SEND, params, Data([]))
         if status == POZYX_FAILURE:
             return status
-        return self.checkForFlag(POZYX_INT_STATUS_FUNC, 0.1)
+        return self.checkForFlag(POZYX_INT_STATUS_FUNC, 0.5)
 
     def remoteRegRead(self, destination, address, data):
         """
