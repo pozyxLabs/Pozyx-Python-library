@@ -62,7 +62,7 @@ class Orientation3D(object):
 
     def addSensorData(self, sensor_data):
         """Adds the sensor data to the OSC message"""
-        self.msg_builder.add_arg(sensor_data.pressure)
+        self.addComponentsOSC(sensor_data.pressure)
         self.addComponentsOSC(sensor_data.acceleration)
         self.addComponentsOSC(sensor_data.magnetic)
         self.addComponentsOSC(sensor_data.angular_vel)
