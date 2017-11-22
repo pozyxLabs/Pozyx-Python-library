@@ -1791,11 +1791,11 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        if not dataCheck(txgain_dB):
-            txgain_dB = Data([txgain_dB], 'f')
-        assert txgain_dB[0] >= 0.0 and txgain_dB[
-            0] <= 35.0, 'setUWBGain: TX gain %0.2fdB not in range (0-35dB)' % txgain_dB[0]
-        doublegain_dB = Data([int(2.0 * txgain_dB[0] + 0.5)])
+        if not dataCheck(uwb_gain_dB):
+            uwb_gain_dB = Data([uwb_gain_dB], 'f')
+        assert uwb_gain_dB[0] >= 0.0 and uwb_gain_dB[
+            0] <= 35.0, 'setUWBGain: TX gain %0.2fdB not in range (0-35dB)' % uwb_gain_dB[0]
+        doublegain_dB = Data([int(2.0 * uwb_gain_dB[0] + 0.5)])
 
         return self.setWrite(POZYX_UWB_GAIN, doublegain_dB, remote_id)
 
@@ -1885,7 +1885,7 @@ class PozyxLib(PozyxCore):
         doublegain_dB = SingleRegister()
         status = self.getRead(
             POZYX_UWB_GAIN, doublegain_dB, remote_id)
-        txgain_dB[0] = 0.5 * doublegain_dB[0]
+        uwb_gain_dB[0] = 0.5 * doublegain_dB[0]
         return status
 
     def getTxPower(self, txgain_dB, remote_id=None):

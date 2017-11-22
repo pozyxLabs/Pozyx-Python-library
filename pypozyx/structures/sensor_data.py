@@ -230,6 +230,7 @@ class SensorData(ByteStructure):
         self.gravity_vector.load(data[20:23], convert)
         self.temperature.load(data[23], convert)
 
+
     def update_data(self):
         """Not used so data remains the raw unformatted data"""
         pass
