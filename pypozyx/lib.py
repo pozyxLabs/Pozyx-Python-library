@@ -54,7 +54,7 @@ class PozyxLib(PozyxCore):
             sensor_mode = SingleRegister(sensor_mode)
         assert sensor_mode[0] >= 0 and sensor_mode[
             0] <= 12, 'setSensorMode: mode %i not in range (0-12)' % sensor_mode
-        status = self.setWrite(POZYX_INT_MASK, sensor_mode, remote_id)
+        status = self.setWrite(POZYX_SENSORS_MODE, sensor_mode, remote_id)
         # legacy delay?
         sleep(POZYX_DELAY_MODE_CHANGE)
         return status
