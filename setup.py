@@ -5,7 +5,7 @@ setup(
     name='pypozyx',
     packages=['pypozyx', 'pypozyx.definitions',
               'pypozyx.structures', 'pypozyx.tests'],
-    version='1.0.0',
+    version='1.0.1',
     description='Python library for Pozyx',
     author='Laurent Van Acker',
     author_email='laurent@pozyx.io',

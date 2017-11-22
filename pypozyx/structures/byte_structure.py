@@ -10,8 +10,6 @@ class ByteStructure(object):
     their basic functionality from. It implements the low-level functionality
     that makes it easy to make use arbitrary struct formats in the interface
     with Pozyx.
-
-    TODO: Refactor then document
     """
     byte_size = 4
     data_format = 'BBBB'

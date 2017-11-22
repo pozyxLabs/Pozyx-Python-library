@@ -101,7 +101,6 @@ def dataCheck(data):
         return False
     return True
 
-
 class XYZ(ByteStructure):
     """
     Generic XYZ data structure consisting of 3 integers x, y, and z.
@@ -232,3 +231,39 @@ class SingleRegister(Data):
             return bin(self.data[0])
         else:
             return str(self.data[0])
+
+class SingleSensorValue(ByteStructure):
+    """
+    Generic Single Sensor Value data structure.
+
+    Not recommended to use in practice, as relevant sensor data classes are derived from this.
+
+    If deriving this, don't forget to implement your own update_data function, or data will
+    be [value] consistently instead of [..., value, ...].
+    """
+    physical_convert = 1
+
+    byte_size = 4
+    data_format = 'i'
+
+    def __init__(self, value=0):
+        """Initializes the XYZ or XYZ-derived object."""
+        self.value = value
+        self.data = [self.value]
+
+    def load(self, data=[0], convert=1):
+        self.data = data
+        if convert:
+            self.value = float(data[0]) / self.physical_convert
+        else:
+            self.value = data[0]
+
+    def update_data(self):
+        try:
+            if self.data != [self.value]:
+                self.data = [self.value]
+        except:
+            return
+
+    def __str__(self):
+        return 'Value: {self.value}'.format(self=self)

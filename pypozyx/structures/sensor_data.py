@@ -3,7 +3,7 @@
 
 from pypozyx.definitions.constants import *
 from pypozyx.structures.byte_structure import ByteStructure
-from pypozyx.structures.generic import XYZ
+from pypozyx.structures.generic import XYZ, SingleSensorValue
 
 
 class Coordinates(XYZ):
@@ -125,6 +125,27 @@ class Quaternion(XYZ):
         return 'X: {self.x}, Y: {self.y}, Z: {self.z}, W: {self.w}'.format(self=self)
 
 
+class MaxLinearAcceleration(SingleSensorValue):
+    physical_convert = POZYX_MAX_LIN_ACCEL_DIV_MG
+
+    byte_size = 2
+    data_format = 'h'
+
+
+class Temperature(SingleSensorValue):
+    physical_convert = POZYX_TEMP_DIV_CELSIUS
+
+    byte_size = 1
+    data_format = 'b'
+
+
+class Pressure(SingleSensorValue):
+    physical_convert = POZYX_PRESS_DIV_PA
+
+    byte_size = 4
+    data_format = 'I'
+
+
 class EulerAngles(ByteStructure):
     """Container for euler angles as heading, roll, and pitch (in degrees)."""
     physical_convert = POZYX_EULER_DIV_DEG
@@ -186,7 +207,7 @@ class SensorData(ByteStructure):
     def __init__(self, data=[0] * 24):
         """Initializes the SensorData object."""
         self.data = data
-        self.pressure = data[0]
+        self.pressure = Pressure(data[0])
         self.acceleration = Acceleration(data[1], data[2], data[3])
         self.magnetic = Magnetic(data[4], data[5], data[6])
         self.angular_vel = AngularVelocity(data[7], data[8], data[9])
@@ -195,17 +216,11 @@ class SensorData(ByteStructure):
         self.linear_acceleration = LinearAcceleration(
             data[17], data[18], data[19])
         self.gravity_vector = LinearAcceleration(data[20], data[21], data[22])
-        self.temperature = data[23]
+        self.temperature = Temperature(data[23])
 
     def load(self, data, convert=1):
         self.data = data
-        if convert == 1:
-            self.pressure = float(data[0]) / POZYX_PRESS_DIV_PA
-            self.temperature = int(data[23] / POZYX_TEMP_DIV_CELSIUS)
-        else:
-            self.pressure = float(data[0])
-            self.temperature = int(data[23])
-
+        self.pressure.load(data[0], convert)
         self.acceleration.load(data[1:4], convert)
         self.magnetic.load(data[4:7], convert)
         self.angular_vel.load(data[7:10], convert)
@@ -213,6 +228,7 @@ class SensorData(ByteStructure):
         self.quaternion.load(data[13:17], convert)
         self.linear_acceleration.load(data[17:20], convert)
         self.gravity_vector.load(data[20:23], convert)
+        self.temperature.load(data[23], convert)
 
     def update_data(self):
         """Not used so data remains the raw unformatted data"""
@@ -236,7 +252,7 @@ class RawSensorData(SensorData):
 
     def __init__(self, data=[0] * 24):
         """Initializes the RawSensorData object"""
-        XYZ.__init__(self, data)
+        SensorData.__init__(self, data)
 
     def load(self, data, convert=0):
         SensorData.load(self, data, convert=0)
