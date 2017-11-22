@@ -154,7 +154,7 @@ class Data(ByteStructure):
     ---------------
     Data creates a packed data structure with size and format that is entirely the user's choice.
     The format follows the one used in struct, where b is a byte, h is a 2-byte int, and
-    i is a default-sized integer, and f is a float. In capitals, these are signed.
+    i is a default-sized integer, and f is a float. In capitals, these are unsigned.
     So, to create a custom construct consisting of 4 uint16 and a single int, the
     following code can be used.
 
