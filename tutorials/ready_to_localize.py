@@ -37,10 +37,12 @@ class ReadyToLocalize(object):
         print("- System will auto start configuration")
         print()
         print("- System will auto start positioning")
+        print()
+        self.pozyx.printDeviceInfo(self.remote_id)
         print("------------POZYX POSITIONING V1.1 --------------")
         print()
-        print("START Ranging: ")
         self.pozyx.clearDevices(self.remote_id)
+
         self.setAnchorsManual()
         self.printPublishConfigurationResult()
 

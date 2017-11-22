@@ -30,18 +30,15 @@ def device_check(pozyx, remote_id=None):
 def network_check_discovery(pozyx, remote_id=None):
     pozyx.clearDevices(remote_id)
     if pozyx.doDiscovery(discovery_type=POZYX_DISCOVERY_ALL_DEVICES, remote_id=remote_id) == POZYX_SUCCESS:
-        pozyx.printDeviceList(remote_id)
+        pozyx.printDeviceList(remote_id, include_coordinates=False)
 
 
 if __name__ == '__main__':
     port = get_serial_ports()[0].device
     pozyx = PozyxSerial(port)
-    # use this for local devices
-    device_check(pozyx)
-    # uncomment this for remote devices
-    # device_check(pozyx, 0x6000)
 
-    # use this for checking devices in range
-    network_check_discovery(pozyx)
-    # uncomment this for checking devices in range for remote devices.
-    # network_check_discovery(pozyx, 0x6000)
+    # change to remote ID for troubleshooting that device
+    remote_id = None
+
+    device_check(pozyx, remote_id)
+    network_check_discovery(pozyx, remote_id)

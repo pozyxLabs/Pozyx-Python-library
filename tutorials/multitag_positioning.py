@@ -34,7 +34,21 @@ class MultitagPositioning(object):
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
-        print("------------POZYX MULTITAG POSITIONING V1.1 - -----------\nNOTES: \n- Parameters required:\n\t- Anchors for calibration\n\t- Tags to work with\n\n- System will manually calibration\n\n- System will auto start positioning\n- -----------POZYX MULTITAG POSITIONING V1.1 ------------\nSTART Positioning: ")
+        print("------------POZYX MULTITAG POSITIONING V1.1 ------------")
+        print("NOTES:")
+        print("- Parameters required:)
+        print("\t- Anchors for calibration")
+        print("\t- Tags to work with")
+        print()
+        print("- System will manually calibration")
+        print()
+        print("System will auto start positioning")
+        print()
+        self.pozyx.printDeviceInfo(self.remote_id)
+        print("------------POZYX MULTITAG POSITIONING V1.1 ------------")
+        print()
+
+
         self.setAnchorsManual()
         self.printPublishAnchorConfiguration()
 

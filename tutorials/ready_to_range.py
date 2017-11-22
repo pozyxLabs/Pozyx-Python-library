@@ -32,6 +32,8 @@ class ReadyToRange(object):
         print()
         print("- Approach target device to see range and")
         print("led control")
+        print()
+        self.pozyx.printDeviceInfo(self.remote_id)
         print("- -----------POZYX RANGING V1.1 ------------")
         print()
         print("START Ranging: ")

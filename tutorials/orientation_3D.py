@@ -37,6 +37,8 @@ class Orientation3D(object):
 
     def setup(self):
         """There is no specific setup functionality"""
+        self.pozyx.printDeviceInfo(self.remote_id)
+
         self.current_time = time()
 
     def loop(self):
