@@ -44,7 +44,7 @@ class ChangeUWBSettings:
         self.pozyx.setUWBSettings(self.uwb_settings)
         whoami = SingleRegister()
         status = self.pozyx.getWhoAmI(whoami, remote_id)
-        if whoami[0] != 0x67 or status != POZYX_SUCCESS:
+        if whoami[0] != 0x43 or status != POZYX_SUCCESS:
             print("Changing UWB settings on device 0x%0.4x failed" % remote_id)
             return
         else:
@@ -57,12 +57,18 @@ class ChangeUWBSettings:
                 print("\tAnd saving settings succeeded")
 
 if __name__ == '__main__':
+    # default_settings = UWBSettings(channel=5,
+    #                            bitrate=0,
+    #                            prf=2,
+    #                            plen=0x08,
+    #                            gain_db=11.5)
+
     # new uwb_settings
-    uwb_settings = UWBSettings(channel=2,
-                               bitrate=2,
+    uwb_settings = UWBSettings(channel=5,
+                               bitrate=0,
                                prf=2,
-                               plen=0x04,
-                               gain_db=15.0)
+                               plen=0x08,
+                               gain_db=11.5)
 
     # set to True if local tag needs to change settings as well.
     set_local = True

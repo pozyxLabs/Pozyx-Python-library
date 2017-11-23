@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""change_uwb_settings.py - Changes the UWB settings of all devices listed.
+"""anchor_configurator.py - sets the device list of all tags.
 
-It can also print the currently saved device list of the Pozyx
+It can also print the currently saved device list on the tags
 
 This assumes all listed devices are on the same UWB settings already,
 otherwise you should run the set_same_settings.py script, as that one
@@ -11,7 +11,7 @@ finds all devices on all settings.
 from pypozyx import *
 
 
-class MultiDeviceListCongifuration(object):
+class MultiDeviceListConfiguration(object):
 
     def __init__(self, pozyx, tags=[None]):
         self.pozyx = pozyx

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Pozyx basic troubleshooting (c) Pozyx Labs 2016
+Pozyx basic troubleshooting (c) Pozyx Labs 2017
 
 If you're experiencing trouble with Pozyx, this should be your first step to check for problems.
 Please read the article on https://www.pozyx.io/Documentation/Tutorials/troubleshoot_basics/Python

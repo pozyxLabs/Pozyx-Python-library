@@ -172,11 +172,11 @@ class SetSameUWBSettings:
 
 if __name__ == "__main__":
     # new uwb_settings
-    uwb_settings = UWBSettings(channel=2,
-                               bitrate=2,
+    uwb_settings = UWBSettings(channel=5,
+                               bitrate=0,
                                prf=2,
-                               plen=0x04,
-                               gain_db=15.0)
+                               plen=0x08,
+                               gain_db=11.5)
 
     # set to True if local tag needs to change settings as well.
     set_local = True
