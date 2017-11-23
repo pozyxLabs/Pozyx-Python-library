@@ -58,13 +58,6 @@ definitions
     Pozyx constant definitions, such as general constants, register indexes,
     and bit masks for certain functionality.
 
-State of the beta
------------------
-The PyPozyx package is currently in Beta version 1. In this Beta, the initial
-run of documentation will be added, and bugfixes will be done as encountered.
-When this is done, the library will enter Beta version 2, which is the final
-planned beta. In this, we will focus on robustness and do a final documentation
-evaluation. After this, we'll consider it 1.0.
 
 Serial port warnings
 --------------------
@@ -87,9 +80,13 @@ switch at some point.
 
 """
 
+__version__ = '1.0.1'
+
+VERSION = __version__
+
+
 from pypozyx.definitions.constants import *
-from pypozyx.pozyx_serial import (PozyxSerial, get_pozyx_ports,
-                                  get_serial_ports, list_serial_ports)
+from pypozyx.pozyx_serial import *
 from pypozyx.structures.device import *
 from pypozyx.structures.generic import *
 from pypozyx.structures.sensor_data import *

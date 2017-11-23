@@ -4,8 +4,8 @@
 """
 
 from pypozyx.lib import PozyxLib
-from pypozyx.definitions.constants import *
-from pypozyx.definitions.registers import *
+from pypozyx.definitions.constants import MODE_POLLING
+# from pypozyx.definitions.registers import *
 
 
 class PozyxI2C(PozyxLib):

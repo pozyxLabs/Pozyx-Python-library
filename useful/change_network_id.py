@@ -16,7 +16,10 @@ def set_new_id(pozyx, new_id, remote_id):
 
 if __name__ == "__main__":
 
-    port = get_serial_ports()[0].device
+    serial_port = get_first_pozyx_serial_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
 
     new_id = 0xA004         # the new network id of the pozyx device, change as desired
     remote = False          # whether to use the remote device
@@ -25,5 +28,5 @@ if __name__ == "__main__":
     if not remote:
         remote_id = None
 
-    pozyx = PozyxSerial(port)
-    set_new_id(port, pozyx, new_id, remote_id, True)
+    pozyx = PozyxSerial(serial_port)
+    set_new_id(pozyx, new_id, remote_id)

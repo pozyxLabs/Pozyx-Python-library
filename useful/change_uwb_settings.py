@@ -9,6 +9,7 @@ finds all devices on all settings.
 from pypozyx import *
 from pypozyx.definitions.registers import POZYX_UWB_CHANNEL, POZYX_UWB_RATES, POZYX_UWB_PLEN
 
+
 class ChangeUWBSettings:
 
     def __init__(self, pozyx, uwb_settings, devices=[], set_local=True, save_to_flash=True):
@@ -56,6 +57,7 @@ class ChangeUWBSettings:
             else:
                 print("\tAnd saving settings succeeded")
 
+
 if __name__ == '__main__':
     # default_settings = UWBSettings(channel=5,
     #                            bitrate=0,
@@ -80,11 +82,18 @@ if __name__ == '__main__':
     # 0x6799]
     devices = []
 
+    # serial port
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
+
     # pozyx
-    pozyx = PozyxSerial(get_serial_ports()[0].device)
+    pozyx = PozyxSerial(serial_port)
 
     # initialize the class
-    c = ChangeUWBSettings(pozyx, uwb_settings, devices, set_local, save_to_flash)
+    c = ChangeUWBSettings(pozyx, uwb_settings, devices,
+                          set_local, save_to_flash)
 
     # run the functionality
     c.run()

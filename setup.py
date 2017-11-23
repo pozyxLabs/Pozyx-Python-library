@@ -4,7 +4,7 @@ from distutils.core import setup
 setup(
     name='pypozyx',
     packages=['pypozyx', 'pypozyx.definitions',
-              'pypozyx.structures', 'pypozyx.tests'],
+              'pypozyx.structures', 'pypozyx'],
     version='1.0.1',
     description='Python library for Pozyx',
     author='Laurent Van Acker',

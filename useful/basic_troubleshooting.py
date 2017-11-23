@@ -41,8 +41,12 @@ def network_check_discovery(pozyx, remote_id=None):
 
 
 if __name__ == '__main__':
-    port = get_serial_ports()[0].device
-    pozyx = PozyxSerial(port)
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
+
+    pozyx = PozyxSerial(serial_port)
 
     # change to remote ID for troubleshooting that device
     remote_id = None

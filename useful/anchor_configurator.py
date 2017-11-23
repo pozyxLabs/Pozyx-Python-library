@@ -35,7 +35,11 @@ class MultiDeviceListConfiguration(object):
 
 if __name__ == '__main__':
     # virtual serial port of the Pozyx
-    port = get_serial_ports()[0].device
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
+
 
     # To configure the devicelist anew, set to True
     # To read the currently configured device list, set to False
@@ -51,7 +55,7 @@ if __name__ == '__main__':
                DeviceCoordinates(0x0003, 1, Coordinates(0, 1000, 0)),
                DeviceCoordinates(0x0004, 1, Coordinates(1000, 1000, 0))]
 
-    pozyx = PozyxSerial(port)
+    pozyx = PozyxSerial(serial_port)
 
     d = MultiDeviceListConfiguration(pozyx, tags)
 

@@ -85,7 +85,10 @@ class Orientation3D(object):
 
 if __name__ == '__main__':
     # shortcut to not have to find out the port yourself
-    serial_port = get_serial_ports()[0].device
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
 
     remote_id = 0x6069                    # remote device network ID
     remote = False                         # whether to use a remote device

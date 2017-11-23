@@ -188,7 +188,13 @@ if __name__ == "__main__":
     # 0x6799]
     devices = []
 
+    # serial port
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
+
     # pozyx
-    pozyx = PozyxSerial(get_serial_ports()[0].device)
+    pozyx = PozyxSerial(serial_port)
 
     s = SetSameUWBSettings(pozyx, uwb_settings, devices, save_to_flash)
