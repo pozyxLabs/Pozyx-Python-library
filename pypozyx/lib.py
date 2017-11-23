@@ -2,7 +2,7 @@
 """pypozyx.lib - Contains core and extended Pozyx user functionality through the PozyxLib class."""
 
 from time import sleep
-
+from math import sqrt,pow
 from pypozyx.core import PozyxCore
 from pypozyx.definitions.bitmasks import *
 from pypozyx.definitions.constants import *
@@ -1142,6 +1142,30 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(POZYX_EUL_HEADING, euler_angles, remote_id)
 
+
+    def getNormalizedQuaternion(self, quaternion, remote_id=None):
+        """
+        Obtain the Pozyx's normalized quaternion sensor data that is required for ROS.
+
+        Args:
+            quaternion: Container for the read data. Quaternion().
+
+        Kwargs:
+            remote_id: Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        res = self.getQuaternion(quaternion,remote_id)
+        if res == POZYX_SUCCESS:
+            # Normalize quaternion
+            sum = sqrt(pow(quaternion.x,2)+ pow(quaternion.y,2) + pow(quaternion.z,2) + pow(quaternion.w,2))
+            quaternion.x/=sum
+            quaternion.y/=sum
+            quaternion.z/=sum
+            quaternion.w/=sum
+        return res
+        
     def getQuaternion(self, quaternion, remote_id=None):
         """
         Obtain the Pozyx's quaternion sensor data.
@@ -1156,6 +1180,7 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         return self.getRead(POZYX_QUAT_W, quaternion, remote_id)
+  
 
     def getLinearAcceleration_mg(self, linear_acceleration, remote_id=None):
         """

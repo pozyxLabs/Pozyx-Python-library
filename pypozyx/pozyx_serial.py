@@ -7,7 +7,7 @@ from pypozyx.lib import PozyxLib
 from pypozyx.structures.generic import Data, SingleRegister
 from serial import Serial
 from serial.tools.list_ports import comports
-
+import os
 ## \addtogroup auxiliary_serial
 # @{
 
@@ -72,11 +72,15 @@ class PozyxSerial(PozyxLib):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
         try:
-            self.ser = Serial(port, baudrate, timeout=timeout,
+            if os.name == "posix":
+                self.ser = Serial(port, baudrate, timeout=timeout)
+            else:
+                self.ser = Serial(port, baudrate, timeout=timeout,
                               write_timeout=write_timeout)
-        except:
+        except Exception as exc:
             print(
                 "Couldn't connect with Pozyx, wrong/busy serial port, or pySerial not installed.")
+            print str(exc)
             if debug_trace:
                 import traceback
                 import sys
