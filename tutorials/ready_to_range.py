@@ -56,7 +56,12 @@ class ReadyToRange(object):
             if self.ledControl(device_range.distance) == POZYX_FAILURE:
                 print("ERROR: setting (remote) leds")
         else:
-            print("ERROR: ranging")
+            error_code = SingleRegister()
+            status = self.pozyx.getErrorCode(error_code)
+            if status == POZYX_SUCCESS:
+                print("ERROR Ranging, local %s" % self.pozyx.getErrorMessage(error_code))
+            else:
+                print("ERROR Ranging, couldn't retrieve local error")
 
     def ledControl(self, distance):
         """Sets LEDs according to the distance between two devices"""
@@ -71,7 +76,7 @@ class ReadyToRange(object):
         return status
 
 if __name__ == "__main__":
-    serial_port = 'COM12'                # Serial port of the Pozyx device
+    serial_port = 'COM12'               # Serial port of the Pozyx device
 
     remote_id = 0x605D           # the network ID of the remote device
     remote = False               # whether to use the given remote device for ranging
