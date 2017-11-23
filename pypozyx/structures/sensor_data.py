@@ -138,6 +138,9 @@ class Temperature(SingleSensorValue):
     byte_size = 1
     data_format = 'b'
 
+    def __str__(self):
+        return "{self.value} °C"
+
 
 class Pressure(SingleSensorValue):
     physical_convert = POZYX_PRESS_DIV_PA
@@ -220,7 +223,7 @@ class SensorData(ByteStructure):
 
     def load(self, data, convert=1):
         self.data = data
-        self.pressure.load(data[0], convert)
+        self.pressure.load([data[0]], convert)
         self.acceleration.load(data[1:4], convert)
         self.magnetic.load(data[4:7], convert)
         self.angular_vel.load(data[7:10], convert)
@@ -228,7 +231,7 @@ class SensorData(ByteStructure):
         self.quaternion.load(data[13:17], convert)
         self.linear_acceleration.load(data[17:20], convert)
         self.gravity_vector.load(data[20:23], convert)
-        self.temperature.load(data[23], convert)
+        self.temperature.load([data[23]], convert)
 
 
     def update_data(self):

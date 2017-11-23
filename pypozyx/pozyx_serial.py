@@ -8,8 +8,10 @@ from pypozyx.structures.generic import Data, SingleRegister
 from serial import Serial
 from serial.tools.list_ports import comports
 import os
-## \addtogroup auxiliary_serial
+
+# \addtogroup auxiliary_serial
 # @{
+
 
 def list_serial_ports():
     """Prints the open serial ports line per line"""
@@ -31,7 +33,7 @@ def get_pozyx_ports():
         if "STMicroelectronics Virtual COM Port" in port.description:
             pozyx_ports.append(port.device)
 
-## @}
+# @}
 
 
 class PozyxSerial(PozyxLib):
@@ -49,7 +51,9 @@ class PozyxSerial(PozyxLib):
     Kwargs:
         baudrate: the baudrate of the serial port. Default value is 115200.
         timeout: timeout for the serial port communication in seconds. Default is 0.1s or 100ms.
-        print_output: boolean for debugging purposes. If set to True,
+        print_output: boolean for printing the serial exchanges, mainly for debugging purposes
+        debug_trace: boolean for printing the trace on bad serial init
+        suppress_warnings: boolean for suppressing warnings in the Pozyx use, usage not recommended
 
     Example usage:
         >>> pozyx = PozyxSerial('COMX') # Windows
@@ -66,21 +70,23 @@ class PozyxSerial(PozyxLib):
         >>> pozyx = PozyxSerial(serial.tools.list_ports.comports()[0])
     """
 
-    ## \addtogroup core
+    # \addtogroup core
     # @{
-    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False, debug_trace=False):
+    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False, debug_trace=True, suppress_warnings=False):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
+        self.suppress_warnings = suppress_warnings
+        print("OS NAME", os.name)
         try:
             if os.name == "posix":
                 self.ser = Serial(port, baudrate, timeout=timeout)
             else:
                 self.ser = Serial(port, baudrate, timeout=timeout,
-                              write_timeout=write_timeout)
+                                  write_timeout=write_timeout)
         except Exception as exc:
             print(
                 "Couldn't connect with Pozyx, wrong/busy serial port, or pySerial not installed.")
-            print str(exc)
+            print(str(exc))
             if debug_trace:
                 import traceback
                 import sys
@@ -106,7 +112,7 @@ class PozyxSerial(PozyxLib):
                   regs[0])
             raise SystemExit
 
-    ## @}
+    # @}
 
     def regWrite(self, address, data):
         """

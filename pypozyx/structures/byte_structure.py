@@ -108,7 +108,7 @@ class ByteStructure(object):
 
     def __eq__(self, other):
         """Returns whether the structures contain the same data"""
-        return self.data == other.data
+        return self.data == other.data and self.data_format == other.data_format
 
     def __str__(self):
         """Returns a string that should be tailored to each ByteStructure-derived class."""

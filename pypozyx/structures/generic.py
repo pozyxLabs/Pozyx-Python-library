@@ -249,7 +249,7 @@ class SingleSensorValue(ByteStructure):
     def __init__(self, value=0):
         """Initializes the XYZ or XYZ-derived object."""
         self.value = value
-        self.data = [self.value]
+        self.load([value])
 
     def load(self, data=[0], convert=1):
         self.data = data

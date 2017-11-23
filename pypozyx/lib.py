@@ -1077,7 +1077,7 @@ class PozyxLib(PozyxCore):
             pressure[0] = pressure[0] / POZYX_PRESS_DIV_PA
         return status
 
-    def getMaxLinearAcceleration_mg(self, max_linear_acceleration, remote_id):
+    def getMaxLinearAcceleration_mg(self, max_linear_acceleration, remote_id=None):
         """
         Obtain the Pozyx's acceleration sensor data in mg.
 
@@ -1175,7 +1175,7 @@ class PozyxLib(PozyxCore):
             quaternion.z/=sum
             quaternion.w/=sum
         return res
-        
+
     def getQuaternion(self, quaternion, remote_id=None):
         """
         Obtain the Pozyx's quaternion sensor data.
@@ -1190,7 +1190,7 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         return self.getRead(POZYX_QUAT_W, quaternion, remote_id)
-  
+
 
     def getLinearAcceleration_mg(self, linear_acceleration, remote_id=None):
         """
