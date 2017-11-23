@@ -36,7 +36,7 @@ class MultitagPositioning(object):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
         print("------------POZYX MULTITAG POSITIONING V1.1 ------------")
         print("NOTES:")
-        print("- Parameters required:)
+        print("- Parameters required:")
         print("\t- Anchors for calibration")
         print("\t- Tags to work with")
         print()
@@ -45,6 +45,7 @@ class MultitagPositioning(object):
         print("System will auto start positioning")
         print()
         self.pozyx.printDeviceInfo(self.remote_id)
+        print()
         print("------------POZYX MULTITAG POSITIONING V1.1 ------------")
         print()
 
@@ -102,8 +103,8 @@ class MultitagPositioning(object):
         if network_id is None:
             network_id = 0
         if status == POZYX_SUCCESS:
-            print("Error %s on ID %s, error code %s" %
-                  (operation, "0x%0.4x" % network_id, str(error_code)))
+            print("Error %s on ID %s, %s" %
+                  (operation, "0x%0.4x" % network_id, self.pozyx.getErrorMessage(error_code)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message(
                     "/error_%s" % operation, [network_id, error_code[0]])

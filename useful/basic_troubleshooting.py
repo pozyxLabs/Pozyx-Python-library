@@ -9,6 +9,11 @@ Please read the article on https://www.pozyx.io/Documentation/Tutorials/troubles
 from pypozyx import *
 from pypozyx.definitions.registers import POZYX_WHO_AM_I
 
+def get_device_type(hardware_version):
+    if hardware_version >> 5 == 1:
+        return 'tag'
+    else:
+        return 'anchor'
 
 def device_check(pozyx, remote_id=None):
 
@@ -20,16 +25,18 @@ def device_check(pozyx, remote_id=None):
         print("device 0x%0.4x" % remote_id)
 
     pozyx.getRead(POZYX_WHO_AM_I, data, remote_id=remote_id)
-    print('who am i: 0x%0.2x' % data[0])
-    print('firmware version: 0x%0.2x' % data[1])
-    print('hardware version: 0x%0.2x' % data[2])
-    print('self test result: %s' % bin(data[3]))
-    print('error: 0x%0.2x' % data[4])
+    print("who am i: 0x%0.2x" % data[0])
+    print("firmware version: %i.%i" % (data[1] >> 4, data[1] % 0x10))
+    print("hardware: %s v1.%i" % (get_device_type(data[2]), data[2] % 0x20))
+    print("self test result: %s" % bin(data[3]))
+    print("error: 0x%0.2x" % data[4])
+    print("error message: %s" % pozyx.getErrorMessage(data[4]))
 
 
 def network_check_discovery(pozyx, remote_id=None):
     pozyx.clearDevices(remote_id)
     if pozyx.doDiscovery(discovery_type=POZYX_DISCOVERY_ALL_DEVICES, remote_id=remote_id) == POZYX_SUCCESS:
+        print("Found devices:")
         pozyx.printDeviceList(remote_id, include_coordinates=False)
 
 

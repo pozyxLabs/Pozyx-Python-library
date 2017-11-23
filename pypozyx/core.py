@@ -294,7 +294,7 @@ class PozyxCore():
         Example:
             >>> self.useFunction(POZYX_DEVICES_CLEAR)
         """
-        if not is_functioncall(address):
+        if not is_functioncall(function):
             if not self.suppress_warnings:
                 warn("Register 0x%0.02x isn't a function register" % address, stacklevel=3)
         if params is None:

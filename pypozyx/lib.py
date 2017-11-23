@@ -1674,7 +1674,7 @@ class PozyxLib(PozyxCore):
             print("\t- Error: Couldn't retrieve device information")
             return
 
-        print("\t-firmware version: 0x%s" % firmware.value)
+        print("\t-firmware version %i.%i" % (firmware.value >> 4, firmware.value % 0x10))
 
     def printDeviceList(self, remote_id=None, include_coordinates=True):
         """
@@ -1704,9 +1704,9 @@ class PozyxLib(PozyxCore):
             if include_coordinates:
                 coordinates = Coordinates()
                 self.getDeviceCoordinates(device_id, coordinates, remote_id)
-                print(DeviceCoordinates(device_id, 0x1, coordinates))
+                print("\t- %s" % DeviceCoordinates(device_id, 0x1, coordinates))
             else:
-                print(device_id)
+                print("\t- 0x%0.4x" % device_id)
 
     # @}
 

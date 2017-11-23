@@ -34,6 +34,7 @@ class ReadyToRange(object):
         print("led control")
         print()
         self.pozyx.printDeviceInfo(self.remote_id)
+        print()
         print("- -----------POZYX RANGING V1.1 ------------")
         print()
         print("START Ranging: ")
@@ -70,7 +71,7 @@ class ReadyToRange(object):
         return status
 
 if __name__ == "__main__":
-    port = 'COM12'                # COM port of the Pozyx device
+    serial_port = 'COM12'                # Serial port of the Pozyx device
 
     remote_id = 0x605D           # the network ID of the remote device
     remote = False               # whether to use the given remote device for ranging
@@ -82,7 +83,7 @@ if __name__ == "__main__":
 
     ranging_protocol = POZYX_RANGE_PROTOCOL_PRECISION # the ranging protocol
 
-    pozyx = PozyxSerial(port)
+    pozyx = PozyxSerial(serial_port)
     r = ReadyToRange(pozyx, destination_id, range_step_mm, ranging_protocol, remote_id)
     r.setup()
     while True:
