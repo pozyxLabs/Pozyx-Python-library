@@ -2,7 +2,6 @@
 """pypozyx.lib - Contains core and extended Pozyx user functionality through the PozyxLib class."""
 
 from time import sleep
-from math import sqrt,pow
 from pypozyx.core import PozyxCore
 from pypozyx.definitions.bitmasks import *
 from pypozyx.definitions.constants import *
@@ -1152,7 +1151,6 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(POZYX_EUL_HEADING, euler_angles, remote_id)
 
-
     def getNormalizedQuaternion(self, quaternion, remote_id=None):
         """
         Obtain the Pozyx's normalized quaternion sensor data that is required for ROS.
@@ -1166,15 +1164,10 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        res = self.getQuaternion(quaternion,remote_id)
-        if res == POZYX_SUCCESS:
-            # Normalize quaternion
-            sum = sqrt(pow(quaternion.x,2)+ pow(quaternion.y,2) + pow(quaternion.z,2) + pow(quaternion.w,2))
-            quaternion.x/=sum
-            quaternion.y/=sum
-            quaternion.z/=sum
-            quaternion.w/=sum
-        return res
+        status = self.getQuaternion(quaternion, remote_id)
+        if status == POZYX_SUCCESS:
+            quaternion.normalize()
+        return status
 
     def getQuaternion(self, quaternion, remote_id=None):
         """
@@ -1190,7 +1183,6 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         return self.getRead(POZYX_QUAT_W, quaternion, remote_id)
-
 
     def getLinearAcceleration_mg(self, linear_acceleration, remote_id=None):
         """
@@ -1603,20 +1595,25 @@ class PozyxLib(PozyxCore):
         status &= self.getDeviceListSize(list_size, remote_id)
         device_list = DeviceList(list_size=list_size[0])
         status &= self.getDeviceIds(device_list, remote_id)
-        if device_id not in device_list or status is POZYX_FAILURE:
+        if device_id not in device_list or status != POZYX_SUCCESS:
             return POZYX_FAILURE
         devices = []
         for id_ in device_list:
             if id_ == device_id:
                 continue
             coordinates = Coordinates()
-            self.getDeviceCoordinates(id_, coordinates, remote_id)
+            status = self.getDeviceCoordinates(id_, coordinates, remote_id)
+            if status != POZYX_SUCCESS:
+                return status
             devices.append(DeviceCoordinates(id_, 0x1, coordinates))
 
         anchor_select_mode = SingleRegister()
-        self.getAnchorSelectionMode(anchor_select_mode, remote_id)
 
-        self.configureAnchors(
+        status = self.getAnchorSelectionMode(anchor_select_mode, remote_id)
+        if status != POZYX_SUCCESS:
+            return status
+
+        return self.configureAnchors(
             devices, anchor_select=anchor_select_mode, remote_id=remote_id)
 
     def changeDeviceCoordinates(self, device_id, new_coordinates, remote_id=None):
@@ -1674,7 +1671,8 @@ class PozyxLib(PozyxCore):
             print("\t- Error: Couldn't retrieve device information")
             return
 
-        print("\t-firmware version %i.%i" % (firmware.value >> 4, firmware.value % 0x10))
+        print("\t-firmware version %i.%i" %
+              (firmware.value >> 4, firmware.value % 0x10))
 
     def printDeviceList(self, remote_id=None, include_coordinates=True):
         """
@@ -1728,7 +1726,7 @@ class PozyxLib(PozyxCore):
         """
         registers = [POZYX_UWB_CHANNEL, POZYX_UWB_RATES,
                      POZYX_UWB_PLEN, POZYX_UWB_GAIN]
-        self.saveRegisters(registers, remote_id)
+        return self.saveRegisters(registers, remote_id)
 
     def setNetworkId(self, network_id, remote_id=None):
         """

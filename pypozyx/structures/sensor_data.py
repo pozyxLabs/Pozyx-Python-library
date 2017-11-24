@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """pypozyx.structures.sensor_data - Contains container classes for data from the Pozyx's many sensors."""
+from math import sqrt
 
-from pypozyx.definitions.constants import *
+from pypozyx.definitions.constants import (POZYX_ACCEL_DIV_MG, POZYX_MAG_DIV_UT, POZYX_GYRO_DIV_DPS,
+                                           POZYX_QUAT_DIV, POZYX_MAX_LIN_ACCEL_DIV_MG, POZYX_TEMP_DIV_CELSIUS, POZYX_PRESS_DIV_PA, POZYX_EULER_DIV_DEG)
 from pypozyx.structures.byte_structure import ByteStructure
 from pypozyx.structures.generic import XYZ, SingleSensorValue
 
@@ -121,6 +123,18 @@ class Quaternion(XYZ):
         except:
             return
 
+    def get_sum(self):
+        """Returns the normalization value of the quaternion"""
+        return sqrt((self.x * self.x) + (self.y * self.y) + (self.z * self.z) + (self.w * self.w))
+
+    def normalize(self):
+        """Normalizes the quaternion's data"""
+        sum = self.get_sum()
+        self.w /= sum
+        self.x /= sum
+        self.y /= sum
+        self.z /= sum
+
     def __str__(self):
         return 'X: {self.x}, Y: {self.y}, Z: {self.z}, W: {self.w}'.format(self=self)
 
@@ -232,7 +246,6 @@ class SensorData(ByteStructure):
         self.linear_acceleration.load(data[17:20], convert)
         self.gravity_vector.load(data[20:23], convert)
         self.temperature.load([data[23]], convert)
-
 
     def update_data(self):
         """Not used so data remains the raw unformatted data"""
