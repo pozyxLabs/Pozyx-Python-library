@@ -1,5 +1,6 @@
 """
-Made to be able to be run when testing a single device.
+Currently only local testing is supported.
 
-Thus only local...
+In the future, a fixture may be used where discovery is performed
+and then the discovered device is a target.
 """

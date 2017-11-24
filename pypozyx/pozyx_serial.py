@@ -1,17 +1,29 @@
 """pypozyx.pozyx_serial - contains the serial interface with Pozyx through PozyxSerial."""
 from time import sleep
 
-from pypozyx.definitions.constants import *
-from pypozyx.definitions.registers import *
+from pypozyx.definitions.constants import (POZYX_SUCCESS, POZYX_FAILURE,
+                                           MAX_SERIAL_SIZE)
+
 from pypozyx.lib import PozyxLib
-from pypozyx.structures.generic import Data, SingleRegister
-from serial import Serial
+from pypozyx.structures.generic import SingleRegister
+from serial import Serial, VERSION as PYSERIAL_VERSION, SerialException
 from serial.tools.list_ports import comports
 
-## \addtogroup auxiliary_serial
+from warnings import warn
+
+# \addtogroup auxiliary_serial
 # @{
 
+
 def list_serial_ports():
+    """Prints the open serial ports line per line"""
+    warn("list_serial_ports now deprecated, use print_all_serial_ports instead", DeprecationWarning)
+    ports = comports()
+    for port in ports:
+        print(port)
+
+
+def print_all_serial_ports():
     """Prints the open serial ports line per line"""
     ports = comports()
     for port in ports:
@@ -23,15 +35,61 @@ def get_serial_ports():
     return comports()
 
 
+def is_pozyx_port(port):
+    """Returns whether the port is a Pozyx device"""
+    return "Pozyx Labs" in port.manufacturer or "Pozyx" in port.product or "0483:" in port.hwid
+
+
+def get_port_object(device):
+    """Returns the PySerial port object from a given port path"""
+    for port in get_serial_ports():
+        if port.device == device:
+            return port
+
+
+def is_pozyx(device):
+    """Returns whether the device is a recognized Pozyx device"""
+    port = get_port_object(device)
+    if port is not None and is_pozyx_port(port):
+        return True
+    return False
+
+
 def get_pozyx_ports():
-    """Returns the Pozyx serial ports. Untested on UNIX"""
+    """Returns the Pozyx serial ports. Windows only. Needs driver installed"""
+    pozyx_ports = []
+    for port in get_serial_ports():
+        if is_pozyx_port(port):
+            pozyx_ports.append(port.device)
+
+
+def get_first_pozyx_serial_port():
+    """Returns the first encountered Pozyx serial port's identifier"""
+    for port in get_serial_ports():
+        if is_pozyx_port(port):
+            return port.device
+
+
+def get_pozyx_ports_windows():
+    """Returns the Pozyx serial ports. Windows only. Needs driver installed"""
     ports = get_serial_ports()
     pozyx_ports = []
     for port in ports:
         if "STMicroelectronics Virtual COM Port" in port.description:
             pozyx_ports.append(port.device)
 
-## @}
+
+def is_correct_pyserial_version():
+    """Returns whether the pyserial version is supported"""
+    version_tags = [int(version_tag)
+                    for version_tag in PYSERIAL_VERSION.split('.')]
+    if version_tags[0] >= 3:
+        if version_tags[0] == 3 and version_tags[1] <= 3:
+            warn("PySerial out of date, please update to v3.4 if possible", stacklevel=0)
+        return True
+    return False
+
+# @}
 
 
 class PozyxSerial(PozyxLib):
@@ -49,7 +107,10 @@ class PozyxSerial(PozyxLib):
     Kwargs:
         baudrate: the baudrate of the serial port. Default value is 115200.
         timeout: timeout for the serial port communication in seconds. Default is 0.1s or 100ms.
-        print_output: boolean for debugging purposes. If set to True,
+        print_output: boolean for printing the serial exchanges, mainly for debugging purposes
+        debug_trace: boolean for printing the trace on bad serial init (DEPRECATED)
+        show_trace: boolean for printing the trace on bad serial init (replaces debug_trace)
+        suppress_warnings: boolean for suppressing warnings in the Pozyx use, usage not recommended
 
     Example usage:
         >>> pozyx = PozyxSerial('COMX') # Windows
@@ -66,51 +127,81 @@ class PozyxSerial(PozyxLib):
         >>> pozyx = PozyxSerial(serial.tools.list_ports.comports()[0])
     """
 
-    ## \addtogroup core
+    # \addtogroup core
     # @{
-    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1, print_output=False, debug_trace=False):
+    def __init__(self, port, baudrate=115200, timeout=0.1, write_timeout=0.1,
+                 print_output=False, debug_trace=False, show_trace=False,
+                 suppress_warnings=False):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
-        try:
-            self.ser = Serial(port, baudrate, timeout=timeout,
-                              write_timeout=write_timeout)
-        except:
-            print(
-                "Couldn't connect with Pozyx, wrong/busy serial port, or pySerial not installed.")
-            if debug_trace:
-                import traceback
-                import sys
-                traceback.print_tb(sys.exc_info()[2])
-            raise SystemExit
+        if debug_trace is True:
+            if not suppress_warnings:
+                warn(
+                    "Using debug_trace is on its way out, please use show_trace in the future", DeprecationWarning)
+        self.show_trace = debug_trace or show_trace
+        self.suppress_warnings = suppress_warnings
+
+        self.connectToPozyx(port, baudrate, timeout, write_timeout)
 
         sleep(0.25)
 
-        regs = Data([0, 0, 0])
-        if self.regRead(POZYX_WHO_AM_I, regs) == POZYX_FAILURE:
-            print("Connected to Pozyx, but couldn't read serial data.")
-            if debug_trace:
-                import traceback
-                import sys
-                traceback.print_tb(sys.exc_info()[2])
-            raise SystemExit
+        self.validatePozyx()
 
-        self._hw_version = regs[1]
-        self._sw_version = regs[2]
+    def connectToPozyx(self, port, baudrate, timeout, write_timeout):
+        """Attempts to connect to the Pozyx via a serial connection"""
 
-        if regs[0] != 0x43:
-            print("WHO AM I returned 0x%0.2x, something is wrong with Pozyx." %
-                  regs[0])
-            raise SystemExit
+        try:
+            if is_correct_pyserial_version():
+                if not is_pozyx(port):
+                    warn("The passed device is not a recognized Pozyx device, is %s" % get_port_object(port).description, stacklevel=2)
+                self.ser = Serial(port=port, baudrate=baudrate, timeout=timeout,
+                                  write_timeout=write_timeout)
+            else:
+                warn("PySerial version %s not supported, please upgrade to 3.0 or (prefferably) higher" %
+                     PYSERIAL_VERSION, stacklevel=0)
+                self.ser = Serial(port=port, baudrate=baudrate, timeout=timeout,
+                                  writeTimeout=write_timeout)
+        except SerialException as exc:
+            print("Wrong or busy serial port, SerialException:", str(exc))
+            self.printTrace()
+            quit()
+        except Exception as exc:
+            print("Couldn't connect to Pozyx, unknown exception:", str(exc))
+            self.printTrace()
+            quit()
 
-    ## @}
+    def validatePozyx(self):
+        """Validates whether the connected device is indeed a Pozyx device"""
+        whoami = SingleRegister()
+        if self.getWhoAmI(whoami) != POZYX_SUCCESS:
+
+            print("Connected to device, but couldn't read serial data. Is it a Pozyx?")
+            self.printTrace()
+            quit()
+
+        if whoami.value != 0x43:
+            print("POZYX_WHO_AM_I returned 0x%0.2x, something is wrong with Pozyx." %
+                  whoami.value)
+            quit()
+
+    def printTrace(self):
+        """Prints the trace, handy for debugging. Enabled by show_trace flag"""
+        if self.show_trace:
+            import traceback
+            import sys
+            traceback.print_tb(sys.exc_info()[2])
+
+    # @}
 
     def regWrite(self, address, data):
         """
-        Writes data to the Pozyx registers, starting at a register address, if registers are writable.
+        Writes data to the Pozyx registers, starting at a register address,
+        if registers are writable.
 
         Args:
             address: Register address to start writing at.
-            data: Data to write to the Pozyx registers. Has to be ByteStructure-derived object.
+            data: Data to write to the Pozyx registers.
+                Has to be ByteStructure-derived object.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -124,13 +215,13 @@ class PozyxSerial(PozyxLib):
             index += MAX_SERIAL_SIZE
             try:
                 self.ser.write(s.encode())
-            except:
+            except SerialException:
                 return POZYX_FAILURE
             # delay(POZYX_DELAY_LOCAL_WRITE)
         s = 'W,%0.2x,%s\r' % (address + index, data.byte_data[2 * index:])
         try:
             self.ser.write(s.encode())
-        except:
+        except SerialException:
             return POZYX_FAILURE
         return POZYX_SUCCESS
 
@@ -149,18 +240,20 @@ class PozyxSerial(PozyxLib):
         if self.print_output:
             print('The response to %s is %s.' % (s.strip(), response.strip()))
         if len(response) == 0:
-            raise EnvironmentError
+            raise SerialException
         if response[0] == 'D':
             return response[2:-2]
-        raise EnvironmentError
+        raise SerialException
 
     def regRead(self, address, data):
         """
-        Reads data from the Pozyx registers, starting at a register address, if registers are readable.
+        Reads data from the Pozyx registers, starting at a register address,
+        if registers are readable.
 
         Args:
             address: Register address to start writing at.
-            data: Data to write to the Pozyx registers. Has to be ByteStructure-derived object.
+            data: Data to write to the Pozyx registers.
+                Has to be ByteStructure-derived object.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -172,25 +265,28 @@ class PozyxSerial(PozyxLib):
                 address + i * MAX_SERIAL_SIZE, MAX_SERIAL_SIZE)
             try:
                 r += self.serialExchange(s)
-            except:
+            except SerialException:
                 return POZYX_FAILURE
         s = 'R,%0.2x,%i\r' % (
             address + runs * MAX_SERIAL_SIZE, data.byte_size - runs * MAX_SERIAL_SIZE)
         try:
             r += self.serialExchange(s)
-        except:
+        except SerialException:
             return POZYX_FAILURE
         data.load_bytes(r)
         return POZYX_SUCCESS
 
     def regFunction(self, address, params, data):
         """
-        Performs a register function on the Pozyx, if the address is a register function.
+        Performs a register function on the Pozyx, if the address is a register
+        function.
 
         Args:
             address: Register function address of function to perform.
-            params: Parameters for the register function. Has to be ByteStructure-derived object.
-            data: Container for the data the register function returns. Has to be ByteStructure-derived object.
+            params: Parameters for the register function.
+                Has to be ByteStructure-derived object.
+            data: Container for the data the register function returns.
+                Has to be ByteStructure-derived object.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -199,7 +295,7 @@ class PozyxSerial(PozyxLib):
         s = 'F,%0.2x,%s,%i\r' % (address, params.byte_data, data.byte_size + 1)
         try:
             r = self.serialExchange(s)
-        except:
+        except SerialException:
             return POZYX_FAILURE
         if len(data) > 0:
             data.load_bytes(r[2:])
@@ -207,16 +303,16 @@ class PozyxSerial(PozyxLib):
 
     def waitForFlag(self, interrupt_flag, timeout_s, interrupt=None):
         """
-        Waits for a certain interrupt flag to be triggered, indicating that that type of interrupt
-        occured.
+        Waits for a certain interrupt flag to be triggered, indicating that
+        that type of interrupt occured.
 
         Args:
             interrupt_flag: Flag indicating interrupt type.
-            timeout_s: time in seconds that POZYX_INT_STATUS will be checked for the flag before returning
-                POZYX_TIMEOUT.
+            timeout_s: time in seconds that POZYX_INT_STATUS will be checked
+                for the flag before returning POZYX_TIMEOUT.
 
         Kwargs:
-            interrupt: Container for the POZYX_INT_STATUS data. For debugging purposes.
+            interrupt: Container for the POZYX_INT_STATUS data
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT

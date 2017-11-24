@@ -37,10 +37,13 @@ class ReadyToLocalize(object):
         print("- System will auto start configuration")
         print()
         print("- System will auto start positioning")
+        print()
+        self.pozyx.printDeviceInfo(self.remote_id)
+        print()
         print("------------POZYX POSITIONING V1.1 --------------")
         print()
-        print("START Ranging: ")
         self.pozyx.clearDevices(self.remote_id)
+
         self.setAnchorsManual()
         self.printPublishConfigurationResult()
 
@@ -71,21 +74,21 @@ class ReadyToLocalize(object):
         network_id = self.remote_id
         if network_id is None:
             self.pozyx.getErrorCode(error_code)
-            print("ERROR %s, local error code %s" % (operation, str(error_code)))
+            print("LOCAL ERROR %s, %s" % (operation, self.pozyx.getErrorMessage(error_code)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message("/error", [operation, 0, error_code[0]])
             return
         status = self.pozyx.getErrorCode(error_code, self.remote_id)
         if status == POZYX_SUCCESS:
-            print("ERROR %s on ID %s, error code %s" %
-                  (operation, "0x%0.4x" % network_id, str(error_code)))
+            print("ERROR %s on ID %s, %s" %
+                  (operation, "0x%0.4x" % network_id, self.pozyx.getErrorMessage(error_code)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message(
                     "/error", [operation, network_id, error_code[0]])
         else:
             self.pozyx.getErrorCode(error_code)
-            print("ERROR %s, couldn't retrieve remote error code, local error code %s" %
-                  (operation, str(error_code)))
+            print("ERROR %s, couldn't retrieve remote error code, LOCAL ERROR %s" %
+                  (operation, self.pozyx.getErrorMessage(error_code)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message("/error", [operation, 0, -1])
             # should only happen when not being able to communicate with a remote Pozyx.
@@ -118,7 +121,7 @@ class ReadyToLocalize(object):
             anchor_coordinates = Coordinates()
             status = self.pozyx.getDeviceCoordinates(
                 device_list[i], anchor_coordinates, self.remote_id)
-            print("ANCHOR,0x%0.4x, %s" % (device_list[i], str(anchor_coordinates)))
+            print("ANCHOR, 0x%0.4x, %s" % (device_list[i], str(anchor_coordinates)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message(
                     "/anchor", [device_list[i], int(anchor_coordinates.x), int(anchor_coordinates.y), int(anchor_coordinates.z)])
@@ -135,7 +138,10 @@ class ReadyToLocalize(object):
 
 if __name__ == "__main__":
     # shortcut to not have to find out the port yourself
-    serial_port = get_serial_ports()[0].device
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
 
     remote_id = 0x6069                 # remote device network ID
     remote = False                   # whether to use a remote device

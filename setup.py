@@ -4,9 +4,9 @@ from distutils.core import setup
 setup(
     name='pypozyx',
     packages=['pypozyx', 'pypozyx.definitions',
-              'pypozyx.structures', 'pypozyx.tests'],
-    version='1.0.0',
-    description='Python library for Pozyx',
+              'pypozyx.structures', 'pypozyx'],
+    version='1.1.0',
+    description='Python library for Pozyx devices',
     author='Laurent Van Acker',
     author_email='laurent@pozyx.io',
     url = 'https://github.com/pozyxLabs/Pozyx-Python-library',
