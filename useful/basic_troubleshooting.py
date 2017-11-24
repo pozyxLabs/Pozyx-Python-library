@@ -16,7 +16,6 @@ def get_device_type(hardware_version):
         return 'anchor'
 
 def device_check(pozyx, remote_id=None):
-
     data = Data([0] * 5)
 
     if remote_id is None:
