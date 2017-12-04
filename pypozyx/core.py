@@ -17,6 +17,7 @@ from pypozyx.structures.generic import (Data, SingleRegister, dataCheck,
                                         is_functioncall, is_reg_readable,
                                         is_reg_writable)
 
+from warnings import warn
 
 class PozyxCore:
     """PozyxCore
@@ -84,8 +85,6 @@ class PozyxCore:
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        if is_reg_writable(address) == 0:
-            return POZYX_FAILURE
         if len(data) > MAX_BUF_SIZE - 1:
             return POZYX_FAILURE
 
@@ -99,7 +98,7 @@ class PozyxCore:
         status = self.regFunction(POZYX_TX_SEND, params, Data([]))
         if status == POZYX_FAILURE:
             return status
-        return self.checkForFlag(POZYX_INT_STATUS_FUNC, 0.1)
+        return self.checkForFlag(POZYX_INT_STATUS_FUNC, 0.5)
 
     def remoteRegRead(self, destination, address, data):
         """
@@ -115,8 +114,6 @@ class PozyxCore:
         """
         if dataCheck(destination):
             destination = destination[0]
-        if is_reg_readable(address) == 0:
-            return POZYX_FAILURE
         if len(data) > MAX_BUF_SIZE:
             return POZYX_FAILURE
         if destination == 0:
@@ -157,9 +154,6 @@ class PozyxCore:
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        if is_functioncall(address) == 0:
-            return POZYX_FAILURE
-
         send_data = Data([0, address] + params.data, 'BB' + params.data_format)
         status = self.regFunction(POZYX_TX_DATA, send_data, Data([]))
         if status == POZYX_FAILURE:
@@ -243,6 +237,9 @@ class PozyxCore:
             >>> leds = SingleRegister(0xFF)
             >>> self.setWrite(POZYX_LED_CTRL, leds)
         """
+        if not is_reg_writable(address):
+            if not self.suppress_warnings:
+                warn("Register 0x%0.02x isn't writable" % address, stacklevel=3)
         if remote_id is None:
             status = self.regWrite(address, data)
             sleep(local_delay)
@@ -271,6 +268,9 @@ class PozyxCore:
             >>> print(whoami)
             67
         """
+        if not is_reg_readable(address):
+            if not self.suppress_warnings:
+                warn("Register 0x%0.02x isn't readable" % address, stacklevel=3)
         if remote_id is None:
             return self.regRead(address, data)
         else:
@@ -294,6 +294,9 @@ class PozyxCore:
         Example:
             >>> self.useFunction(POZYX_DEVICES_CLEAR)
         """
+        if not is_functioncall(function):
+            if not self.suppress_warnings:
+                warn("Register 0x%0.02x isn't a function register" % address, stacklevel=3)
         if params is None:
             params = Data([])
         if data is None:

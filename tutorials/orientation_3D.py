@@ -37,6 +37,8 @@ class Orientation3D(object):
 
     def setup(self):
         """There is no specific setup functionality"""
+        self.pozyx.printDeviceInfo(self.remote_id)
+
         self.current_time = time()
 
     def loop(self):
@@ -60,7 +62,7 @@ class Orientation3D(object):
 
     def addSensorData(self, sensor_data):
         """Adds the sensor data to the OSC message"""
-        self.msg_builder.add_arg(sensor_data.pressure)
+        self.addComponentsOSC(sensor_data.pressure)
         self.addComponentsOSC(sensor_data.acceleration)
         self.addComponentsOSC(sensor_data.magnetic)
         self.addComponentsOSC(sensor_data.angular_vel)
@@ -83,10 +85,13 @@ class Orientation3D(object):
 
 if __name__ == '__main__':
     # shortcut to not have to find out the port yourself
-    serial_port = get_serial_ports()[0].device
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
 
     remote_id = 0x6069                    # remote device network ID
-    remote = True                         # whether to use a remote device
+    remote = False                         # whether to use a remote device
     if not remote:
         remote_id = None
 

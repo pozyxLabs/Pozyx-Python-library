@@ -9,7 +9,8 @@ to remotely control a Pozyx device. Move around with the other Pozyx device.
 This demo measures the range between the two devices. The closer the devices are to each other, the more LEDs will
 light up on both devices.
 """
-from pypozyx import *
+from pypozyx import (PozyxSerial, POZYX_RANGE_PROTOCOL_FAST, POZYX_RANGE_PROTOCOL_PRECISION,
+                     SingleRegister, DeviceRange, POZYX_SUCCESS, POZYX_FAILURE, get_first_pozyx_serial_port)
 
 
 class ReadyToRange(object):
@@ -32,6 +33,9 @@ class ReadyToRange(object):
         print()
         print("- Approach target device to see range and")
         print("led control")
+        print()
+        self.pozyx.printDeviceInfo(self.remote_id)
+        print()
         print("- -----------POZYX RANGING V1.1 ------------")
         print()
         print("START Ranging: ")
@@ -47,13 +51,20 @@ class ReadyToRange(object):
     def loop(self):
         """Performs ranging and sets the LEDs accordingly"""
         device_range = DeviceRange()
-        status = self.pozyx.doRanging(self.destination_id, device_range, self.remote_id)
+        status = self.pozyx.doRanging(
+            self.destination_id, device_range, self.remote_id)
         if status == POZYX_SUCCESS:
             print(device_range)
             if self.ledControl(device_range.distance) == POZYX_FAILURE:
                 print("ERROR: setting (remote) leds")
         else:
-            print("ERROR: ranging")
+            error_code = SingleRegister()
+            status = self.pozyx.getErrorCode(error_code)
+            if status == POZYX_SUCCESS:
+                print("ERROR Ranging, local %s" %
+                      self.pozyx.getErrorMessage(error_code))
+            else:
+                print("ERROR Ranging, couldn't retrieve local error")
 
     def ledControl(self, distance):
         """Sets LEDs according to the distance between two devices"""
@@ -67,8 +78,16 @@ class ReadyToRange(object):
             status &= self.pozyx.setLed(1, (distance < 4 * range_step_mm), id)
         return status
 
+
 if __name__ == "__main__":
-    port = 'COM12'                # COM port of the Pozyx device
+    # hardcoded way to assign a serial port of the Pozyx
+    serial_port = 'COM12'
+
+    # the easier way
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
 
     remote_id = 0x605D           # the network ID of the remote device
     remote = False               # whether to use the given remote device for ranging
@@ -76,12 +95,14 @@ if __name__ == "__main__":
         remote_id = None
 
     destination_id = 0x6069      # network ID of the ranging destination
-    range_step_mm = 1000         # distance that separates the amount of LEDs lighting up.
+    # distance that separates the amount of LEDs lighting up.
+    range_step_mm = 1000
 
-    ranging_protocol = POZYX_RANGE_PROTOCOL_PRECISION # the ranging protocol
+    ranging_protocol = POZYX_RANGE_PROTOCOL_PRECISION   # the ranging protocol
 
-    pozyx = PozyxSerial(port)
-    r = ReadyToRange(pozyx, destination_id, range_step_mm, ranging_protocol, remote_id)
+    pozyx = PozyxSerial(serial_port)
+    r = ReadyToRange(pozyx, destination_id, range_step_mm,
+                     ranging_protocol, remote_id)
     r.setup()
     while True:
         r.loop()

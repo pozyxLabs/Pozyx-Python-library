@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""change_uwb_settings.py - Changes the UWB settings of all devices listed.
+"""anchor_configurator.py - sets the device list of all tags.
 
-It can also print the currently saved device list of the Pozyx
+It can also print the currently saved device list on the tags
 
 This assumes all listed devices are on the same UWB settings already,
 otherwise you should run the set_same_settings.py script, as that one
@@ -11,7 +11,7 @@ finds all devices on all settings.
 from pypozyx import *
 
 
-class MultiDeviceListCongifuration(object):
+class MultiDeviceListConfiguration(object):
 
     def __init__(self, pozyx, tags=[None]):
         self.pozyx = pozyx
@@ -35,7 +35,11 @@ class MultiDeviceListCongifuration(object):
 
 if __name__ == '__main__':
     # virtual serial port of the Pozyx
-    port = get_serial_ports()[0].device
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
+
 
     # To configure the devicelist anew, set to True
     # To read the currently configured device list, set to False
@@ -51,7 +55,7 @@ if __name__ == '__main__':
                DeviceCoordinates(0x0003, 1, Coordinates(0, 1000, 0)),
                DeviceCoordinates(0x0004, 1, Coordinates(1000, 1000, 0))]
 
-    pozyx = PozyxSerial(port)
+    pozyx = PozyxSerial(serial_port)
 
     d = MultiDeviceListConfiguration(pozyx, tags)
 

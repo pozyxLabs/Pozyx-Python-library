@@ -34,7 +34,22 @@ class MultitagPositioning(object):
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
-        print("------------POZYX MULTITAG POSITIONING V1.1 - -----------\nNOTES: \n- Parameters required:\n\t- Anchors for calibration\n\t- Tags to work with\n\n- System will manually calibration\n\n- System will auto start positioning\n- -----------POZYX MULTITAG POSITIONING V1.1 ------------\nSTART Positioning: ")
+        print("------------POZYX MULTITAG POSITIONING V1.1 ------------")
+        print("NOTES:")
+        print("- Parameters required:")
+        print("\t- Anchors for calibration")
+        print("\t- Tags to work with")
+        print()
+        print("- System will manually calibration")
+        print()
+        print("System will auto start positioning")
+        print()
+        self.pozyx.printDeviceInfo(self.remote_id)
+        print()
+        print("------------POZYX MULTITAG POSITIONING V1.1 ------------")
+        print()
+
+
         self.setAnchorsManual()
         self.printPublishAnchorConfiguration()
 
@@ -88,8 +103,8 @@ class MultitagPositioning(object):
         if network_id is None:
             network_id = 0
         if status == POZYX_SUCCESS:
-            print("Error %s on ID %s, error code %s" %
-                  (operation, "0x%0.4x" % network_id, str(error_code)))
+            print("Error %s on ID %s, %s" %
+                  (operation, "0x%0.4x" % network_id, self.pozyx.getErrorMessage(error_code)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message(
                     "/error_%s" % operation, [network_id, error_code[0]])
@@ -111,7 +126,10 @@ class MultitagPositioning(object):
 
 if __name__ == "__main__":
     # shortcut to not have to find out the port yourself
-    serial_port = get_serial_ports()[0].device
+    serial_port = get_first_pozyx_serial_port()
+    if serial_port is None:
+        print("No Pozyx connected. Check your USB cable or your driver!")
+        quit()
 
     remote_id = 0x1000                     # remote device network ID
     remote = False                         # whether to use a remote device

@@ -23,21 +23,23 @@ p = PozyxSerial(port)
 If your port is correct and the serial connection to the Pozyx isn't used by other software, this will run without any errors.
 
 #### But! How do I know what port my Pozyx is on?
-You can see the COM ports on your system easily using Python with:
+* You can see the COM ports on your system easily using Python with:
 `python -c "from pypozyx import *;list_serial_ports()"`
-
+* **NEW** You can quickly find whether there's a recognized Pozyx device using:
+`python -c "from pypozyx import *;print(get_first_pozyx_serial_port())"`
 
 ### Documentation and examples
-You can find the Python tutorials on our site. You probably got here from [the getting started page](https://www.pozyx.io/Documentation/Tutorials/getting_started/Python)
+You can find the Python tutorials on our site. You probably got here from [the getting started page](https://www.pozyx.io/Documentation/Tutorials/getting_started/Python) after all.
 
-There is currently a lack of documentation, unlike for the Arduino library. For now, these pointers and pages should be helpful:
-* All functions that exist in the Arduino library, also exist in the Python library under the same name and functionality, so most of the [Arduino Library Documentation](https://www.pozyx.io/Documentation/Datasheet/arduino) is transformable to this. The major difference is that you don't ever again need to pass along the length of the data you're reading/writing. This is taken care of by the library:
-* The Data and SingleRegister classes take care of this. eg. to read out the WhoAmI register, appending to the test code above.    
+Documentation can be found [here](https://www.pozyx.io/Documentation/Datasheet/python).
+
+* This was originally a port of the Pozyx's Arduino library, so most of the [Arduino Library Documentation](https://www.pozyx.io/Documentation/Datasheet/arduino) is transformable to this. The major difference is that you don't ever again need to pass along the length of the data you're reading/writing. This is taken care of by the library through the Data and SingleRegister classes like so:
 ```python
 whoami = SingleRegister()
 pozyx.regRead(POZYX_WHO_AM_I, whoami) # which is pozyx.getWhoAmI(whoami)
 ```
 * `SingleRegister(value=0, size=1, signed=1)` is basically an instance `Data([0], 'B')`, which functions as a single uint8_t. If you want to make your custom data, for a single register you can adapt the size and signed parameters, and for larger data structures you can use your own data formats. `Data([0]*3, 'BHI')`, for example, creates a structure of 1 uint8_t, uint16_t and uint32_t. Writing and reading data using this example as a parameter will automatically read/write 7 bytes worth of data. To specify your own data formats, check the [struct package documentation for Python 3](https://docs.python.org/3.5/library/struct.html#format-characters) or [Python 2](https://docs.python.org/2/library/struct.html).
+* A more pythonic library would be nice, but isn't in the works.
 
 
-More usage examples can be found in the useful and examples folders of the repository.
+More usage examples can be found in the [useful](https://github.com/pozyxLabs/Pozyx-Python-library/tree/master/useful) and [tutorials](https://github.com/pozyxLabs/Pozyx-Python-library/tree/master/tutorials) folders of the repository.

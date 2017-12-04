@@ -101,7 +101,6 @@ def dataCheck(data):
         return False
     return True
 
-
 class XYZ(ByteStructure):
     """
     Generic XYZ data structure consisting of 3 integers x, y, and z.
@@ -155,7 +154,7 @@ class Data(ByteStructure):
     ---------------
     Data creates a packed data structure with size and format that is entirely the user's choice.
     The format follows the one used in struct, where b is a byte, h is a 2-byte int, and
-    i is a default-sized integer, and f is a float. In capitals, these are signed.
+    i is a default-sized integer, and f is a float. In capitals, these are unsigned.
     So, to create a custom construct consisting of 4 uint16 and a single int, the
     following code can be used.
 
@@ -232,3 +231,39 @@ class SingleRegister(Data):
             return bin(self.data[0])
         else:
             return str(self.data[0])
+
+class SingleSensorValue(ByteStructure):
+    """
+    Generic Single Sensor Value data structure.
+
+    Not recommended to use in practice, as relevant sensor data classes are derived from this.
+
+    If deriving this, don't forget to implement your own update_data function, or data will
+    be [value] consistently instead of [..., value, ...].
+    """
+    physical_convert = 1
+
+    byte_size = 4
+    data_format = 'i'
+
+    def __init__(self, value=0):
+        """Initializes the XYZ or XYZ-derived object."""
+        self.value = value
+        self.load([value])
+
+    def load(self, data=[0], convert=1):
+        self.data = data
+        if convert:
+            self.value = float(data[0]) / self.physical_convert
+        else:
+            self.value = data[0]
+
+    def update_data(self):
+        try:
+            if self.data != [self.value]:
+                self.data = [self.value]
+        except:
+            return
+
+    def __str__(self):
+        return 'Value: {self.value}'.format(self=self)
