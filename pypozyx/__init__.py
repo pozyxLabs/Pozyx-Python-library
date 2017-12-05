@@ -80,7 +80,7 @@ switch at some point.
 
 """
 
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 
 VERSION = __version__
 version = __version__
