@@ -12,10 +12,7 @@ Prerequisites
 
 Installing this package
 -----------------------
-As it's not yet available on PyPi, you will have to install the library from source like this
-
-* Download the library as a zip file, or clone it in a folder.
-* After changing your command window's working directory to the extracted/cloned folder, perform ``python setup.py install``
+Just run ``pip install pypozyx``
 
 PyPozyx is now installed. To check whether it is: if you followed all the steps correctly, and know which port your Pozyx is on, the following code should work:
 

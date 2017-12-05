@@ -9,9 +9,7 @@ This library works with both Python 2 and 3.
 * **Windows only** install [ST's virtual COM driver](http://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-stm32102.html). After running this installer, please run the correct driver package for your system, located in "C:\Program Files (x86)\STMicroelectronics\Software\Virtual comport driver". Choose Win7 if you run Windows 7 or older. Choose Win8 for Windows 8 or newer. Run "dpinst_amd64.exe" on a 64-bit system, "dpinst_x86.exe"on a 32-bit system.
 
 ### Installing this package.
-As it's not yet available on PyPi, you will have to install the library from source like this:
-* Download the library as a zip file, or clone it in a folder.
-* After changing your command window's working directory to the extracted/cloned folder, perform `python setup.py install`
+Just run `pip install pypozyx`
 
 PyPozyx is now installed. To check whether it is: if you followed all the steps correctly, and know which port your Pozyx is on, the following code should work:
 
