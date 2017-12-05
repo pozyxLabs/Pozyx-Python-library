@@ -12,7 +12,7 @@ setup(
     name='pypozyx',
     packages=['pypozyx', 'pypozyx.definitions',
               'pypozyx.structures'],
-    version='1.1.0',
+    version='1.1.1',
     description='Python library for Pozyx devices',
     install_requires=[
         'pyserial>=3.0'

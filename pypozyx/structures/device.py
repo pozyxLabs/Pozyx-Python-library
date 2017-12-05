@@ -224,7 +224,7 @@ class UWBSettings(ByteStructure):
 
     def parse_bitrate(self):
         """Parses the bitrate to be humanly readable."""
-        bitrates = {0: '110kbit/s', 1: '850kbit/s', 2: '6.81Mbit/s'}
+        bitrates = {0: '110 kbit/s', 1: '850 kbit/s', 2: '6.81 Mbit/s'}
         try:
             return bitrates[self.bitrate]
         except:
@@ -248,4 +248,4 @@ class UWBSettings(ByteStructure):
             return 'invalid preamble length'
 
     def __str__(self):
-        return "CH: {}, bitrate: {}, prf: {}, plen: {}, gain: {}dB".format(self.channel, self.parse_bitrate(), self.parse_prf(), self.parse_plen(), self.gain_db)
+        return "CH: {}, bitrate: {}, prf: {}, plen: {}, gain: {} dB".format(self.channel, self.parse_bitrate(), self.parse_prf(), self.parse_plen(), self.gain_db)
