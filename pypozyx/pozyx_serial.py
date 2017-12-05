@@ -37,7 +37,22 @@ def get_serial_ports():
 
 def is_pozyx_port(port):
     """Returns whether the port is a Pozyx device"""
-    return "Pozyx Labs" in port.manufacturer or "Pozyx" in port.product or "0483:" in port.hwid
+    try:
+        if "Pozyx Labs" in port.manufacturer:
+            return True
+    except TypeError:
+        pass
+    try:
+        if "Pozyx" in port.product:
+            return True
+    except TypeError:
+        pass
+    try:
+        if "0483:" in port.hwid:
+            return True
+    except TypeError:
+        pass
+    return False
 
 
 def get_port_object(device):
