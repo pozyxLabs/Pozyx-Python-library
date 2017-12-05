@@ -19,7 +19,7 @@ from pypozyx.structures.generic import (Data, SingleRegister, dataCheck,
 
 from warnings import warn
 
-class PozyxCore():
+class PozyxCore:
     """PozyxCore
 
     PozyxCore
@@ -321,7 +321,7 @@ class PozyxCore():
             interrupt_flag: Flag of interrupt type to check the interrupt register against.
             timeout_s: duration to wait for the interrupt in seconds
 
-        Kwags:
+        Kwargs:
             interrupt: Container for the interrupt status register data.
 
         Returns:
