@@ -167,13 +167,14 @@ class PozyxSerial(PozyxLib):
 
         try:
             if is_correct_pyserial_version():
-                if not is_pozyx(port):
+                if not is_pozyx(port) and not self.suppress_warnings:
                     warn("The passed device is not a recognized Pozyx device, is %s" % get_port_object(port).description, stacklevel=2)
                 self.ser = Serial(port=port, baudrate=baudrate, timeout=timeout,
                                   write_timeout=write_timeout)
             else:
-                warn("PySerial version %s not supported, please upgrade to 3.0 or (prefferably) higher" %
-                     PYSERIAL_VERSION, stacklevel=0)
+                if not self.suppress_warnings:
+                    warn("PySerial version %s not supported, please upgrade to 3.0 or (prefferably) higher" %
+                         PYSERIAL_VERSION, stacklevel=0)
                 self.ser = Serial(port=port, baudrate=baudrate, timeout=timeout,
                                   writeTimeout=write_timeout)
         except SerialException as exc:

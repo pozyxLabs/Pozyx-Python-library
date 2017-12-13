@@ -1569,9 +1569,12 @@ class PozyxLib(PozyxCore):
                 anchor = DeviceCoordinates(
                     anchor[0], anchor[1], Coordinates(anchor[2], anchor[3], anchor[4]))
             if anchor.flag != 0x1:
-                print("ID 0x%0.4x added as tag, is this intentional?" % remote_id)
+                warn("ID 0x%0.4x added as tag, is this intentional?" % remote_id)
             status &= self.addDevice(anchor, remote_id)
 
+        if len(anchor_list) < 3 or len(anchor_list) > 16:
+            warn("Not enough anchors to do positioning")
+            return status
         return status & self.setSelectionOfAnchors(anchor_select, len(anchor_list), remote_id)
 
     def removeDevice(self, device_id, remote_id=None):

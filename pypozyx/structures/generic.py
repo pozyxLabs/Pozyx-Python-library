@@ -199,6 +199,8 @@ class SingleRegister(Data):
         print_hex: How to print the register output. Hex by default. Special options are 'hex' and 'bin'
             other things, such as 'dec', will return decimal output.
     """
+    byte_size = 1
+    data_format = 'B'
 
     def __init__(self, value=0, size=1, signed=0, print_style='hex'):
         self.print_style = print_style
