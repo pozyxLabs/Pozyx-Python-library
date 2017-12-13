@@ -296,7 +296,7 @@ class PozyxCore:
         """
         if not is_functioncall(function):
             if not self.suppress_warnings:
-                warn("Register 0x%0.02x isn't a function register" % address, stacklevel=3)
+                warn("Register 0x%0.02x isn't a function register" % function, stacklevel=3)
         if params is None:
             params = Data([])
         if data is None:
