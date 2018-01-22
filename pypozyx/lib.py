@@ -504,9 +504,9 @@ class PozyxLib(PozyxCore):
             config = SingleRegister(config)
         return self.setWrite(POZYX_CONFIG_LEDS, config, remote_id)
 
-    # @}
+    ## @}
 
-    # \addtogroup positioning_functions
+    ## \addtogroup positioning_functions
     # @{
 
     def saveAnchorIds(self, remote_id=None):
@@ -1021,9 +1021,9 @@ class PozyxLib(PozyxCore):
                     return POZYX_FAILURE
         return POZYX_TIMEOUT
 
-    # @}
+    ## @}
 
-    # \addtogroup sensor_data
+    ## \addtogroup sensor_data
     # @{
 
     def getSensorMode(self, sensor_mode, remote_id=None):
@@ -1235,9 +1235,9 @@ class PozyxLib(PozyxCore):
             temperature[0] = temperature[0] / POZYX_TEMP_DIV_CELSIUS
         return status
 
-    # @}
+    ##  @}
 
-    # \addtogroup device_list
+    ## \addtogroup device_list
     # @{
 
     def getDeviceListSize(self, device_list_size, remote_id=None):
@@ -1709,9 +1709,9 @@ class PozyxLib(PozyxCore):
             else:
                 print("\t- 0x%0.4x" % device_id)
 
-    # @}
+    ## @}
 
-    # \addtogroup communication_functions
+    ## \addtogroup communication_functions
     # @{
 
     def saveUWBSettings(self, remote_id=None):
@@ -1960,7 +1960,7 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(POZYX_RX_DATA_LEN, data_length, remote_id)
 
-    # @}
+    ## @}
 
     def saveConfiguration(self, save_type, registers=None, remote_id=None):
         """
