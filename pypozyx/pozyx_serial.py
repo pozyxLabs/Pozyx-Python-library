@@ -76,6 +76,7 @@ def get_pozyx_ports():
     for port in get_serial_ports():
         if is_pozyx_port(port):
             pozyx_ports.append(port.device)
+    return pozyx_ports
 
 
 def get_first_pozyx_serial_port():
