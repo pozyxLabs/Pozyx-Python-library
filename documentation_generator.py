@@ -30,7 +30,6 @@ def clean_up_doxypypy_files(filename):
         fp.writelines(lines_to_keep)
 
 
-
 if __name__ == '__main__':
     import os
     import subprocess
@@ -58,7 +57,6 @@ if __name__ == '__main__':
             clean_up_doxypypy_files(doxypy_folder + '/' + file)
 
         subprocess.run('doxygen doxygen_settings', shell=True)
-
 
 
     # generate groups
