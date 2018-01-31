@@ -10,11 +10,10 @@ of the Pozyx device both locally and remotely. Follow the steps to correctly set
 parameters and upload this sketch. Watch the coordinates change as you move your device around!
 
 """
-from time import sleep, time
+from time import sleep
 
-from pypozyx import *
-from pypozyx.definitions.registers import POZYX_EUL_HEADING
-from pythonosc.osc_message_builder import OscMessageBuilder
+from pypozyx import (POZYX_POS_ALG_UWB_ONLY, POZYX_3D, Coordinates, POZYX_SUCCESS, POZYX_ANCHOR_SEL_AUTO,
+                     DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister)
 from pythonosc.udp_client import SimpleUDPClient
 
 
@@ -143,8 +142,8 @@ if __name__ == "__main__":
     if use_processing:
         osc_udp_client = SimpleUDPClient(ip, network_port)
 
-    #tags = [0x6055]
     tags = [0x607a]
+
     # tags = [0x6055, 0x607a]        # remote tags
     # necessary data for calibration
     anchors = [DeviceCoordinates(0x6058, 1, Coordinates(0, 0, 2210)),

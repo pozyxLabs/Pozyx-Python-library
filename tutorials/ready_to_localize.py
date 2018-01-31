@@ -10,8 +10,8 @@ parameters and upload this sketch. Watch the coordinates change as you move your
 """
 from time import sleep
 
-from pypozyx import *
-from pythonosc.osc_message_builder import OscMessageBuilder
+from pypozyx import (POZYX_POS_ALG_UWB_ONLY, POZYX_3D, Coordinates, POZYX_SUCCESS, POZYX_ANCHOR_SEL_AUTO,
+                     DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister, DeviceList)
 from pythonosc.udp_client import SimpleUDPClient
 
 
@@ -106,21 +106,20 @@ class ReadyToLocalize(object):
         """Prints and potentially publishes the anchor configuration result in a human-readable way."""
         list_size = SingleRegister()
 
-        status = self.pozyx.getDeviceListSize(list_size, self.remote_id)
+        self.pozyx.getDeviceListSize(list_size, self.remote_id)
         print("List size: {0}".format(list_size[0]))
         if list_size[0] != len(self.anchors):
             self.printPublishErrorCode("configuration")
             return
         device_list = DeviceList(list_size=list_size[0])
-        status = self.pozyx.getDeviceIds(device_list, self.remote_id)
+        self.pozyx.getDeviceIds(device_list, self.remote_id)
         print("Calibration result:")
         print("Anchors found: {0}".format(list_size[0]))
         print("Anchor IDs: ", device_list)
 
         for i in range(list_size[0]):
             anchor_coordinates = Coordinates()
-            status = self.pozyx.getDeviceCoordinates(
-                device_list[i], anchor_coordinates, self.remote_id)
+            self.pozyx.getDeviceCoordinates(device_list[i], anchor_coordinates, self.remote_id)
             print("ANCHOR, 0x%0.4x, %s" % (device_list[i], str(anchor_coordinates)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message(
@@ -133,8 +132,9 @@ class ReadyToLocalize(object):
             print("ANCHOR,0x%0.4x,%s" % (anchor.network_id, str(anchor.coordinates)))
             if self.osc_udp_client is not None:
                 self.osc_udp_client.send_message(
-                    "/anchor", [anchor.network_id, int(anchor_coordinates.x), int(anchor_coordinates.y), int(anchor_coordinates.z)])
+                    "/anchor", [anchor.network_id, int(anchor.coordinates.x), int(anchor.coordinates.y), int(anchor.coordinates.z)])
                 sleep(0.025)
+
 
 if __name__ == "__main__":
     # shortcut to not have to find out the port yourself
