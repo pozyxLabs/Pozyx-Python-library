@@ -20,7 +20,7 @@ The data can be viewed in the Processing sketch orientation_3D.pde
 """
 from time import time
 
-from pypozyx import *
+from pypozyx import SensorData, SingleRegister, POZYX_SUCCESS, get_first_pozyx_serial_port, PozyxSerial
 from pypozyx.definitions.bitmasks import POZYX_INT_MASK_IMU
 from pythonosc.osc_message_builder import OscMessageBuilder
 from pythonosc.udp_client import SimpleUDPClient
@@ -55,7 +55,7 @@ class Orientation3D(object):
         """Makes the OSC sensor data package and publishes it"""
         self.msg_builder = OscMessageBuilder("/sensordata")
         self.msg_builder.add_arg(int(1000 * (time() - self.current_time)))
-        current_time = time()
+        self.current_time = time()
         self.addSensorData(sensor_data)
         self.addCalibrationStatus(calibration_status)
         self.osc_udp_client.send(self.msg_builder.build())
@@ -82,6 +82,7 @@ class Orientation3D(object):
         self.msg_builder.add_arg((calibration_status[0] & 0x0C) >> 2)
         self.msg_builder.add_arg((calibration_status[0] & 0x30) >> 4)
         self.msg_builder.add_arg((calibration_status[0] & 0xC0) >> 6)
+
 
 if __name__ == '__main__':
     # shortcut to not have to find out the port yourself

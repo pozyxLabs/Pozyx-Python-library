@@ -6,6 +6,8 @@ def clean_up_doxypypy_files(filename):
     with open(filename, 'r') as fp:
         lines += fp.readlines()
     for line in lines:
+        if line.strip() == '':
+            continue
         if in_example is True:
             if '#' not in line:
                 in_example = False
@@ -28,7 +30,6 @@ def clean_up_doxypypy_files(filename):
         fp.writelines(lines_to_keep)
 
 
-
 if __name__ == '__main__':
     import os
     import subprocess
@@ -48,15 +49,14 @@ if __name__ == '__main__':
         os.mkdir(doxypy_folder + '/structures')
 
         for file in files:
-            command = ['doxypypy', '-a', '-c', original_folder + '/' + file, '>', doxypy_folder + '/' + file]
+            command = ['doxypypy', '-d', '-a', '-c', original_folder + '/' + file, '>', doxypy_folder + '/' + file]
             command = ' '.join(command)
             subprocess.run(command, shell=True)
-
+        # exit()
         for file in files:
             clean_up_doxypypy_files(doxypy_folder + '/' + file)
 
         subprocess.run('doxygen doxygen_settings', shell=True)
-
 
 
     # generate groups

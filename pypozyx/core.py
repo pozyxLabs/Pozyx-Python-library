@@ -340,6 +340,7 @@ class PozyxCore:
     ## @}
 
     ## \addtogroup communication_functions
+    # @{
 
     def readRXBufferData(self, data):
         """
@@ -442,3 +443,5 @@ class PozyxCore:
         return status
 
     ## @}
+
+## @}

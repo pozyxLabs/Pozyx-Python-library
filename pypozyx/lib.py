@@ -37,8 +37,7 @@ class PozyxLib(PozyxCore):
     # @{
 
     def setSensorMode(self, sensor_mode, remote_id=None):
-        """
-        Set the Pozyx's sensor mode.
+        """Set the Pozyx's sensor mode.
 
         Args:
             sensor_mode: New sensor mode. See POZYX_SENSORS_MODE register. integer sensor_mode or SingleRegister(sensor_mode).
@@ -59,8 +58,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def resetSystem(self, remote_id=None):
-        """
-        Resets the Pozyx device.
+        """Resets the Pozyx device.
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -71,8 +69,7 @@ class PozyxLib(PozyxCore):
         return self.useFunction(POZYX_RESET_SYS, remote_id=remote_id)
 
     def saveRegisters(self, registers, remote_id=None):
-        """
-        Saves the given registers to the Pozyx's flash memory, if these are writable registers.
+        """Saves the given registers to the Pozyx's flash memory, if these are writable registers.
 
         This means that upon reset, the Pozyx will use these saved values instead of the default values.
         This is especially practical when changing UWB settings of an entire network, making it unnecessary
@@ -94,8 +91,7 @@ class PozyxLib(PozyxCore):
             POZYX_FLASH_REGS, registers, remote_id)
 
     def getNumRegistersSaved(self, remote_id=None):
-        """
-        Obtains the number of registers saved to the Pozyx's flash memory.
+        """Obtains the number of registers saved to the Pozyx's flash memory.
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -114,8 +110,7 @@ class PozyxLib(PozyxCore):
         return num
 
     def isRegisterSaved(self, regAddress, remote_id=None):
-        """
-        Returns whether the given register is saved to the Pozyx's flash memory.
+        """Returns whether the given register is saved to the Pozyx's flash memory.
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -131,8 +126,7 @@ class PozyxLib(PozyxCore):
         return (details[byte_num] >> bit_num) & 0x1
 
     def setConfigGPIO(self, gpio_num, mode, pull, remote_id=None):
-        """
-        Set the Pozyx's selected GPIO pin configuration(mode and pull).
+        """Set the Pozyx's selected GPIO pin configuration(mode and pull).
 
         Args:
             gpio_num: GPIO pin number, 1 to 4.
@@ -160,8 +154,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(gpio_register, mask, remote_id)
 
     def setGPIO(self, gpio_num, value, remote_id=None):
-        """
-        Set the Pozyx's selected GPIO pin output.
+        """Set the Pozyx's selected GPIO pin output.
 
         Args:
             gpio_num: GPIO pin number, 1 to 4
@@ -183,8 +176,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(gpio_register, value, remote_id)
 
     def setLed(self, led_num, state, remote_id=None):
-        """
-        Set the Pozyx's selected LED state.
+        """Set the Pozyx's selected LED state.
 
         Args:
             led_num: LED pin number, 1 to 4
@@ -204,8 +196,7 @@ class PozyxLib(PozyxCore):
         return self.useFunction(POZYX_LED_CTRL, params, None, remote_id)
 
     def clearConfiguration(self, remote_id=None):
-        """
-        Clears the Pozyx's flash memory.
+        """Clears the Pozyx's flash memory.
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -224,8 +215,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def configInterruptPin(self, pin=0, mode=0, active_high=False, latch=False, remote_id=None):
-        """
-        Configures the interrupt pin via the POZYX_INT_CONFIG register.
+        """Configures the interrupt pin via the POZYX_INT_CONFIG register.
 
         Kwargs:
             pin: The Pozyx's pin ID. 1 to 4 on anchor, 1 to 6 on tag. 0 means no pin. SingleRegister or integer.
@@ -247,8 +237,7 @@ class PozyxLib(PozyxCore):
         self.setWrite(POZYX_INT_CONFIG, int_config, remote_id)
 
     def getWhoAmI(self, whoami, remote_id=None):
-        """
-        Obtains the Pozyx's WHO_AM_I.
+        """Obtains the Pozyx's WHO_AM_I.
 
         Args:
             whoami: Container for the read data. SingleRegister or Data([0]).
@@ -262,8 +251,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_WHO_AM_I, whoami, remote_id)
 
     def getFirmwareVersion(self, firmware, remote_id=None):
-        """
-        Obtains the Pozyx's firmware version.
+        """Obtains the Pozyx's firmware version.
 
         Args:
             firmware: Container for the read data. SingleRegister or Data([0]).
@@ -277,8 +265,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_FIRMWARE_VER, firmware, remote_id)
 
     def getHardwareVersion(self, hardware, remote_id=None):
-        """
-        Obtains the Pozyx's hardware version.
+        """Obtains the Pozyx's hardware version.
 
         Args:
             hardware: Container for the read data. SingleRegister or Data([0]).
@@ -292,8 +279,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_HARDWARE_VER, hardware, remote_id)
 
     def getSelftest(self, selftest, remote_id=None):
-        """
-        Obtains the Pozyx's selftest.
+        """Obtains the Pozyx's selftest.
 
         Args:
             selftest: Container for the read data. SingleRegister or Data([0]).
@@ -307,8 +293,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_ST_RESULT, selftest, remote_id)
 
     def getErrorCode(self, error_code, remote_id=None):
-        """
-        Obtains the Pozyx's error code.
+        """Obtains the Pozyx's error code.
 
         Args:
             error_code: Container for the read data. SingleRegister or Data([0]).
@@ -322,8 +307,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_ERRORCODE, error_code, remote_id)
 
     def getInterruptStatus(self, interrupts, remote_id=None):
-        """
-        Obtains the Pozyx's interrupt register.
+        """Obtains the Pozyx's interrupt register.
 
         Args:
             interrupts: Container for the read data. SingleRegister or Data([0]).
@@ -337,8 +321,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_INT_STATUS, interrupts, remote_id)
 
     def getCalibrationStatus(self, calibration_status, remote_id=None):
-        """
-        Obtains the Pozyx's calibration status.
+        """Obtains the Pozyx's calibration status.
 
         Args:
             calibration_status: Container for the read data. SingleRegister or Data([0]).
@@ -352,8 +335,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_CALIB_STATUS, calibration_status, remote_id)
 
     def getInterruptMask(self, mask, remote_id=None):
-        """
-        Obtains the Pozyx's interrupt mask.
+        """Obtains the Pozyx's interrupt mask.
 
         Args:
             mask: Container for the read data. SingleRegister or Data([0]).
@@ -367,8 +349,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_INT_MASK, mask, remote_id)
 
     def getConfigModeGPIO(self, gpio_num, mode, remote_id=None):
-        """
-        Obtain the Pozyx's configuration mode of the selected GPIO pin.
+        """Obtain the Pozyx's configuration mode of the selected GPIO pin.
 
         Args:
             gpio_num: GPIO pin number, 1 to 4.
@@ -390,8 +371,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getConfigPullGPIO(self, gpio_num, pull, remote_id=None):
-        """
-        Obtain the Pozyx's selected GPIO pin pull.
+        """Obtain the Pozyx's selected GPIO pin pull.
 
         Args:
             gpio_num: GPIO pin number, 1 to 4.
@@ -413,8 +393,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getGPIO(self, gpio_num, value, remote_id=None):
-        """
-        Obtain the Pozyx's value of the selected GPIO pin, being either HIGH or LOW(physically 3.3V or 0V).
+        """Obtain the Pozyx's value of the selected GPIO pin, being either HIGH or LOW(physically 3.3V or 0V).
 
         Args:
             gpio_num: GPIO pin number, 1 to 4.
@@ -434,8 +413,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(gpio_register, value, remote_id)
 
     def getErrorMessage(self, error_code):
-        """
-        Returns the system error string for the given error code
+        """Returns the system error string for the given error code
 
         Args:
             error_code: Error code for which to return the error message. int or SingleRegister
@@ -451,8 +429,7 @@ class PozyxLib(PozyxCore):
         return ERROR_CODES.get(error_code, "Unknown error 0x%0.02x" % error_code)
 
     def getSystemError(self, remote_id=None):
-        """
-        Returns the Pozyx's system error string.
+        """Returns the Pozyx's system error string.
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -471,8 +448,7 @@ class PozyxLib(PozyxCore):
         return "Error: couldn't retrieve error from device."
 
     def setInterruptMask(self, mask, remote_id=None):
-        """
-        Set the Pozyx's interrupt mask.
+        """Set the Pozyx's interrupt mask.
 
         Args:
             mask: Interrupt mask. See POZYX_INT_MASK register. integer mask or SingleRegister(mask)
@@ -488,8 +464,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(POZYX_INT_MASK, mask, remote_id)
 
     def setLedConfig(self, config, remote_id=None):
-        """
-        Set the Pozyx's LED configuration.
+        """Set the Pozyx's LED configuration.
 
         Args:
             config: LED configuration. See POZYX_CONFIG_LEDS register. integer configuration or SingleRegister(configuration)
@@ -504,14 +479,13 @@ class PozyxLib(PozyxCore):
             config = SingleRegister(config)
         return self.setWrite(POZYX_CONFIG_LEDS, config, remote_id)
 
-    # @}
+    ## @}
 
-    # \addtogroup positioning_functions
+    ## \addtogroup positioning_functions
     # @{
 
     def saveAnchorIds(self, remote_id=None):
-        """
-        Saves the anchor IDs used in positioning to the Pozyx's flash memory.
+        """Saves the anchor IDs used in positioning to the Pozyx's flash memory.
 
         This means that upon reset, the Pozyx won't need to be recalibrated before performing positioning.
 
@@ -524,8 +498,7 @@ class PozyxLib(PozyxCore):
         self.saveConfiguration(POZYX_FLASH_ANCHOR_IDS, remote_id=remote_id)
 
     def getUpdateInterval(self, ms, remote_id=None):
-        """
-        Obtains the Pozyx's update interval.
+        """Obtains the Pozyx's update interval.
 
         Args:
             ms: Container for the read data. SingleRegister or Data([0]).
@@ -539,8 +512,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_POS_INTERVAL, ms, remote_id)
 
     def getRangingProtocol(self, protocol, remote_id=None):
-        """
-        Obtains the Pozyx's ranging protocol
+        """Obtains the Pozyx's ranging protocol
 
         Args:
             protocol: Container for the read protocol data. SingleRegister or Data([0])
@@ -554,8 +526,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_RANGE_PROTOCOL, protocol, remote_id)
 
     def setRangingProtocol(self, protocol, remote_id=None):
-        """
-        Set the Pozyx's ranging protocol.
+        """Set the Pozyx's ranging protocol.
 
         Args:
             protocol: the new ranging protocol. See POZYX_RANGE_PROTOCOL register. integer or SingleRegister(protocol)
@@ -573,8 +544,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(POZYX_RANGE_PROTOCOL, protocol, remote_id)
 
     def getPositionAlgorithm(self, algorithm, remote_id=None):
-        """
-        Obtains the Pozyx's positioning algorithm.
+        """Obtains the Pozyx's positioning algorithm.
 
         Args:
             algorithm: Container for the read data. SingleRegister or Data([0]).
@@ -590,8 +560,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getPositionDimension(self, dimension, remote_id=None):
-        """
-        Obtains the Pozyx's positioning dimension.
+        """Obtains the Pozyx's positioning dimension.
 
         Args:
             dimension: Container the for read data. SingleRegister or Data([0]).
@@ -607,8 +576,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getAnchorSelectionMode(self, mode, remote_id=None):
-        """
-        Obtains the Pozyx's anchor selection mode.
+        """Obtains the Pozyx's anchor selection mode.
 
         Args:
             mode: Container for the read data. SingleRegister or Data([0]).
@@ -624,8 +592,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getNumberOfAnchors(self, nr_anchors, remote_id=None):
-        """
-        Obtains the Pozyx's number of selected anchors.
+        """Obtains the Pozyx's number of selected anchors.
 
         Args:
             nr_anchors: Container for the read data. SingleRegister or Data([0]).
@@ -641,8 +608,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getOperationMode(self, mode, remote_id=None):
-        """
-        Obtains the Pozyx's mode of operation.
+        """Obtains the Pozyx's mode of operation.
 
         Args:
             mode: Container for the read data. SingleRegister or Data([0]).
@@ -656,8 +622,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_OPERATION_MODE, mode, remote_id)
 
     def getCoordinates(self, coordinates, remote_id=None):
-        """
-        Obtains the Pozyx's coordinates. These are either set manually or by positioning.
+        """Obtains the Pozyx's coordinates. These are either set manually or by positioning.
 
         Args:
             coordinates: Container for the read data. Coordinates().
@@ -670,9 +635,22 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(POZYX_POS_X, coordinates, remote_id)
 
-    def getPositionError(self, pos_error, remote_id=None):
+    def getHeight(self, height, remote_id=None):
+        """Obtains the Pozyx's height coordinate.
+
+        Args:
+            height: Container for the read height data. Data([0], 'i').
+
+        Kwargs:
+            remote_id: Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        Obtains the Pozyx's positioning error.
+        return self.getRead(POZYX_POS_Z, height, remote_id)
+
+    def getPositionError(self, pos_error, remote_id=None):
+        """Obtains the Pozyx's positioning error.
 
         Args:
             pos_error: Container for the read data. PositionError().
@@ -686,8 +664,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_POS_ERR_X, pos_error, remote_id)
 
     def getPositioningAnchorIds(self, anchors, remote_id=None):
-        """
-        Obtain the IDs of the anchors in the Pozyx's device list used for positioning.
+        """Obtain the IDs of the anchors in the Pozyx's device list used for positioning.
 
         You need to make sure to know how many anchors are used, as an incorrect
         size of anchors will cause the function to fail. Use getNumberOfAnchors
@@ -723,8 +700,7 @@ class PozyxLib(PozyxCore):
         return self.useFunction(POZYX_POS_GET_ANCHOR_IDS, Data([]), anchors, remote_id)
 
     def getDeviceRangeInfo(self, device_id, device_range, remote_id=None):
-        """
-        Obtain the range information of the device with selected ID in the Pozyx's device list.
+        """Obtain the range information of the device with selected ID in the Pozyx's device list.
 
         Args:
             device_id: ID of desired device whose coordinates are of interest. NetworkID()
@@ -743,8 +719,7 @@ class PozyxLib(PozyxCore):
         return self.useFunction(POZYX_DEVICE_GETRANGEINFO, device_id, device_range, remote_id)
 
     def setUpdateInterval(self, ms, remote_id=None):
-        """
-        Set the Pozyx's update interval in ms(milliseconds).
+        """Set the Pozyx's update interval in ms(milliseconds).
 
         Args:
             ms: Update interval in ms. integer ms or SingleRegister(ms, size=2)
@@ -762,8 +737,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(POZYX_POS_INTERVAL, ms, remote_id)
 
     def setCoordinates(self, coordinates, remote_id=None):
-        """
-        Set the Pozyx's coordinates.
+        """Set the Pozyx's coordinates.
 
         Args:
             coordinates: Desired Pozyx coordinates. Coordinates() or [x, y, z].
@@ -779,9 +753,25 @@ class PozyxLib(PozyxCore):
                 coordinates[0], coordinates[1], coordinates[2])
         return self.setWrite(POZYX_POS_X, coordinates, remote_id)
 
-    def setConfigGPIO(self, gpio_num, mode, pull, remote_id=None):
+    def setHeight(self, height, remote_id=None):
+        """Sets the Pozyx device's height.
+
+        Args:
+            height: Desired Pozyx height. integer height or Data([height], 'i').
+
+        Kwargs:
+            remote_id: Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        Set the Pozyx's selected GPIO pin configuration(mode and pull).
+        if not dataCheck(height):
+            height = Data([height], 'i')
+        return self.setWrite(POZYX_POS_Z, height, remote_id=remote_id)
+
+
+    def setConfigGPIO(self, gpio_num, mode, pull, remote_id=None):
+        """Set the Pozyx's selected GPIO pin configuration(mode and pull).
 
         Args:
             gpio_num: GPIO pin number, 1 to 4.
@@ -809,8 +799,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(gpio_register, mask, remote_id)
 
     def setPositionFilter(self, filter_type, filter_strength, remote_id=None):
-        """
-        Set the Pozyx's positioning filter.
+        """Set the Pozyx's positioning filter.
 
         Note that currently only FILTER_TYPE_MOVINGAVERAGE, FILTER_TYPE_MOVINGMEDIAN and FILTER_TYPE_FIR are implemented.
 
@@ -836,8 +825,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(POZYX_POS_FILTER, params, remote_id)
 
     def setPositionAlgorithm(self, algorithm, dimension, remote_id=None):
-        """
-        Set the Pozyx's positioning algorithm.
+        """Set the Pozyx's positioning algorithm.
 
         Note that currently only POZYX_POS_ALG_UWB_ONLY and POZYX_POS_ALG_TRACKING are implemented.
 
@@ -863,8 +851,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(POZYX_POS_ALG, params, remote_id)
 
     def setSelectionOfAnchors(self, mode, nr_anchors, remote_id=None):
-        """
-        Set the Pozyx's coordinates.
+        """Set the Pozyx's coordinates.
 
         Args:
             mode: Anchor selection mode. integer mode or SingleRegister(mode).
@@ -889,8 +876,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(POZYX_POS_NUM_ANCHORS, params, remote_id)
 
     def setPositioningAnchorIds(self, anchors, remote_id=None):
-        """
-        Set the anchors the Pozyx will use for positioning.
+        """Set the anchors the Pozyx will use for positioning.
 
         Args:
             anchors: List of anchors that'll be used for positioning. DeviceList() or [anchor_id1, anchor_id2, ...]
@@ -909,8 +895,7 @@ class PozyxLib(PozyxCore):
         return self.useFunction(POZYX_POS_SET_ANCHOR_IDS, anchors, None, remote_id)
 
     def doRanging(self, destination, device_range, remote_id=None):
-        """
-        Performs ranging with another destination device, resulting in range information.
+        """Performs ranging with another destination device, resulting in range information.
 
         This is pretty straightforward, the range information consists of the following:
             - the timestamp of the range measurement.
@@ -953,8 +938,7 @@ class PozyxLib(PozyxCore):
         return POZYX_FAILURE
 
     def doPositioning(self, position, dimension=POZYX_3D, height=Data([0], 'i'), algorithm=POZYX_POS_ALG_UWB_ONLY, remote_id=None):
-        """
-        Performs positioning with the Pozyx. This is probably why you're using Pozyx.
+        """Performs positioning with the Pozyx. This is probably why you're using Pozyx.
 
         This function only performs the positioning and doesn't take care of the previous steps
         required to get this operational, so be sure to adhere to this checklist:
@@ -1021,14 +1005,13 @@ class PozyxLib(PozyxCore):
                     return POZYX_FAILURE
         return POZYX_TIMEOUT
 
-    # @}
+    ## @}
 
-    # \addtogroup sensor_data
+    ## \addtogroup sensor_data
     # @{
 
     def getSensorMode(self, sensor_mode, remote_id=None):
-        """
-        Obtains the Pozyx's sensor mode.
+        """Obtains the Pozyx's sensor mode.
 
         Args:
             sensor_mode: Container for the read data. SingleRegister or Data([0]).
@@ -1042,8 +1025,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_SENSORS_MODE, sensor_mode, remote_id)
 
     def getAllSensorData(self, sensor_data, remote_id=None):
-        """
-        Obtains all the Pozyx's sensor data in their default units.
+        """Obtains all the Pozyx's sensor data in their default units.
 
         Args:
             sensor_data: Container for the read data. SensorData() or RawSensorData().
@@ -1057,8 +1039,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_PRESSURE, sensor_data, remote_id)
 
     def getPressure_Pa(self, pressure, remote_id=None):
-        """
-        Obtain the Pozyx's pressure sensor data in Pa(pascal).
+        """Obtain the Pozyx's pressure sensor data in Pa(pascal).
 
         Args:
             pressure: Container for the read data. Pressure or Data([0], 'I') (Data is DEPRECATED).
@@ -1077,8 +1058,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getMaxLinearAcceleration_mg(self, max_linear_acceleration, remote_id=None):
-        """
-        Obtain the Pozyx's acceleration sensor data in mg.
+        """Obtain the Pozyx's acceleration sensor data in mg.
 
         Args:
             max_linear_acceleration: Container for the read data. MaxLinearAcceleration.
@@ -1092,8 +1072,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_ACCEL_X, max_linear_acceleration, remote_id)
 
     def getAcceleration_mg(self, acceleration, remote_id=None):
-        """
-        Obtain the Pozyx's acceleration sensor data in mg.
+        """Obtain the Pozyx's acceleration sensor data in mg.
 
         Args:
             acceleration: Container for the read data. Acceleration().
@@ -1107,8 +1086,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_ACCEL_X, acceleration, remote_id)
 
     def getMagnetic_uT(self, magnetic, remote_id=None):
-        """
-        Obtain the Pozyx's magnetic sensor data in uT(microtesla).
+        """Obtain the Pozyx's magnetic sensor data in uT(microtesla).
 
         Args:
             magnetic: Container for the read data. Magnetic().
@@ -1122,8 +1100,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_MAGN_X, magnetic, remote_id)
 
     def getAngularVelocity_dps(self, angular_vel, remote_id=None):
-        """
-        Obtain the Pozyx's angular velocity sensor data in dps(degrees per second).
+        """Obtain the Pozyx's angular velocity sensor data in dps(degrees per second).
 
         Args:
             angular_vel: Container for the read data. AngularVelocity().
@@ -1137,8 +1114,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_GYRO_X, angular_vel, remote_id)
 
     def getEulerAngles_deg(self, euler_angles, remote_id=None):
-        """
-        Obtain the Pozyx's euler angles sensor data in degrees(heading, roll, pitch).
+        """Obtain the Pozyx's euler angles sensor data in degrees(heading, roll, pitch).
 
         Args:
             euler_angles: Container for the read data. EulerAngles().
@@ -1152,8 +1128,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_EUL_HEADING, euler_angles, remote_id)
 
     def getNormalizedQuaternion(self, quaternion, remote_id=None):
-        """
-        Obtain the Pozyx's normalized quaternion sensor data that is required for ROS.
+        """Obtain the Pozyx's normalized quaternion sensor data that is required for ROS.
 
         Args:
             quaternion: Container for the read data. Quaternion().
@@ -1170,8 +1145,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getQuaternion(self, quaternion, remote_id=None):
-        """
-        Obtain the Pozyx's quaternion sensor data.
+        """Obtain the Pozyx's quaternion sensor data.
 
         Args:
             quaternion: Container for the read data. Quaternion().
@@ -1185,8 +1159,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_QUAT_W, quaternion, remote_id)
 
     def getLinearAcceleration_mg(self, linear_acceleration, remote_id=None):
-        """
-        Obtain the Pozyx's linear acceleration sensor data in mg.
+        """Obtain the Pozyx's linear acceleration sensor data in mg.
 
         Args:
             linear_acceleration: Container for the read data. LinearAcceleration() or Acceleration().
@@ -1200,8 +1173,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_LIA_X, linear_acceleration, remote_id)
 
     def getGravityVector_mg(self, gravity_vector, remote_id=None):
-        """
-        Obtain the Pozyx's gravity vector sensor data in mg.
+        """Obtain the Pozyx's gravity vector sensor data in mg.
 
         Args:
             gravity_vector: Container for the read data. Acceleration().
@@ -1215,8 +1187,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_GRAV_X, gravity_vector, remote_id)
 
     def getTemperature_c(self, temperature, remote_id=None):
-        """
-        Obtain the Pozyx's temperature sensor data in C(celsius).
+        """Obtain the Pozyx's temperature sensor data in C(celsius).
 
         Args:
             temperature: Container for the read data. Temperature or Data([0], 'b') (DEPRECATED).
@@ -1235,14 +1206,13 @@ class PozyxLib(PozyxCore):
             temperature[0] = temperature[0] / POZYX_TEMP_DIV_CELSIUS
         return status
 
-    # @}
+    ##  @}
 
-    # \addtogroup device_list
+    ## \addtogroup device_list
     # @{
 
     def getDeviceListSize(self, device_list_size, remote_id=None):
-        """
-        Obtain the size of Pozyx's list of added devices.
+        """Obtain the size of Pozyx's list of added devices.
 
         Args:
             device_list_size: Container for the read data. SingleRegister() or Data([0]).
@@ -1256,8 +1226,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_DEVICE_LIST_SIZE, device_list_size, remote_id)
 
     def getDeviceIds(self, devices, remote_id=None):
-        """
-        Obtain the IDs of all devices in the Pozyx's device list.
+        """Obtain the IDs of all devices in the Pozyx's device list.
 
         You need to make sure to know how many devices are in the list, as an incorrect
         size of anchors will cause the function to fail. Use getDeviceListSize
@@ -1299,8 +1268,7 @@ class PozyxLib(PozyxCore):
             POZYX_DEVICES_GETIDS, params, devices, remote_id)
 
     def getAnchorIds(self, anchors, remote_id=None):
-        """
-        Obtain the IDs of the anchors in the Pozyx's device list.
+        """Obtain the IDs of the anchors in the Pozyx's device list.
 
         You need to make sure to know how many anchors are in the list, as an incorrect
         size of anchors will cause the function to fail.
@@ -1345,8 +1313,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getTagIds(self, tags, remote_id=None):
-        """
-        Obtain the IDs of the tags in the Pozyx's device list.
+        """Obtain the IDs of the tags in the Pozyx's device list.
 
         You need to make sure to know how many tags are in the list, as an incorrect
         size of tags will cause the function to fail.
@@ -1391,8 +1358,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getDeviceCoordinates(self, device_id, coordinates, remote_id=None):
-        """
-        Obtain the coordinates of the device with selected ID in the Pozyx's device list.
+        """Obtain the coordinates of the device with selected ID in the Pozyx's device list.
 
         Args:
             device_id: ID of desired device whose coordinates are of interest. NetworkID()
@@ -1412,8 +1378,7 @@ class PozyxLib(PozyxCore):
             POZYX_DEVICE_GETCOORDS, device_id, coordinates, remote_id)
 
     def doDiscovery(self, discovery_type=POZYX_DISCOVERY_ANCHORS_ONLY, slots=3, slot_duration=0.01, remote_id=None):
-        """
-        Performs discovery on the Pozyx, which will let it discover other Pozyx devices with the same
+        """Performs discovery on the Pozyx, which will let it discover other Pozyx devices with the same
         UWB settings in range.
 
         Kwargs:
@@ -1428,8 +1393,7 @@ class PozyxLib(PozyxCore):
         """
         assert discovery_type == POZYX_DISCOVERY_TAGS_ONLY or discovery_type == POZYX_DISCOVERY_ANCHORS_ONLY or discovery_type == POZYX_DISCOVERY_ALL_DEVICES, 'doDiscovery: wrong type of discovery'
         assert slots > 1 and slots < 10, 'doDiscovery: number of slots %i out of range' % slots
-        assert int(slot_duration *
-                   1000) > 5, 'doDiscovery: slot duration too short'
+        assert slot_duration == 0 or int(slot_duration * 1000) > 5, 'doDiscovery: slot duration too short'
 
         self.getInterruptStatus(SingleRegister())
         params = Data([discovery_type, slots, int(slot_duration * 1000)])
@@ -1446,9 +1410,53 @@ class PozyxLib(PozyxCore):
             sleep(timeout_s)
         return status
 
-    def doAnchorCalibration(self, dimension, num_measurements, anchors, heights=None, remote_id=None):
+    def doDiscoveryTags(self, slots=3, slot_duration=0.01, remote_id=None):
+        """Performs tag discovery on the Pozyx, which will let it discover Pozyx tags with the same
+        UWB settings in range.
+
+        Kwargs:
+            slots: Number of timeslots used in attempt to discover devices. Default is 3 slots.
+            slot_duration: Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
+            remote_id: Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        Performs automatic anchor calibration on the Pozyx.
+        return self.doDiscovery(discovery_type=POZYX_DISCOVERY_TAGS_ONLY, slots=slots,
+                                slot_duration=slot_duration, remote_id=remote_id)
+
+    def doDiscoveryAnchors(self, slots=3, slot_duration=0.01, remote_id=None):
+        """Performs anchor discovery on the Pozyx, which will let it discover Pozyx anchors with the same
+        UWB settings in range.
+
+        Kwargs:
+            slots: Number of timeslots used in attempt to discover devices. Default is 3 slots.
+            slot_duration: Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
+            remote_id: Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        return self.doDiscovery(discovery_type=POZYX_DISCOVERY_ANCHORS_ONLY, slots=slots,
+                                slot_duration=slot_duration, remote_id=remote_id)
+
+    def doDiscoveryAll(self, slots=3, slot_duration=0.01, remote_id=None):
+        """Performs general discovery on the Pozyx, which will let it discover both Pozyx tags and anchors
+        with the same UWB settings in range.
+
+        Kwargs:
+            slots: Number of timeslots used in attempt to discover devices. Default is 3 slots.
+            slot_duration: Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
+            remote_id: Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        return self.doDiscovery(discovery_type=POZYX_DISCOVERY_ALL_DEVICES, slots=slots,
+                                slot_duration=slot_duration, remote_id=remote_id)
+
+    def doAnchorCalibration(self, dimension, num_measurements, anchors, heights=None, remote_id=None):
+        """Performs automatic anchor calibration on the Pozyx.
 
         Using manual calibration over automatic calibration is highly recommended, as this will not only
         be less robust to use, the results will also be worse than a carefully accurately manually measured
@@ -1499,8 +1507,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def clearDevices(self, remote_id=None):
-        """
-        Clears the Pozyx's device list.
+        """Clears the Pozyx's device list.
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -1511,8 +1518,7 @@ class PozyxLib(PozyxCore):
         return self.useFunction(POZYX_DEVICES_CLEAR, remote_id=remote_id)
 
     def addDevice(self, device_coordinates, remote_id=None):
-        """
-        Adds a device to the Pozyx's device list. Can be either a tag or anchor.
+        """Adds a device to the Pozyx's device list. Can be either a tag or anchor.
 
         Args:
             device_coordinates: Device's ID, flag, and coordinates structure. DeviceCoordinates(ID, flag, Coordinates(x, y, z)) or [ID, flag, x, y, z]
@@ -1530,8 +1536,7 @@ class PozyxLib(PozyxCore):
         return self.useFunction(POZYX_DEVICE_ADD, device_coordinates, Data([]), remote_id)
 
     def saveNetwork(self, remote_id=None):
-        """
-        Saves the Pozyx's device list to its flash memory.
+        """Saves the Pozyx's device list to its flash memory.
 
         This means that upon a reset, the Pozyx will still have the same configured device list.
 
@@ -1548,8 +1553,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def configureAnchors(self, anchor_list, anchor_select=POZYX_ANCHOR_SEL_AUTO, remote_id=None):
-        """
-        Configures a set of anchors as the relevant anchors on a device
+        """Configures a set of anchors as the relevant anchors on a device
 
         Args:
             anchor_list: Python list of either DeviceCoordinates or [ID, flag, x, y, z]
@@ -1578,8 +1582,7 @@ class PozyxLib(PozyxCore):
         return status & self.setSelectionOfAnchors(anchor_select, len(anchor_list), remote_id)
 
     def removeDevice(self, device_id, remote_id=None):
-        """
-        Removes a device from the Pozyx's device list, keeping the rest of the list intact
+        """Removes a device from the Pozyx's device list, keeping the rest of the list intact
 
         Args:
             device_id: ID that needs to be removed. NetworkID or integer.
@@ -1620,8 +1623,7 @@ class PozyxLib(PozyxCore):
             devices, anchor_select=anchor_select_mode, remote_id=remote_id)
 
     def changeDeviceCoordinates(self, device_id, new_coordinates, remote_id=None):
-        """
-        Changes a device's coordinates in the Pozyx's device list, keeping the rest of the list intact
+        """Changes a device's coordinates in the Pozyx's device list, keeping the rest of the list intact
 
         Args:
             device_id: ID that needs to be removed. NetworkID or integer.
@@ -1661,8 +1663,7 @@ class PozyxLib(PozyxCore):
             devices, anchor_select=anchor_select_mode, remote_id=remote_id)
 
     def printDeviceInfo(self, remote_id=None):
-        """
-        Prints a Pozyx's basic info, such as firmware.
+        """Prints a Pozyx's basic info, such as firmware.
 
         Mostly for debugging
         """
@@ -1678,8 +1679,7 @@ class PozyxLib(PozyxCore):
               (firmware.value >> 4, firmware.value % 0x10))
 
     def printDeviceList(self, remote_id=None, include_coordinates=True):
-        """
-        Prints a Pozyx's device list.
+        """Prints a Pozyx's device list.
 
         Kwargs:
             remote_id: Remote Pozyx ID
@@ -1709,14 +1709,13 @@ class PozyxLib(PozyxCore):
             else:
                 print("\t- 0x%0.4x" % device_id)
 
-    # @}
+    ## @}
 
-    # \addtogroup communication_functions
+    ## \addtogroup communication_functions
     # @{
 
     def saveUWBSettings(self, remote_id=None):
-        """
-        Saves the Pozyx's UWB settings to its flash memory.
+        """Saves the Pozyx's UWB settings to its flash memory.
 
         This means that upon a reset, the Pozyx will still have the same configured UWB settings.
         As of writing, POZYX_UWB_GAIN is not savable yet.
@@ -1732,8 +1731,7 @@ class PozyxLib(PozyxCore):
         return self.saveRegisters(registers, remote_id)
 
     def setNetworkId(self, network_id, remote_id=None):
-        """
-        Set the Pozyx's network ID.
+        """Set the Pozyx's network ID.
 
         If using this remotely, make sure to change the network ID to the new ID in
         subsequent code, as its ID will have changed and using the old ID will not work.
@@ -1752,8 +1750,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(POZYX_NETWORK_ID, network_id, remote_id)
 
     def setUWBSettings(self, UWB_settings, remote_id=None):
-        """
-        Set the Pozyx's UWB settings.
+        """Set the Pozyx's UWB settings.
 
         If using this remotely, remember to change the local UWB settings as well
         to make sure you are still able to communicate with the remote device.
@@ -1780,8 +1777,7 @@ class PozyxLib(PozyxCore):
         return self.setUWBGain(gain, remote_id)
 
     def setUWBChannel(self, channel_num, remote_id=None):
-        """
-        Set the Pozyx's UWB channel.
+        """Set the Pozyx's UWB channel.
 
         If using this remotely, remember to change the local UWB channel as well
         to make sure you are still able to communicate with the remote device.
@@ -1804,8 +1800,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(POZYX_UWB_CHANNEL, channel_num, remote_id)
 
     def setUWBGain(self, uwb_gain_dB, remote_id=None):
-        """
-        Set the Pozyx's UWB transceiver gain.
+        """Set the Pozyx's UWB transceiver gain.
 
         Args:
             uwb_gain_dB: The new transceiver gain in dB, a value between 0.0 and 33.0.
@@ -1826,8 +1821,7 @@ class PozyxLib(PozyxCore):
         return self.setWrite(POZYX_UWB_GAIN, doublegain_dB, remote_id)
 
     def setTxPower(self, txgain_dB, remote_id=None):
-        """
-        DEPRECATED: use getUWBGain instead. Set the Pozyx's UWB transceiver gain.
+        """DEPRECATED: use getUWBGain instead. Set the Pozyx's UWB transceiver gain.
 
         Args:
             txgain_dB: The new transceiver gain in dB, a value between 0.0 and 33.0.
@@ -1843,8 +1837,7 @@ class PozyxLib(PozyxCore):
         return self.setUWBGain(txgain_dB, remote_id)
 
     def getNetworkId(self, network_id):
-        """
-        Obtains the Pozyx's network ID.
+        """Obtains the Pozyx's network ID.
 
         Args:
             network_id: Container for the read data.  NetworkID() or SingleRegister(size=2) or Data([0], 'H').
@@ -1858,8 +1851,7 @@ class PozyxLib(PozyxCore):
         return self.regRead(POZYX_NETWORK_ID, network_id)
 
     def getUWBSettings(self, UWB_settings, remote_id=None):
-        """
-        Obtains the Pozyx's UWB settings.
+        """Obtains the Pozyx's UWB settings.
 
         Args:
             UWB_settings: Container for the read data.  UWBSettings().
@@ -1877,8 +1869,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getUWBChannel(self, channel_num, remote_id=None):
-        """
-        Obtains the Pozyx's UWB channel.
+        """Obtains the Pozyx's UWB channel.
 
         Args:
             channel_num: Container for the read data. SingleRegister or Data([0]).
@@ -1896,8 +1887,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getUWBGain(self, uwb_gain_dB, remote_id=None):
-        """
-        Obtains the Pozyx's transmitter UWB gain in dB, as a float.
+        """Obtains the Pozyx's transmitter UWB gain in dB, as a float.
 
         Args:
             uwb_gain_dB: Container for the read data. Data([0], 'f').
@@ -1915,8 +1905,7 @@ class PozyxLib(PozyxCore):
         return status
 
     def getTxPower(self, txgain_dB, remote_id=None):
-        """
-        DEPRECATED: use getUWBGain instead. Obtains the Pozyx's transmitter UWB gain in dB, as a float.
+        """DEPRECATED: use getUWBGain instead. Obtains the Pozyx's transmitter UWB gain in dB, as a float.
 
         Args:
             txgain_dB: Container for the read data. Data([0], 'f').
@@ -1931,8 +1920,7 @@ class PozyxLib(PozyxCore):
         return self.getUWBGain(txgain_dB, remote_id)
 
     def getLastNetworkId(self, network_id, remote_id=None):
-        """
-        Obtain the network ID of the last device Pozyx communicated with.
+        """Obtain the network ID of the last device Pozyx communicated with.
 
         Args:
             network_id: Container for the read data. NetworkID() or SingleRegister(size=2) or Data([0], 'H').
@@ -1946,8 +1934,7 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_RX_NETWORK_ID, network_id, remote_id)
 
     def getLastDataLength(self, data_length, remote_id=None):
-        """
-        Obtain the size of the most recent data packet received by the Pozyx.
+        """Obtain the size of the most recent data packet received by the Pozyx.
 
         Args:
             data_length: Container for the read data. SingleRegister() or Data([0]).
@@ -1960,11 +1947,10 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(POZYX_RX_DATA_LEN, data_length, remote_id)
 
-    # @}
+    ## @}
 
     def saveConfiguration(self, save_type, registers=None, remote_id=None):
-        """
-        General function to save the Pozyx's configuration to its flash memory.
+        """General function to save the Pozyx's configuration to its flash memory.
 
         This constitutes three different Pozyx configurations to save, and each have their specialised derived function:
             POZYX_FLASH_REGS: This saves the passed Pozyx registers if they're writable, see saveRegisters.

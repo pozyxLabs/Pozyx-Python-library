@@ -76,6 +76,7 @@ def get_pozyx_ports():
     for port in get_serial_ports():
         if is_pozyx_port(port):
             pozyx_ports.append(port.device)
+    return pozyx_ports
 
 
 def get_first_pozyx_serial_port():
@@ -104,6 +105,14 @@ def is_correct_pyserial_version():
         return True
     return False
 
+
+class PozyxException(IOError):
+    """Base class for Pozyx related exceptions"""
+
+
+class PozyxConnectionError(PozyxException):
+    """Bad connection to Pozyx gives an exception"""
+
 # @}
 
 
@@ -124,7 +133,7 @@ class PozyxSerial(PozyxLib):
         timeout: timeout for the serial port communication in seconds. Default is 0.1s or 100ms.
         print_output: boolean for printing the serial exchanges, mainly for debugging purposes
         debug_trace: boolean for printing the trace on bad serial init (DEPRECATED)
-        show_trace: boolean for printing the trace on bad serial init (replaces debug_trace)
+        show_trace: boolean for printing the trace on bad serial init (DEPRECATED)
         suppress_warnings: boolean for suppressing warnings in the Pozyx use, usage not recommended
 
     Example usage:
@@ -149,11 +158,10 @@ class PozyxSerial(PozyxLib):
                  suppress_warnings=False):
         """Initializes the PozyxSerial object. See above for details."""
         self.print_output = print_output
-        if debug_trace is True:
+        if debug_trace is True or show_trace is True:
             if not suppress_warnings:
-                warn(
-                    "Using debug_trace is on its way out, please use show_trace in the future", DeprecationWarning)
-        self.show_trace = debug_trace or show_trace
+                warn("debug_trace or show_trace are on their way out, exceptions of the type PozyxException are now raised.",
+                     DeprecationWarning)
         self.suppress_warnings = suppress_warnings
 
         self.connectToPozyx(port, baudrate, timeout, write_timeout)
@@ -178,34 +186,18 @@ class PozyxSerial(PozyxLib):
                 self.ser = Serial(port=port, baudrate=baudrate, timeout=timeout,
                                   writeTimeout=write_timeout)
         except SerialException as exc:
-            print("Wrong or busy serial port, SerialException:", str(exc))
-            self.printTrace()
-            quit()
+            raise PozyxConnectionError("Wrong or busy serial port, SerialException: {}".format(str(exc)))
         except Exception as exc:
-            print("Couldn't connect to Pozyx, unknown exception:", str(exc))
-            self.printTrace()
-            quit()
+            raise PozyxConnectionError("Couldn't connect to Pozyx, {}: {}".format(exc.__class__.__name__, str(exc)))
 
     def validatePozyx(self):
         """Validates whether the connected device is indeed a Pozyx device"""
         whoami = SingleRegister()
         if self.getWhoAmI(whoami) != POZYX_SUCCESS:
-
-            print("Connected to device, but couldn't read serial data. Is it a Pozyx?")
-            self.printTrace()
-            quit()
+            raise PozyxConnectionError("Connected to device, but couldn't read serial data. Is it a Pozyx?")
 
         if whoami.value != 0x43:
-            print("POZYX_WHO_AM_I returned 0x%0.2x, something is wrong with Pozyx." %
-                  whoami.value)
-            quit()
-
-    def printTrace(self):
-        """Prints the trace, handy for debugging. Enabled by show_trace flag"""
-        if self.show_trace:
-            import traceback
-            import sys
-            traceback.print_tb(sys.exc_info()[2])
+            raise PozyxConnectionError("POZYX_WHO_AM_I returned 0x%0.2x, something is wrong with Pozyx." % whoami.value)
 
     # @}
 
