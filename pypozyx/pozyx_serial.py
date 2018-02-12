@@ -177,28 +177,24 @@ class PozyxSerial(PozyxLib):
                          PYSERIAL_VERSION, stacklevel=0)
                 self.ser = Serial(port=port, baudrate=baudrate, timeout=timeout,
                                   writeTimeout=write_timeout)
+
         except SerialException as exc:
-            print("Wrong or busy serial port, SerialException:", str(exc))
             self.printTrace()
-            quit()
+            raise SerialException("Wrong or busy serial port, SerialException:" + str(exc))
         except Exception as exc:
-            print("Couldn't connect to Pozyx, unknown exception:", str(exc))
             self.printTrace()
-            quit()
+            raise type(exc)("Couldn't connect to Pozyx, unknown exception:" + str(exc))
 
     def validatePozyx(self):
         """Validates whether the connected device is indeed a Pozyx device"""
         whoami = SingleRegister()
         if self.getWhoAmI(whoami) != POZYX_SUCCESS:
-
-            print("Connected to device, but couldn't read serial data. Is it a Pozyx?")
             self.printTrace()
-            quit()
+            raise SerialException("Connected to device, but couldn't read serial data. Is it a Pozyx?")
 
         if whoami.value != 0x43:
-            print("POZYX_WHO_AM_I returned 0x%0.2x, something is wrong with Pozyx." %
-                  whoami.value)
-            quit()
+            self.printTrace()
+            raise SerialException("POZYX_WHO_AM_I returned 0x%0.2x, something is wrong with Pozyx." % whoami.value)
 
     def printTrace(self):
         """Prints the trace, handy for debugging. Enabled by show_trace flag"""
