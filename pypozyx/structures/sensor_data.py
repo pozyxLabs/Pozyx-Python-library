@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """pypozyx.structures.sensor_data - Contains container classes for data from the Pozyx's many sensors."""
 from math import sqrt
 
