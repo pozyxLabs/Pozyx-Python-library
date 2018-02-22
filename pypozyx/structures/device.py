@@ -170,6 +170,11 @@ class DeviceList(Data):
             self.data[i] = data[i]
 
 
+# TODO
+class RXInfo(ByteStructure):
+    pass
+
+
 class UWBSettings(ByteStructure):
     """
     Container for a device's UWB settings.
