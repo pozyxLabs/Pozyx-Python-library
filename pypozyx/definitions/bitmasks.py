@@ -33,6 +33,12 @@ class PozyxBitmasks:
     POZYX_LED_CTRL_LED3 = 0x04
     POZYX_LED_CTRL_LED4 = 0x08
 
+    # Remote operations
+    POZYX_REMOTE_READ = 0x02
+    POZYX_REMOTE_WRITE = 0x04
+    POZYX_REMOTE_DATA = 0x06
+    POZYX_REMOTE_FUNCTION = 0x08
+
     # Bit mask for device type
     POZYX_TYPE = 0xE0
 
@@ -66,6 +72,12 @@ POZYX_LED_CTRL_LED1 = 0x01
 POZYX_LED_CTRL_LED2 = 0x02
 POZYX_LED_CTRL_LED3 = 0x04
 POZYX_LED_CTRL_LED4 = 0x08
+
+# Remote operations
+POZYX_REMOTE_READ = 0x02
+POZYX_REMOTE_WRITE = 0x04
+POZYX_REMOTE_DATA = 0x06
+POZYX_REMOTE_FUNCTION = 0x08
 
 # Bit mask for device type
 POZYX_TYPE = 0xE0

@@ -327,4 +327,4 @@ class PozyxSerial(PozyxLib):
         """
         if interrupt is None:
             interrupt = SingleRegister()
-        return self.waitForFlag_safe(interrupt_flag, timeout_s, interrupt)
+        return self.waitForFlagSafe(interrupt_flag, timeout_s, interrupt)

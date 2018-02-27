@@ -306,19 +306,6 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(POZYX_ERRORCODE, error_code, remote_id)
 
-    def getInterruptStatus(self, interrupts, remote_id=None):
-        """Obtains the Pozyx's interrupt register.
-
-        Args:
-            interrupts: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-        """
-        return self.getRead(POZYX_INT_STATUS, interrupts, remote_id)
 
     def getCalibrationStatus(self, calibration_status, remote_id=None):
         """Obtains the Pozyx's calibration status.

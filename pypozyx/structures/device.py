@@ -17,6 +17,7 @@ UWBSettings
 """
 
 from pypozyx.definitions.constants import *
+from pypozyx.definitions.bitmasks import PozyxBitmasks
 from pypozyx.structures.byte_structure import ByteStructure
 from pypozyx.structures.generic import Data
 from pypozyx.structures.sensor_data import Coordinates
@@ -83,6 +84,7 @@ class DeviceRange(ByteStructure):
     byte_size = 10
     data_format = 'IIh'
 
+    # TODO should ideally be rss not RSS
     def __init__(self, timestamp=0, distance=0, RSS=0):
         """Initializes the DeviceRange object."""
         self.timestamp = timestamp
@@ -170,9 +172,52 @@ class DeviceList(Data):
             self.data[i] = data[i]
 
 
-# TODO
+
 class RXInfo(ByteStructure):
-    pass
+    byte_size = 3
+    data_format = 'HB'
+
+    def __init__(self, remote_id=0, amount_of_bytes=0):
+        """Initialises the RX Info structure"""
+        self.remote_id = remote_id
+        self.amount_of_bytes = amount_of_bytes
+        self.data = [self.remote_id, self.amount_of_bytes]
+
+    def load(self, data):
+        self.remote_id = data[0]
+        self.amount_of_bytes = data[1]
+        self.data = [self.remote_id, self.amount_of_bytes]
+
+    def update_data(self):
+        try:
+            if self.data != [self.remote_id, self.amount_of_bytes]:
+                self.data = [self.remote_id, self.amount_of_bytes]
+        except:
+            return
+
+
+class TXInfo(ByteStructure):
+    """Container for data transmission meta information
+
+    Args:
+        remote_id: ID to transmit to
+        operation: remote operation to execute
+    """
+    byte_size = 3
+    data_format = 'HB'
+
+    def __init__(self, remote_id, operation=PozyxBitmasks.POZYX_REMOTE_DATA):
+        self.remote_id = remote_id
+        self.operation = operation
+        self.data = [self.remote_id, self.operation]
+
+    def update_data(self):
+        try:
+            if self.data != [self.remote_id, self.operation]:
+                self.data = [self.remote_id, self.operation]
+        except:
+            return
+
 
 
 class UWBSettings(ByteStructure):
@@ -206,8 +251,7 @@ class UWBSettings(ByteStructure):
         self.prf = prf
         self.plen = plen
         self.gain_db = float(gain_db)
-        self.data = [self.channel, self.bitrate,
-                     self.prf, self.plen, self.gain_db]
+        self.data = [self.channel, self.bitrate, self.prf, self.plen, self.gain_db]
 
     def load(self, data):
         self.channel = data[0]
