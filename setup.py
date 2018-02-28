@@ -3,6 +3,8 @@ from os import path
 from setuptools import setup
 from codecs import open
 
+from pypozyx import VERSION as PYPOZYX_VERSION
+
 here = path.abspath(path.dirname(__file__))
 # Get the long description from the README file
 with open(path.join(here, 'README.rst'), encoding='utf-8') as readme:
@@ -12,7 +14,7 @@ setup(
     name='pypozyx',
     packages=['pypozyx', 'pypozyx.definitions',
               'pypozyx.structures'],
-    version='1.1.4',
+    version=PYPOZYX_VERSION,
     description='Python library for Pozyx devices',
     install_requires=[
         'pyserial>=3.0'
@@ -22,7 +24,7 @@ setup(
     license='GPLv3',
     author_email='laurent@pozyx.io',
     url='https://github.com/pozyxLabs/Pozyx-Python-library',
-    download_url='https://github.com/pozyxLabs/Pozyx-Python-library/archive/v1.0.tar.gz',
+    download_url='https://github.com/pozyxLabs/Pozyx-Python-library/archive/v{}.tar.gz'.format(PYPOZYX_VERSION),
     keywords=['pozyx', 'serial', 'positioning', 'localisation'],
     classifiers=[
         'Programming Language :: Python',

@@ -37,28 +37,28 @@ or
   >>> d = Data([0] * len(data_format), data_format)
 """
 
-import struct
-
 from pypozyx.structures.byte_structure import ByteStructure
 
 
 def is_reg_readable(reg):
     """Returns whether a Pozyx register is readable."""
-    if (reg >= 0x00 and reg < 0x07) or (reg >= 0x10 and reg < 0x12) or (reg >= 0x14 and reg < 0x22) or (reg >= 0x22 and reg < 0x24) or (reg >= 0x27 and reg < 0x2B) or (reg >= 0x30 and reg < 0x48) or (reg >= 0x4E and reg < 0x89):
+    if (0x00 <= reg < 0x07) or (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg < 0x24) or (
+            0x27 <= reg < 0x2B) or (0x30 <= reg < 0x48) or (0x4E <= reg < 0x89):
         return True
     return False
 
 
 def is_reg_writable(reg):
     """Returns whether a Pozyx register is writeable."""
-    if (reg >= 0x10 and reg < 0x12) or (reg >= 0x14 and reg < 0x22) or (reg >= 0x22 and reg < 0x24) or (reg >= 0x27 and reg < 0x2B) or (reg >= 0x30 and reg < 0x3C) or (reg >= 0x85 and reg < 0x89):
+    if (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg < 0x24) or (0x27 <= reg < 0x2B) or (
+            0x30 <= reg < 0x3C) or (0x85 <= reg < 0x89):
         return True
     return False
 
 
 def is_functioncall(reg):
     """Returns whether a Pozyx register is a Pozyx function."""
-    if (reg >= 0xB0 and reg < 0xBC) or (reg >= 0xC0 and reg < 0xC9):
+    if (0xB0 <= reg < 0xBC) or (0xC0 <= reg < 0xC9):
         return True
     return False
 
@@ -101,6 +101,7 @@ def dataCheck(data):
         return False
     return True
 
+
 class XYZ(ByteStructure):
     """
     Generic XYZ data structure consisting of 3 integers x, y, and z.
@@ -122,7 +123,7 @@ class XYZ(ByteStructure):
         self.z = z
         self.data = [x, y, z]
 
-    def load(self, data=[0] * 3, convert=1):
+    def load(self, data, convert=True):
         self.data = data
         if convert:
             self.x = data[0] / self.physical_convert
@@ -180,7 +181,7 @@ class Data(ByteStructure):
         self.set_packed_size()
         self.byte_data = '00' * self.byte_size
 
-    def load(self, data, convert=1):
+    def load(self, data, convert=True):
         self.data = data
 
 
@@ -210,11 +211,13 @@ class SingleRegister(Data):
             data_format = 'h'
         elif size == 4:
             data_format = 'i'
+        else:
+            raise ValueError("Size should be 1, 2, or 4")
         if signed == 0:
             data_format = data_format.capitalize()
         Data.__init__(self, [value], data_format)
 
-    def load(self, data, convert=1):
+    def load(self, data, convert=True):
         self.data = data
 
     @property
@@ -225,7 +228,6 @@ class SingleRegister(Data):
     def value(self, new_value):
         self.data[0] = new_value
 
-
     def __str__(self):
         if self.print_style is 'hex':
             return hex(self.data[0]).capitalize()
@@ -233,6 +235,7 @@ class SingleRegister(Data):
             return bin(self.data[0])
         else:
             return str(self.data[0])
+
 
 class SingleSensorValue(ByteStructure):
     """
@@ -253,7 +256,7 @@ class SingleSensorValue(ByteStructure):
         self.value = value
         self.load([value])
 
-    def load(self, data=[0], convert=1):
+    def load(self, data=[0], convert=True):
         self.data = data
         if convert:
             self.value = float(data[0]) / self.physical_convert

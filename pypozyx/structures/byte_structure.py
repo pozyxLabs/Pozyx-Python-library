@@ -87,7 +87,8 @@ class ByteStructure(object):
         else:
             print("Trying to change data with invalid new values (use int or list)")
 
-    def load(self, data, convert=1):
+    # TODO make convert use True/False not 1/0
+    def load(self, data, convert=True):
         """Loads data in its relevant class components."""
         raise NotImplementedError(
             'load(data) should be customised for every derived structure')

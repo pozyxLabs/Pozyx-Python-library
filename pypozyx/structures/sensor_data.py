@@ -3,8 +3,7 @@
 """pypozyx.structures.sensor_data - Contains container classes for data from the Pozyx's many sensors."""
 from math import sqrt
 
-from pypozyx.definitions.constants import (POZYX_ACCEL_DIV_MG, POZYX_MAG_DIV_UT, POZYX_GYRO_DIV_DPS,
-                                           POZYX_QUAT_DIV, POZYX_MAX_LIN_ACCEL_DIV_MG, POZYX_TEMP_DIV_CELSIUS, POZYX_PRESS_DIV_PA, POZYX_EULER_DIV_DEG)
+from pypozyx.definitions.constants import PozyxConstants
 from pypozyx.structures.byte_structure import ByteStructure
 from pypozyx.structures.generic import XYZ, SingleSensorValue
 
@@ -14,7 +13,7 @@ class Coordinates(XYZ):
     byte_size = 12
     data_format = 'iii'
 
-    def load(self, data, convert=0):
+    def load(self, data, convert=False):
         self.data = data
         self.x = data[0]
         self.y = data[1]
@@ -23,7 +22,7 @@ class Coordinates(XYZ):
 
 class Acceleration(XYZ):
     """Container for acceleration in x, y, and z (in mg)."""
-    physical_convert = POZYX_ACCEL_DIV_MG
+    physical_convert = PozyxConstants.POZYX_ACCEL_DIV_MG
 
     byte_size = 6
     data_format = 'hhh'
@@ -31,7 +30,7 @@ class Acceleration(XYZ):
 
 class Magnetic(XYZ):
     """Container for coordinates in x, y, and z (in uT)."""
-    physical_convert = POZYX_MAG_DIV_UT
+    physical_convert = PozyxConstants.POZYX_MAG_DIV_UT
 
     byte_size = 6
     data_format = 'hhh'
@@ -39,7 +38,7 @@ class Magnetic(XYZ):
 
 class AngularVelocity(XYZ):
     """Container for angular velocity in x, y, and z (in dps)."""
-    physical_convert = POZYX_GYRO_DIV_DPS
+    physical_convert = PozyxConstants.POZYX_GYRO_DIV_DPS
 
     byte_size = 6
     data_format = 'hhh'
@@ -47,12 +46,12 @@ class AngularVelocity(XYZ):
 
 class LinearAcceleration(XYZ):
     """Container for linear acceleration in x, y, and z (in mg), as floats."""
-    physical_convert = POZYX_ACCEL_DIV_MG
+    physical_convert = PozyxConstants.POZYX_ACCEL_DIV_MG
 
     byte_size = 6
     data_format = 'hhh'
 
-    def load(self, data, convert=1):
+    def load(self, data, convert=True):
         if convert:
             self.x = float(data[0]) / self.physical_convert
             self.y = float(data[1]) / self.physical_convert
@@ -96,7 +95,7 @@ class PositionError(XYZ):
 
 class Quaternion(XYZ):
     """Container for quaternion data in x, y, z and w."""
-    physical_convert = POZYX_QUAT_DIV
+    physical_convert = PozyxConstants.POZYX_QUAT_DIV
 
     byte_size = 8
     data_format = 'hhhh'
@@ -107,7 +106,7 @@ class Quaternion(XYZ):
         self.data = [w, x, y, z]
         self.w = w
 
-    def load(self, data, convert=1):
+    def load(self, data, convert=True):
         for i in range(len(data)):
             data[i] = float(data[i])
         XYZ.load(self, data[1:4], convert)
@@ -141,14 +140,14 @@ class Quaternion(XYZ):
 
 
 class MaxLinearAcceleration(SingleSensorValue):
-    physical_convert = POZYX_MAX_LIN_ACCEL_DIV_MG
+    physical_convert = PozyxConstants.POZYX_MAX_LIN_ACCEL_DIV_MG
 
     byte_size = 2
     data_format = 'h'
 
 
 class Temperature(SingleSensorValue):
-    physical_convert = POZYX_TEMP_DIV_CELSIUS
+    physical_convert = PozyxConstants.POZYX_TEMP_DIV_CELSIUS
 
     byte_size = 1
     data_format = 'b'
@@ -158,7 +157,7 @@ class Temperature(SingleSensorValue):
 
 
 class Pressure(SingleSensorValue):
-    physical_convert = POZYX_PRESS_DIV_PA
+    physical_convert = PozyxConstants.POZYX_PRESS_DIV_PA
 
     byte_size = 4
     data_format = 'I'
@@ -166,7 +165,7 @@ class Pressure(SingleSensorValue):
 
 class EulerAngles(ByteStructure):
     """Container for euler angles as heading, roll, and pitch (in degrees)."""
-    physical_convert = POZYX_EULER_DIV_DEG
+    physical_convert = PozyxConstants.POZYX_EULER_DIV_DEG
 
     byte_size = 6
     data_format = 'hhh'
@@ -178,7 +177,7 @@ class EulerAngles(ByteStructure):
         self.roll = roll
         self.pitch = pitch
 
-    def load(self, data, convert=1):
+    def load(self, data, convert=True):
         self.data = data
         if convert:
             self.heading = float(data[0]) / self.physical_convert
@@ -236,7 +235,7 @@ class SensorData(ByteStructure):
         self.gravity_vector = LinearAcceleration(data[20], data[21], data[22])
         self.temperature = Temperature(data[23])
 
-    def load(self, data, convert=1):
+    def load(self, data, convert=True):
         self.data = data
         self.pressure.load([data[0]], convert)
         self.acceleration.load(data[1:4], convert)
@@ -272,5 +271,5 @@ class RawSensorData(SensorData):
         """Initializes the RawSensorData object"""
         SensorData.__init__(self, data)
 
-    def load(self, data, convert=0):
-        SensorData.load(self, data, convert=0)
+    def load(self, data):
+        SensorData.load(self, data, convert=False)

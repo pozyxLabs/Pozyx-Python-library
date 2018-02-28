@@ -27,7 +27,7 @@ class PozyxI2C(PozyxLib):
         pass
 
     #
-    def waitForFlag_safe(self, interrupt_flag, timeout_ms, interrupt):
+    def waitForFlagSafe(self, interrupt_flag, timeout_ms, interrupt):
         pass
 
     def configInterruptPin(self, pin, mode, bActiveHigh, bLatch, remote_id=None):
