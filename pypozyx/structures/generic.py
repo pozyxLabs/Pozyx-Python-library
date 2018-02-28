@@ -37,8 +37,6 @@ or
   >>> d = Data([0] * len(data_format), data_format)
 """
 
-import struct
-
 from pypozyx.structures.byte_structure import ByteStructure
 
 
@@ -103,6 +101,7 @@ def dataCheck(data):
         return False
     return True
 
+
 class XYZ(ByteStructure):
     """
     Generic XYZ data structure consisting of 3 integers x, y, and z.
@@ -124,7 +123,7 @@ class XYZ(ByteStructure):
         self.z = z
         self.data = [x, y, z]
 
-    def load(self, data=[0] * 3, convert=1):
+    def load(self, data, convert=True):
         self.data = data
         if convert:
             self.x = data[0] / self.physical_convert
@@ -182,7 +181,7 @@ class Data(ByteStructure):
         self.set_packed_size()
         self.byte_data = '00' * self.byte_size
 
-    def load(self, data, convert=1):
+    def load(self, data, convert=True):
         self.data = data
 
 
@@ -212,11 +211,13 @@ class SingleRegister(Data):
             data_format = 'h'
         elif size == 4:
             data_format = 'i'
+        else:
+            raise ValueError("Size should be 1, 2, or 4")
         if signed == 0:
             data_format = data_format.capitalize()
         Data.__init__(self, [value], data_format)
 
-    def load(self, data, convert=1):
+    def load(self, data, convert=True):
         self.data = data
 
     @property
@@ -227,7 +228,6 @@ class SingleRegister(Data):
     def value(self, new_value):
         self.data[0] = new_value
 
-
     def __str__(self):
         if self.print_style is 'hex':
             return hex(self.data[0]).capitalize()
@@ -235,6 +235,7 @@ class SingleRegister(Data):
             return bin(self.data[0])
         else:
             return str(self.data[0])
+
 
 class SingleSensorValue(ByteStructure):
     """
@@ -255,7 +256,7 @@ class SingleSensorValue(ByteStructure):
         self.value = value
         self.load([value])
 
-    def load(self, data=[0], convert=1):
+    def load(self, data=[0], convert=True):
         self.data = data
         if convert:
             self.value = float(data[0]) / self.physical_convert
