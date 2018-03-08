@@ -121,7 +121,7 @@ class PozyxLib(PozyxCore):
         details = Data([0] * 20)
         if self.useFunction(POZYX_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
             return POZYX_FAILURE
-        byte_num = regAddress / 8
+        byte_num = int(regAddress / 8)
         bit_num = regAddress % 8
         return (details[byte_num] >> bit_num) & 0x1
 
