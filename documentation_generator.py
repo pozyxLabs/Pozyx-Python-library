@@ -25,7 +25,6 @@ def clean_up_doxypypy_files(filename):
             else:
                 lines_to_keep.append(line.replace('@return', '@retval').replace('POZYX_', '#POZYX_'))
 
-
     with open(filename, 'w') as fp:
         fp.writelines(lines_to_keep)
 
