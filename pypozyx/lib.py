@@ -121,7 +121,7 @@ class PozyxLib(PozyxCore):
         details = Data([0] * 20)
         if self.useFunction(POZYX_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
             return POZYX_FAILURE
-        byte_num = regAddress / 8
+        byte_num = int(regAddress / 8)
         bit_num = regAddress % 8
         return (details[byte_num] >> bit_num) & 0x1
 
@@ -512,6 +512,12 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(POZYX_RANGE_PROTOCOL, protocol, remote_id)
 
+    def setRangingProtocolFast(self, remote_id=None):
+        return self.setRangingProtocol(PozyxConstants.POZYX_RANGE_PROTOCOL_FAST, remote_id=remote_id)
+
+    def setRangingProtocolPrecision(self, remote_id=None):
+        return self.setRangingProtocol(PozyxConstants.POZYX_RANGE_PROTOCOL_PRECISION, remote_id=remote_id)
+
     def setRangingProtocol(self, protocol, remote_id=None):
         """Set the Pozyx's ranging protocol.
 
@@ -785,6 +791,18 @@ class PozyxLib(PozyxCore):
         mask = Data([mode[0] + (pull[0] << 3)])
         return self.setWrite(gpio_register, mask, remote_id)
 
+    def setPositioningFilterNone(self, remote_id=None):
+        return self.setPositionFilter(PozyxConstants.FILTER_TYPE_NONE, SingleRegister(), remote_id=remote_id)
+
+    def setPositioningFilterFIR(self, filter_strength, remote_id=None):
+        return self.setPositionFilter(PozyxConstants.FILTER_TYPE_FIR, filter_strength, remote_id=remote_id)
+
+    def setPositioningFilterMovingMedian(self, filter_strength, remote_id=None):
+        return self.setPositionFilter(PozyxConstants.FILTER_TYPE_MOVINGMEDIAN, filter_strength, remote_id=remote_id)
+
+    def setPositioningFilterMovingAverage(self, filter_strength, remote_id=None):
+        return self.setPositionFilter(PozyxConstants.FILTER_TYPE_MOVINGAVERAGE, filter_strength, remote_id=remote_id)
+
     def setPositionFilter(self, filter_type, filter_strength, remote_id=None):
         """Set the Pozyx's positioning filter.
 
@@ -810,6 +828,16 @@ class PozyxLib(PozyxCore):
 
         params = Data([filter_type[0] + (filter_strength[0] << 4)])
         return self.setWrite(POZYX_POS_FILTER, params, remote_id)
+
+    def setPositionAlgorithmNormal(self, remote_id=None):
+        dimension = SingleRegister()
+        self.getPositionDimension(dimension, remote_id=remote_id)
+        return self.setPositionAlgorithm(PozyxConstants.POZYX_POS_ALG_UWB_ONLY, dimension, remote_id=remote_id)
+
+    def setPositionAlgorithmTracking(self, remote_id=None):
+        dimension = SingleRegister()
+        self.getPositionDimension(dimension, remote_id=remote_id)
+        return self.setPositionAlgorithm(PozyxConstants.POZYX_POS_ALG_TRACKING, dimension, remote_id=remote_id)
 
     def setPositionAlgorithm(self, algorithm, dimension, remote_id=None):
         """Set the Pozyx's positioning algorithm.
@@ -837,12 +865,24 @@ class PozyxLib(PozyxCore):
         params = Data([algorithm[0] + (dimension[0] << 4)])
         return self.setWrite(POZYX_POS_ALG, params, remote_id)
 
-    def setSelectionOfAnchors(self, mode, nr_anchors, remote_id=None):
+    def savePositioningSettings(self, remote_id=None):
+        # Height is included because it will be overwritten if not 2.5D and used if 2.5D.
+        registers_to_save = [PozyxRegisters.POZYX_POS_FILTER, PozyxRegisters.POZYX_POS_ALG,
+                             PozyxRegisters.POZYX_RANGE_PROTOCOL, PozyxRegisters.POZYX_POS_Z]
+        return self.saveRegisters(registers_to_save, remote_id=remote_id)
+
+    def setSelectionOfAnchorsAutomatic(self, number_of_anchors, remote_id=None):
+        return self.setSelectionOfAnchors(PozyxConstants.POZYX_ANCHOR_SEL_AUTO, number_of_anchors, remote_id=remote_id)
+
+    def setSelectionOfAnchorsManual(self, number_of_anchors, remote_id=None):
+        return self.setSelectionOfAnchors(PozyxConstants.POZYX_ANCHOR_SEL_MANUAL, number_of_anchors, remote_id=remote_id)
+
+    def setSelectionOfAnchors(self, mode, number_of_anchors, remote_id=None):
         """Set the Pozyx's coordinates.
 
         Args:
             mode: Anchor selection mode. integer mode or SingleRegister(mode).
-            nr_anchors: Number of anchors used in positioning. integer nr_anchors or SingleRegister(nr_anchors).
+            number_of_anchors: Number of anchors used in positioning. integer nr_anchors or SingleRegister(nr_anchors).
 
         Kwargs:
             remote_id: Remote Pozyx ID.
@@ -852,14 +892,14 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(mode):
             mode = SingleRegister(mode)
-        if not dataCheck(nr_anchors):
-            nr_anchors = SingleRegister(nr_anchors)
+        if not dataCheck(number_of_anchors):
+            number_of_anchors = SingleRegister(number_of_anchors)
         assert mode[0] == POZYX_ANCHOR_SEL_MANUAL or mode[
             0] == POZYX_ANCHOR_SEL_AUTO, 'setSelectionOfAnchors: wrong mode'
-        assert nr_anchors[0] > 2 and nr_anchors[
-            0] <= 16, 'setSelectionOfAnchors: num anchors %i not in range 3-16' % nr_anchors[0]
+        assert number_of_anchors[0] > 2 and number_of_anchors[
+            0] <= 16, 'setSelectionOfAnchors: num anchors %i not in range 3-16' % number_of_anchors[0]
 
-        params = Data([(mode[0] << 7) + nr_anchors[0]])
+        params = Data([(mode[0] << 7) + number_of_anchors[0]])
         return self.setWrite(POZYX_POS_NUM_ANCHORS, params, remote_id)
 
     def setPositioningAnchorIds(self, anchors, remote_id=None):
@@ -1533,10 +1573,8 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        status = self.saveConfiguration(
-            POZYX_FLASH_NETWORK, remote_id=remote_id)
-        status &= self.saveRegisters(
-            [POZYX_POS_NUM_ANCHORS], remote_id=remote_id)
+        status = self.saveConfiguration(POZYX_FLASH_NETWORK, remote_id=remote_id)
+        status &= self.saveRegisters([POZYX_POS_NUM_ANCHORS],remote_id=remote_id)
         return status
 
     def configureAnchors(self, anchor_list, anchor_select=POZYX_ANCHOR_SEL_AUTO, remote_id=None):
