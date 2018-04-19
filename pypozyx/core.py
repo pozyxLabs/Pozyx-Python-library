@@ -194,10 +194,10 @@ class PozyxCore:
             interrupt = SingleRegister()
         start = time()
         while (time() - start) < timeout_s:
-            sleep(PozyxConstants.POZYX_DELAY_POLLING)
             status = self.getInterruptStatus(interrupt)
             if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
                 return True
+            sleep(PozyxConstants.POZYX_DELAY_POLLING)
         return False
 
     ## \addtogroup core
