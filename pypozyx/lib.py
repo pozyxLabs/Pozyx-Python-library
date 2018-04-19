@@ -41,9 +41,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             sensor_mode: New sensor mode. See POZYX_SENSORS_MODE register. integer sensor_mode or SingleRegister(sensor_mode).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -60,8 +58,8 @@ class PozyxLib(PozyxCore):
     def resetSystem(self, remote_id=None):
         """Resets the Pozyx device.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+        Args:
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -80,9 +78,7 @@ class PozyxLib(PozyxCore):
         Args:
             registers: Registers to save to the flash memory. Data([register1, register2, ...]) or [register1, register2, ...]
                 These registers have to be writable. Saving the UWB gain is currently not working.
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -93,8 +89,8 @@ class PozyxLib(PozyxCore):
     def getNumRegistersSaved(self, remote_id=None):
         """Obtains the number of registers saved to the Pozyx's flash memory.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+        Args:
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             The number of saved registers.
@@ -112,8 +108,8 @@ class PozyxLib(PozyxCore):
     def isRegisterSaved(self, regAddress, remote_id=None):
         """Returns whether the given register is saved to the Pozyx's flash memory.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+        Args:
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             1 if the register is saved, 0 if it's not.
@@ -132,9 +128,7 @@ class PozyxLib(PozyxCore):
             gpio_num: GPIO pin number, 1 to 4.
             mode: GPIO configuration mode. integer mode or SingleRegister(mode)
             pull: GPIO configuration pull. integer pull or SingleRegister(pull)
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -159,9 +153,7 @@ class PozyxLib(PozyxCore):
         Args:
             gpio_num: GPIO pin number, 1 to 4
             value: GPIO output value, either HIGH(1) or LOW(0). Physically, 3.3V or 0V. integer value or SingleRegister(value).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -181,9 +173,7 @@ class PozyxLib(PozyxCore):
         Args:
             led_num: LED pin number, 1 to 4
             state: LED output state. Boolean. True = on and False = off, you can use POZYX_LED_ON and POZYX_LED_OFF instead.
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -198,8 +188,8 @@ class PozyxLib(PozyxCore):
     def clearConfiguration(self, remote_id=None):
         """Clears the Pozyx's flash memory.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+        Args:
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -217,11 +207,11 @@ class PozyxLib(PozyxCore):
     def configInterruptPin(self, pin=0, mode=0, active_high=False, latch=False, remote_id=None):
         """Configures the interrupt pin via the POZYX_INT_CONFIG register.
 
-        Kwargs:
-            pin: The Pozyx's pin ID. 1 to 4 on anchor, 1 to 6 on tag. 0 means no pin. SingleRegister or integer.
-            mode: Push-pull (0) or pull (1). SingleRegister or integer. SingleRegister or integer.
-            active_high: Is the interrupt voltage active high or low. Boolean.
-            latch: Is the interrupt a short pulse or latch till read? Boolean.
+        Args:
+            pin (optional): The Pozyx's pin ID. 1 to 4 on anchor, 1 to 6 on tag. 0 means no pin. SingleRegister or integer.
+            mode (optional): Push-pull (0) or pull (1). SingleRegister or integer. SingleRegister or integer.
+            active_high (optional): Is the interrupt voltage active high or low. Boolean.
+            latch (optional): Is the interrupt a short pulse or latch till read? Boolean.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -241,9 +231,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             whoami: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -255,9 +243,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             firmware: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -269,9 +255,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             hardware: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -283,9 +267,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             selftest: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -297,24 +279,19 @@ class PozyxLib(PozyxCore):
 
         Args:
             error_code: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         return self.getRead(POZYX_ERRORCODE, error_code, remote_id)
 
-
     def getCalibrationStatus(self, calibration_status, remote_id=None):
         """Obtains the Pozyx's calibration status.
 
         Args:
             calibration_status: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -326,9 +303,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             mask: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -341,9 +316,7 @@ class PozyxLib(PozyxCore):
         Args:
             gpio_num: GPIO pin number, 1 to 4.
             mode: Container for the read data. SingleRegister() or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -363,9 +336,7 @@ class PozyxLib(PozyxCore):
         Args:
             gpio_num: GPIO pin number, 1 to 4.
             pull: Container for the read data. SingleRegister() or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -385,9 +356,7 @@ class PozyxLib(PozyxCore):
         Args:
             gpio_num: GPIO pin number, 1 to 4.
             value: Container for the read data. SingleRegister() or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -418,8 +387,8 @@ class PozyxLib(PozyxCore):
     def getSystemError(self, remote_id=None):
         """Returns the Pozyx's system error string.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+        Args:
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             string with error description
@@ -439,9 +408,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             mask: Interrupt mask. See POZYX_INT_MASK register. integer mask or SingleRegister(mask)
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -455,9 +422,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             config: LED configuration. See POZYX_CONFIG_LEDS register. integer configuration or SingleRegister(configuration)
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -476,8 +441,8 @@ class PozyxLib(PozyxCore):
 
         This means that upon reset, the Pozyx won't need to be recalibrated before performing positioning.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+        Args:
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -489,9 +454,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             ms: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -503,9 +466,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             protocol: Container for the read protocol data. SingleRegister or Data([0])
-
-        Kwargs:
-            remote_id: Remote Pozyx ID
+            remote_id (optional): Remote Pozyx ID
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -523,9 +484,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             protocol: the new ranging protocol. See POZYX_RANGE_PROTOCOL register. integer or SingleRegister(protocol)
-
-        Kwargs:
-            remote_id: Remote Pozyx ID
+            remote_id (optional): Remote Pozyx ID
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -541,9 +500,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             algorithm: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -557,9 +514,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             dimension: Container the for read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -573,9 +528,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             mode: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -589,9 +542,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             nr_anchors: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -605,9 +556,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             mode: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -619,9 +568,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             coordinates: Container for the read data. Coordinates().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -633,9 +580,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             height: Container for the read height data. Data([0], 'i').
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -647,9 +592,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             pos_error: Container for the read data. PositionError().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -666,9 +609,7 @@ class PozyxLib(PozyxCore):
         Args:
             anchors: Container for the read data. DeviceList(list_size=size)
             or Data([0] * size, 'H' * size).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -698,10 +639,8 @@ class PozyxLib(PozyxCore):
         Args:
             device_id: ID of desired device whose coordinates are of interest. NetworkID()
             or Data([ID], 'H') or integer ID.
-            coordinates: Container for the read data. DeviceRange().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            device_range: Container for the read data. DeviceRange().
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -716,9 +655,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             ms: Update interval in ms. integer ms or SingleRegister(ms, size=2)
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -734,9 +671,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             coordinates: Desired Pozyx coordinates. Coordinates() or [x, y, z].
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -751,9 +686,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             height: Desired Pozyx height. integer height or Data([height], 'i').
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -770,9 +703,7 @@ class PozyxLib(PozyxCore):
             gpio_num: GPIO pin number, 1 to 4.
             mode: GPIO configuration mode. integer mode or SingleRegister(mode)
             pull: GPIO configuration pull. integer pull or SingleRegister(pull)
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -811,9 +742,7 @@ class PozyxLib(PozyxCore):
         Args:
             filter_type: Positioning filter type. Integer or SingleRegister.
             filter_strength: Positioning filter strength. Integer or SingleRegister.
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -847,9 +776,7 @@ class PozyxLib(PozyxCore):
         Args:
             algorithm: Positioning algorithm. integer algorithm or SingleRegister(algorithm).
             dimension: Positioning dimension. integer dimension or SingleRegister(dimension).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -883,9 +810,7 @@ class PozyxLib(PozyxCore):
         Args:
             mode: Anchor selection mode. integer mode or SingleRegister(mode).
             number_of_anchors: Number of anchors used in positioning. integer nr_anchors or SingleRegister(nr_anchors).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -907,9 +832,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             anchors: List of anchors that'll be used for positioning. DeviceList() or [anchor_id1, anchor_id2, ...]
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -940,9 +863,7 @@ class PozyxLib(PozyxCore):
         Args:
             destination: Network ID of the destination, to perform ranging with. integer ID or NetworkID(ID)
             device_range: Container for device range measurement data. DeviceRange object.
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -964,7 +885,7 @@ class PozyxLib(PozyxCore):
             return status
         return POZYX_FAILURE
 
-    def doPositioning(self, position, dimension=POZYX_3D, height=Data([0], 'i'), algorithm=POZYX_POS_ALG_UWB_ONLY, remote_id=None):
+    def doPositioning(self, position, dimension=POZYX_3D, height=Data([0], 'i'), algorithm=None, remote_id=None):
         """Performs positioning with the Pozyx. This is probably why you're using Pozyx.
 
         This function only performs the positioning and doesn't take care of the previous steps
@@ -987,21 +908,20 @@ class PozyxLib(PozyxCore):
 
         Args:
             position: Container for the positioning coordinates. Coordinates object.
-
-        Kwargs:
-            dimension: Dimension to perform positioning in. Default 2.5D. When 2.5D, make sure height is also passed along.
-            height: Height of Pozyx in 2.5D positioning. Default 0. Either integer height or Data([height], 'i').
-            algorithm: Algorithm used when positioning. Default UWB only.
-            remote_id: Remote Pozyx ID.
+            dimension (optional): Dimension to perform positioning in. Default 3D. When 2.5D, make sure height is also passed along.
+            height (optional): Height of Pozyx in 2.5D positioning. Default 0. Either integer height or Data([height], 'i').
+            algorithm (optional): Algorithm set before positioning. No new algorithm is set by default.
+            remote_id (optional): Remote Pozyx ID. Local Pozyx is used when None or omitted.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert algorithm == POZYX_POS_ALG_UWB_ONLY or algorithm == POZYX_POS_ALG_TRACKING, 'doPositioning: wrong algorithm'
+        assert algorithm == POZYX_POS_ALG_UWB_ONLY or algorithm == POZYX_POS_ALG_TRACKING or algorithm is None, 'doPositioning: wrong algorithm'
         assert dimension == POZYX_3D or dimension == POZYX_2D or dimension == POZYX_2_5D, 'doPositioning: wrong dimension'
 
-        alg_options = Data([dimension << 4 | algorithm])
-        status = self.setWrite(POZYX_POS_ALG, alg_options, remote_id)
+        if algorithm is not None:
+            alg_options = Data([dimension << 4 | algorithm])
+            status = self.setWrite(POZYX_POS_ALG, alg_options, remote_id)
         if dimension == POZYX_2_5D:
             if not dataCheck(height):
                 height = Data([height], 'i')
@@ -1042,9 +962,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             sensor_mode: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1056,9 +974,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             sensor_data: Container for the read data. SensorData() or RawSensorData().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1070,9 +986,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             pressure: Container for the read data. Pressure or Data([0], 'I') (Data is DEPRECATED).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1089,9 +1003,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             max_linear_acceleration: Container for the read data. MaxLinearAcceleration.
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1103,9 +1015,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             acceleration: Container for the read data. Acceleration().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1117,9 +1027,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             magnetic: Container for the read data. Magnetic().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1131,9 +1039,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             angular_vel: Container for the read data. AngularVelocity().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1145,9 +1051,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             euler_angles: Container for the read data. EulerAngles().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1159,9 +1063,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             quaternion: Container for the read data. Quaternion().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1176,9 +1078,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             quaternion: Container for the read data. Quaternion().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1190,9 +1090,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             linear_acceleration: Container for the read data. LinearAcceleration() or Acceleration().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1204,9 +1102,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             gravity_vector: Container for the read data. Acceleration().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1218,9 +1114,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             temperature: Container for the read data. Temperature or Data([0], 'b') (DEPRECATED).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1243,9 +1137,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             device_list_size: Container for the read data. SingleRegister() or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1262,9 +1154,7 @@ class PozyxLib(PozyxCore):
         Args:
             devices: Container for the read data. DeviceList(list_size=size)
             or Data([0] * size, 'H' * size).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1302,9 +1192,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             anchors: Container for the read data. SingleRegister() or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1347,9 +1235,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             tags: Container for the read data. SingleRegister() or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1391,9 +1277,7 @@ class PozyxLib(PozyxCore):
             device_id: ID of desired device whose coordinates are of interest. NetworkID()
             or Data([ID], 'H') or integer ID.
             coordinates: Container for the read data. Coordinates().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1408,12 +1292,12 @@ class PozyxLib(PozyxCore):
         """Performs discovery on the Pozyx, which will let it discover other Pozyx devices with the same
         UWB settings in range.
 
-        Kwargs:
-            discovery_type: Type of devices to discover, defaults to discovering the anchors. POZYX_DISCOVERY_ALL_DEVICES,
+        Args:
+            discovery_type (optional): Type of devices to discover, defaults to discovering the anchors. POZYX_DISCOVERY_ALL_DEVICES,
                 POZYX_DISCOVERY_TAGS_ONLY are alternatives.
-            slots: Number of timeslots used in attempt to discover devices. Default is 3 slots.
-            slot_duration: Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
-            remote_id: Remote Pozyx ID.
+            slots (optional): Number of timeslots used in attempt to discover devices. Default is 3 slots.
+            slot_duration (optional): Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1441,10 +1325,10 @@ class PozyxLib(PozyxCore):
         """Performs tag discovery on the Pozyx, which will let it discover Pozyx tags with the same
         UWB settings in range.
 
-        Kwargs:
-            slots: Number of timeslots used in attempt to discover devices. Default is 3 slots.
-            slot_duration: Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
-            remote_id: Remote Pozyx ID.
+        Args:
+            slots (optional): Number of timeslots used in attempt to discover devices. Default is 3 slots.
+            slot_duration (optional): Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1456,10 +1340,10 @@ class PozyxLib(PozyxCore):
         """Performs anchor discovery on the Pozyx, which will let it discover Pozyx anchors with the same
         UWB settings in range.
 
-        Kwargs:
-            slots: Number of timeslots used in attempt to discover devices. Default is 3 slots.
-            slot_duration: Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
-            remote_id: Remote Pozyx ID.
+        Args:
+            slots (optional): Number of timeslots used in attempt to discover devices. Default is 3 slots.
+            slot_duration (optional): Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1471,10 +1355,10 @@ class PozyxLib(PozyxCore):
         """Performs general discovery on the Pozyx, which will let it discover both Pozyx tags and anchors
         with the same UWB settings in range.
 
-        Kwargs:
-            slots: Number of timeslots used in attempt to discover devices. Default is 3 slots.
-            slot_duration: Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
-            remote_id: Remote Pozyx ID.
+        Args:
+            slots (optional): Number of timeslots used in attempt to discover devices. Default is 3 slots.
+            slot_duration (optional): Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1497,9 +1381,7 @@ class PozyxLib(PozyxCore):
             dimension: Dimension for the automatic calibration. When 2.5D, make sure to pass along heights as well.
             num_measurements: Number of measurements to use in calibration. The
             anchors: List of anchor IDs that will be used in the calibration. DeviceList() or [anchor_id1, anchor_id2, ...]
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1536,8 +1418,8 @@ class PozyxLib(PozyxCore):
     def clearDevices(self, remote_id=None):
         """Clears the Pozyx's device list.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+        Args:
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1549,9 +1431,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             device_coordinates: Device's ID, flag, and coordinates structure. DeviceCoordinates(ID, flag, Coordinates(x, y, z)) or [ID, flag, x, y, z]
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1567,8 +1447,8 @@ class PozyxLib(PozyxCore):
 
         This means that upon a reset, the Pozyx will still have the same configured device list.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+        Args:
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1582,10 +1462,8 @@ class PozyxLib(PozyxCore):
 
         Args:
             anchor_list: Python list of either DeviceCoordinates or [ID, flag, x, y, z]
-
-        Kwargs:
-            anchor_select: How to select the anchors in positioning
-            remote_id: Remote Pozyx ID
+            anchor_select (optional): How to select the anchors in positioning
+            remote_id (optional): Remote Pozyx ID
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -1611,9 +1489,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             device_id: ID that needs to be removed. NetworkID or integer.
-
-        Kwargs:
-            remote_id: Remote Pozyx ID
+            remote_id (optional): Remote Pozyx ID
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -1653,9 +1529,7 @@ class PozyxLib(PozyxCore):
         Args:
             device_id: ID that needs to be removed. NetworkID or integer.
             new_coordinates: new coordinates for the device
-
-        Kwargs:
-            remote_id: Remote Pozyx ID
+            remote_id (optional): Remote Pozyx ID
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -1706,8 +1580,8 @@ class PozyxLib(PozyxCore):
     def printDeviceList(self, remote_id=None, include_coordinates=True):
         """Prints a Pozyx's device list.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID
+        Args:
+            remote_id (optional): Remote Pozyx ID
 
         Returns:
             None
@@ -1745,8 +1619,8 @@ class PozyxLib(PozyxCore):
         This means that upon a reset, the Pozyx will still have the same configured UWB settings.
         As of writing, POZYX_UWB_GAIN is not savable yet.
 
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+        Args:
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1763,9 +1637,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             network_id: New Network ID. integer ID or NetworkID(ID) or SingleRegister(ID, size=2)
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1782,9 +1654,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             UWB_settings: The new UWB settings. UWBSettings() or [channel, bitrate, prf, plen, gain_db]
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1810,9 +1680,7 @@ class PozyxLib(PozyxCore):
         Args:
             channel_num: The new UWB channel, being either 1, 2, 3, 4, 5 or 7.
                 See POZYX_UWB_CHANNEL register. integer channel or SingleRegister(channel)
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1830,9 +1698,7 @@ class PozyxLib(PozyxCore):
         Args:
             uwb_gain_dB: The new transceiver gain in dB, a value between 0.0 and 33.0.
                 float gain or Data([gain], 'f').
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1851,9 +1717,7 @@ class PozyxLib(PozyxCore):
         Args:
             txgain_dB: The new transceiver gain in dB, a value between 0.0 and 33.0.
                 float gain or Data([gain], 'f').
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1866,9 +1730,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             network_id: Container for the read data.  NetworkID() or SingleRegister(size=2) or Data([0], 'H').
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -1880,9 +1742,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             UWB_settings: Container for the read data.  UWBSettings().
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1898,9 +1758,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             channel_num: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1916,9 +1774,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             uwb_gain_dB: Container for the read data. Data([0], 'f').
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1934,9 +1790,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             txgain_dB: Container for the read data. Data([0], 'f').
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1949,9 +1803,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             network_id: Container for the read data. NetworkID() or SingleRegister(size=2) or Data([0], 'H').
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1963,9 +1815,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             data_length: Container for the read data. SingleRegister() or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -1990,11 +1840,9 @@ class PozyxLib(PozyxCore):
 
         Args:
             save_type: Type of configuration to save. See above.
-
-        Kwargs:
-            registers: Registers to save to the flash memory. Data([register1, register2, ...]) or [register1, register2, ...]
+            registers (optional): Registers to save to the flash memory. Data([register1, register2, ...]) or [register1, register2, ...]
                 These registers have to be writable. Saving the UWB gain is currently not working.
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
