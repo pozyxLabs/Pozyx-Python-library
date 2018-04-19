@@ -13,7 +13,6 @@ from pypozyx.structures.sensor_data import *
 from warnings import warn
 
 
-# noinspection PyPep8Naming
 class PozyxLib(PozyxCore):
     """PozyxLib
 
