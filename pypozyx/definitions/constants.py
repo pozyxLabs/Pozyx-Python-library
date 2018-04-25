@@ -3,91 +3,90 @@
 
 
 class PozyxConstants:
-    # TODO unused in wrappers atm
-    # Pozyx firmware identifiers
-    POZYX_FW_MAJOR = 0xF0
-    POZYX_FW_MINOR = 0xF
-
-    # Pozyx device identifier for hardware
-    POZYX_ANCHOR = 0x00
-    POZYX_TAG = 0x20
-
     # Pozyx serial buffer sizes
     MAX_BUF_SIZE = 100
     MAX_SERIAL_SIZE = 28
 
+    # Remote operations
+    REMOTE_READ = 0x02
+    REMOTE_WRITE = 0x04
+    REMOTE_DATA = 0x06
+    REMOTE_FUNCTION = 0x08
+
     # Pozyx delay constants
-    POZYX_DELAY_POLLING = 0.002
-    POZYX_DELAY_LOCAL_WRITE = 0.001
-    POZYX_DELAY_LOCAL_FUNCTION = 0.005
-    POZYX_DELAY_REMOTE_WRITE = 0.005
-    POZYX_DELAY_REMOTE_FUNCTION = 0.01
-    POZYX_DELAY_INTERRUPT = 0.1
-    POZYX_DELAY_CALIBRATION = 1
-    POZYX_DELAY_MODE_CHANGE = 0.02
-    POZYX_DELAY_RANGING = 0.025
-    POZYX_DELAY_REMOTE_RANGING = 0.1
-    POZYX_DELAY_POSITIONING = 0.2
-    POZYX_DELAY_REMOTE_POSITIONING = 0.4
-    POZYX_DELAY_FLASH = 0.5
+    DELAY_POLLING = 0.002
+    DELAY_LOCAL_WRITE = 0.001
+    DELAY_LOCAL_FUNCTION = 0.005
+    DELAY_REMOTE_WRITE = 0.005
+    DELAY_REMOTE_FUNCTION = 0.01
+    DELAY_INTERRUPT = 0.1
+    DELAY_MODE_CHANGE = 0.02
+    DELAY_FLASH = 0.5
+
+    # Pozyx timeout constants
+    TIMEOUT_RANGING = 0.025
+    TIMEOUT_REMOTE_RANGING = 0.1
+    TIMEOUT_POSITIONING = 0.2
+    TIMEOUT_REMOTE_POSITIONING = 0.4
+    TIMEOUT_OPTIMAL_DISCOVERY = 0.1
 
     # Pozyx status returns
-    POZYX_FAILURE = 0x0
-    POZYX_SUCCESS = 0x1
-    POZYX_TIMEOUT = 0x8
-
-    # Pozyx positioning dimensions
-    POZYX_3D = 3
-    POZYX_2D = 2
-    POZYX_2_5D = 1
+    STATUS_FAILURE = 0x0
+    STATUS_SUCCESS = 0x1
+    STATUS_TIMEOUT = 0x8
 
     # Pozyx interrupt pin
-    POZYX_INT_PIN0 = 0x0
-    POZYX_INT_PIN1 = 0x1
+    INT_PIN0 = 0x0
+    INT_PIN1 = 0x1
 
     # Pozyx led control indexes
-    POZYX_LED_CTRL_LEDRX = 0x10
-    POZYX_LED_CTRL_LEDTX = 0x20
-    POZYX_LED_ON = True
-    POZYX_LED_OFF = False
+    LED_CTRL_LED_RX = 0x10
+    LED_CTRL_LED_TX = 0x20
+    LED_ON = True
+    LED_OFF = False
 
     # Pozyx device modes
-    POZYX_ANCHOR_MODE = 0
-    POZYX_TAG_MODE = 1
+    ANCHOR_MODE = 0
+    TAG_MODE = 1
 
     # The GPIO modes
-    POZYX_GPIO_DIGITAL_INPUT = 0
-    POZYX_GPIO_PUSHPULL = 1
-    POZYX_GPIO_OPENDRAIN = 1
+    GPIO_DIGITAL_INPUT = 0
+    GPIO_PUSHPULL = 1
+    GPIO_OPENDRAIN = 1
 
     # The GPIO pull resistor configuration
-    POZYX_GPIO_NOPULL = 0
-    POZYX_GPIO_PULLUP = 1
-    POZYX_GPIO_PULLDOWN = 2
+    GPIO_NOPULL = 0
+    GPIO_PULLUP = 1
+    GPIO_PULLDOWN = 2
 
     # anchor selection modes
-    POZYX_ANCHOR_SEL_MANUAL = 0
-    POZYX_ANCHOR_SEL_AUTO = 1
+    ANCHOR_SEL_MANUAL = 0
+    ANCHOR_SEL_AUTO = 1
 
     # discovery options
-    POZYX_DISCOVERY_ANCHORS_ONLY = 0
-    POZYX_DISCOVERY_TAGS_ONLY = 1
-    POZYX_DISCOVERY_ALL_DEVICES = 2
+    DISCOVERY_ANCHORS_ONLY = 0
+    DISCOVERY_TAGS_ONLY = 1
+    DISCOVERY_ALL_DEVICES = 2
+
+    # Pozyx positioning dimensions
+    DIM_3D = 3
+    DIM_2D = 2
+    DIM_2_5D = 1
 
     # positioning algorithm options
-    POZYX_POS_ALG_UWB_ONLY = 0
-    POZYX_POS_ALG_TRACKING = 4
+    POS_ALG_UWB_ONLY = 0
+    POS_ALG_TRACKING = 4
 
     # ranging protocol options
-    POZYX_RANGE_PROTOCOL_PRECISION = 0x00
-    POZYX_RANGE_PROTOCOL_FAST = 0x01
-    POZYX_RANGE_PROTOCOL_TEST = 0x02
+    RANGE_PROTOCOL_PRECISION = 0x00
+    RANGE_PROTOCOL_FAST = 0x01
+    RANGE_PROTOCOL_TEST = 0x02
 
     # positioning filters
     FILTER_TYPE_NONE = 0
     FILTER_TYPE_FIR = 1
-    FILTER_TYPE_MOVINGAVERAGE = 3
-    FILTER_TYPE_MOVINGMEDIAN = 4
+    FILTER_TYPE_MOVING_AVERAGE = 3
+    FILTER_TYPE_MOVING_MEDIAN = 4
 
     # how to intercept pozyx events: by polling or by interrupts
     MODE_POLLING = 0
@@ -95,36 +94,36 @@ class PozyxConstants:
 
     # Division factors for converting the raw register values to meaningful
     # physical quantities
-    POZYX_POS_DIV_MM = 1.0
-    POZYX_PRESS_DIV_PA = 1000.0
-    POZYX_MAX_LIN_ACCEL_DIV_MG = 1.0
-    POZYX_ACCEL_DIV_MG = 1.0
-    POZYX_GYRO_DIV_DPS = 16.0
-    POZYX_MAG_DIV_UT = 16.0
-    POZYX_EULER_DIV_DEG = 16.0
-    POZYX_QUAT_DIV = 16384.0
-    POZYX_TEMP_DIV_CELSIUS = 1.0
+    POSITION_DIV_MM = 1.0
+    PRESSURE_DIV_PA = 1000.0
+    MAX_LINEAR_ACCELERATION_DIV_MG = 1.0
+    ACCELERATION_DIV_MG = 1.0
+    GYRO_DIV_DPS = 16.0
+    MAGNETOMETER_DIV_UT = 16.0
+    EULER_ANGLES_DIV_DEG = 16.0
+    QUATERNION_DIV = 16384.0
+    TEMPERATURE_DIV_CELSIUS = 1.0
 
     # flash configuration types
-    POZYX_FLASH_REGS = 1
-    POZYX_FLASH_ANCHOR_IDS = 2
-    POZYX_FLASH_NETWORK = 3
-    POZYX_FLASH_ALL = 4
+    FLASH_SAVE_REGISTERS = 1
+    FLASH_SAVE_ANCHOR_IDS = 2
+    FLASH_SAVE_NETWORK = 3
+    FLASH_SAVE_ALL = 4
 
     # possible pin configuration settings
-    POZYX_INT_CONFIG = 0x24
-    PIN_MODE_PUSHPULL = 0
-    PIN_MODE_OPENDRAIN = 1
+    INTERRUPT_CONFIG = 0x24
+    PIN_MODE_PUSH_PULL = 0
+    PIN_MODE_OPEN_DRAIN = 1
 
     # Possible pin activity states
     PIN_ACTIVE_LOW = 0
     PIN_ACTIVE_HIGH = 1
 
     # Possible UWB settings
-    POZYX_ALL_CHANNELS = [1, 2, 3, 4, 5, 7]
-    POZYX_ALL_BITRATES = [0, 1, 2]
-    POZYX_ALL_PRFS = [1, 2]
-    POZYX_ALL_PLENS = [0x04, 0x14, 0x24, 0x34, 0x08, 0x18, 0x28, 0x0C]
+    ALL_UWB_CHANNELS = [1, 2, 3, 4, 5, 7]
+    ALL_UWB_BITRATES = [0, 1, 2]
+    ALL_UWB_PRFS = [1, 2]
+    ALL_UWB_PLENS = [0x04, 0x14, 0x24, 0x34, 0x08, 0x18, 0x28, 0x0C]
 
 # Pozyx firmware identifiers
 POZYX_FW_MAJOR = 0xF0
