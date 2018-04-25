@@ -18,9 +18,9 @@ class PozyxRegisters:
     CALIBRATION_STATUS = 0x6  # Returns the calibration status.
 
     # Configuration registers
-    CONFIGURE_INTERRUPT_MASK = 0x10  # Indicates which interrupts are enabled.
-    CONFIGURE_INTERRUPT_PIN = 0x11  # Configure the interrupt pin
-    CONFIGURE_LEDS = 0x15  # Configure the LEDs
+    INTERRUPT_MASK = 0x10  # Indicates which interrupts are enabled.
+    INTERRUPT_PIN = 0x11  # Configure the interrupt pin
+    LED_CONFIGURATION = 0x15  # Configure the LEDs
     POSITIONING_FILTER = 0x14  # Filter used for positioning
     POSITIONING_ALGORITHM = 0x16  # Algorithm used for positioning
     # Configure the number of anchors and selection procedure
