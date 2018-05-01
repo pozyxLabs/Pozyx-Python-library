@@ -3,20 +3,20 @@
 
 class PozyxBitmasks:
     # Pozyx firmware identifiers
-    FW_MAJOR = 0xF0
-    FW_MINOR = 0xF
+    FIRMWARE_MAJOR = 0xF0
+    FIRMWARE_MINOR = 0xF
 
     # Pozyx device identifier for hardware
     ANCHOR = 0x00
     TAG = 0x20
 
     # Bit mask for POZYX_ST_RESULT
-    ST_RESULT_ACC = 0x01
-    ST_RESULT_MAGN = 0x02
-    ST_RESULT_GYR = 0x04
-    ST_RESULT_MCU = 0x08
-    ST_RESULT_PRES = 0x10
-    ST_RESULT_UWB = 0x20
+    SELFTEST_RESULT_ACCELEROMETER = 0x01
+    SELFTEST_RESULT_MAGNETOMETER = 0x02
+    SELFTEST_RESULT_GYRO = 0x04
+    SELFTEST_RESULT_MCU = 0x08
+    SELFTEST_RESULT_PRESSURE = 0x10
+    SELFTEST_RESULT_UWB = 0x20
 
     # Bit mask for POZYX_INT_STATUS
     INT_STATUS_ERR = 0x01

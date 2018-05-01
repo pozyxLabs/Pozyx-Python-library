@@ -474,10 +474,10 @@ class PozyxLib(PozyxCore):
         return self.getRead(POZYX_RANGE_PROTOCOL, protocol, remote_id)
 
     def setRangingProtocolFast(self, remote_id=None):
-        return self.setRangingProtocol(PozyxConstants.POZYX_RANGE_PROTOCOL_FAST, remote_id=remote_id)
+        return self.setRangingProtocol(PozyxConstants.RANGE_PROTOCOL_FAST, remote_id=remote_id)
 
     def setRangingProtocolPrecision(self, remote_id=None):
-        return self.setRangingProtocol(PozyxConstants.POZYX_RANGE_PROTOCOL_PRECISION, remote_id=remote_id)
+        return self.setRangingProtocol(PozyxConstants.RANGE_PROTOCOL_PRECISION, remote_id=remote_id)
 
     def setRangingProtocol(self, protocol, remote_id=None):
         """Set the Pozyx's ranging protocol.
@@ -761,12 +761,12 @@ class PozyxLib(PozyxCore):
     def setPositionAlgorithmNormal(self, remote_id=None):
         dimension = SingleRegister()
         self.getPositionDimension(dimension, remote_id=remote_id)
-        return self.setPositionAlgorithm(PozyxConstants.POZYX_POS_ALG_UWB_ONLY, dimension, remote_id=remote_id)
+        return self.setPositionAlgorithm(PozyxConstants.POS_ALG_UWB_ONLY, dimension, remote_id=remote_id)
 
     def setPositionAlgorithmTracking(self, remote_id=None):
         dimension = SingleRegister()
         self.getPositionDimension(dimension, remote_id=remote_id)
-        return self.setPositionAlgorithm(PozyxConstants.POZYX_POS_ALG_TRACKING, dimension, remote_id=remote_id)
+        return self.setPositionAlgorithm(PozyxConstants.POS_ALG_TRACKING, dimension, remote_id=remote_id)
 
     def setPositionAlgorithm(self, algorithm, dimension, remote_id=None):
         """Set the Pozyx's positioning algorithm.
@@ -794,15 +794,15 @@ class PozyxLib(PozyxCore):
 
     def savePositioningSettings(self, remote_id=None):
         # Height is included because it will be overwritten if not 2.5D and used if 2.5D.
-        registers_to_save = [PozyxRegisters.POZYX_POS_FILTER, PozyxRegisters.POZYX_POS_ALG,
-                             PozyxRegisters.POZYX_RANGE_PROTOCOL, PozyxRegisters.POZYX_POS_Z]
+        registers_to_save = [PozyxRegisters.POSITIONING_FILTER, PozyxRegisters.POSITIONING_ALGORITHM,
+                             PozyxRegisters.RANGING_PROTOCOL, PozyxRegisters.HEIGHT]
         return self.saveRegisters(registers_to_save, remote_id=remote_id)
 
     def setSelectionOfAnchorsAutomatic(self, number_of_anchors, remote_id=None):
-        return self.setSelectionOfAnchors(PozyxConstants.POZYX_ANCHOR_SEL_AUTO, number_of_anchors, remote_id=remote_id)
+        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SEL_AUTO, number_of_anchors, remote_id=remote_id)
 
     def setSelectionOfAnchorsManual(self, number_of_anchors, remote_id=None):
-        return self.setSelectionOfAnchors(PozyxConstants.POZYX_ANCHOR_SEL_MANUAL, number_of_anchors, remote_id=remote_id)
+        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SEL_MANUAL, number_of_anchors, remote_id=remote_id)
 
     def setSelectionOfAnchors(self, mode, number_of_anchors, remote_id=None):
         """Set the Pozyx's coordinates.
@@ -952,7 +952,120 @@ class PozyxLib(PozyxCore):
                     return POZYX_FAILURE
         return POZYX_TIMEOUT
 
+    def getPositioningData(self, positioning_data: PositioningData):
+        flags = Data([positioning_data.flags], 'H')
+        flags.load_hex_string()
+        s = 'F,%0.2x,%s,%i\r' % (PozyxRegisters.DO_POSITIONING_WITH_DATA, flags.byte_data, positioning_data.byte_size + 61)
+        # very custom solution...
+        r = self.serialExchange(s)
+        if positioning_data.has_ranges():
+            amount_of_ranges = int(r[2 * positioning_data.byte_size:2 * positioning_data.byte_size + 2], 16)
+            positioning_data.set_amount_of_ranges(amount_of_ranges)
+            r = r[: positioning_data.byte_size * 2 + 2]
+        if len(positioning_data) > 0:
+            positioning_data.load_bytes(r[2:])
+        return int(r[0:2], 16)
+
+    def doPositioningWithData(self, positioning_data, remote_id=None):
+        if remote_id is None:
+            status = self.useFunction(PozyxRegisters.DO_POSITIONING)
+
+            if status != POZYX_SUCCESS:
+                return POZYX_FAILURE
+            status = self.checkForFlag(PozyxBitmasks.INT_STATUS_POS, PozyxConstants.TIMEOUT_POSITIONING)
+            if status == POZYX_SUCCESS:
+                return self.getPositioningData(positioning_data)
+            return status
+        else:
+            flags_data = Data([positioning_data.flags], 'H')
+            self.remoteRegFunctionWithoutCheck(remote_id, PozyxRegisters.DO_POSITIONING, flags_data)
+
+            status = self.waitForFlag(PozyxBitmasks.INT_STATUS_RX_DATA, PozyxConstants.TIMEOUT_POSITIONING)
+            if status == POZYX_SUCCESS:
+                rx_info = RXInfo()
+                self.getRxInfo(rx_info)
+
+                if positioning_data.has_ranges():
+                    amount_of_ranges = int(
+                        (rx_info.amount_of_bytes - positioning_data.byte_size) / RangeInformation.byte_size)
+                    positioning_data.set_amount_of_ranges(amount_of_ranges)
+
+                if rx_info.remote_id == remote_id:
+                    status = self.readRXBufferData(positioning_data)
+                    return status
+                else:
+                    return POZYX_FAILURE
+            return status
+
     ## @}
+
+    def waitForFlagSafeFast(self, interrupt_flag, timeout_s, interrupt=None):
+        from time import time, sleep
+        if interrupt is None:
+            interrupt = SingleRegister()
+        start = time()
+        while (time() - start) < timeout_s:
+            sleep(PozyxConstants.DELAY_POLLING * 0.33)
+            status = self.getInterruptStatus(interrupt)
+            if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
+                return True
+        return False
+
+    def checkForFlagFast(self, interrupt_flag, timeout_s, interrupt=None):
+        if interrupt is None:
+            interrupt = SingleRegister()
+        error_interrupt_mask = PozyxBitmasks.INT_MASK_ERR
+        if self.waitForFlagSafeFast(interrupt_flag | error_interrupt_mask, timeout_s, interrupt):
+            if (interrupt[0] & error_interrupt_mask) == error_interrupt_mask:
+                return POZYX_FAILURE
+            else:
+                return POZYX_SUCCESS
+        else:
+            return PozyxConstants.TIMEOUT
+
+    def remoteRegFunctionOnlyData(self, destination, address, params, data):
+        send_data = Data([0, address] + params.data, 'BB' + params.data_format)
+        status = self.regFunction(PozyxRegisters.WRITE_TX_DATA, send_data, Data([]))
+        if status != POZYX_SUCCESS:
+            return status
+
+        self.getInterruptStatus(SingleRegister())
+        status = self.sendTXFunction(destination)
+        if status != POZYX_SUCCESS:
+            return status
+
+        status = self.checkForFlagFast(PozyxBitmasks.INT_STATUS_RX_DATA, 1)
+        if status == POZYX_SUCCESS:
+            rx_info = RXInfo()
+            self.getRxInfo(rx_info)
+            if rx_info.remote_id == destination and rx_info.amount_of_bytes == 4:
+                return_data = Data([0], 'I')
+                self.readRXBufferData(return_data)
+                return return_data[0]
+
+        status = self.checkForFlagFast(PozyxBitmasks.INT_STATUS_RX_DATA, 1)
+        if status == POZYX_SUCCESS:
+            rx_info = RXInfo()
+            self.getRxInfo(rx_info)
+            if rx_info.remote_id == destination and rx_info.amount_of_bytes == 4:
+                return_data = Data([0], 'I')
+                self.readRXBufferData(return_data)
+                return return_data[0]
+
+    def rangingWithoutCheck(self, destination, device_range, remote_id=None):
+        assert destination != 0, "doRanging: destination can't equal zero"
+        if not dataCheck(destination):
+            destination = NetworkID(destination)
+
+        if remote_id is None:
+            return self.doRanging(destination, device_range, remote_id=remote_id)
+
+        distance = self.remoteRegFunctionOnlyData(remote_id, PozyxRegisters.DO_RANGING, destination, Data([]))
+
+        if distance is not None:
+            device_range.distance = distance
+            return POZYX_SUCCESS
+        return POZYX_FAILURE
 
     ## \addtogroup sensor_data
     # @{
@@ -1321,6 +1434,16 @@ class PozyxLib(PozyxCore):
             sleep(timeout_s)
         return status
 
+    def doOptimalDiscovery(self, discovery_type=PozyxConstants.DISCOVERY_ALL_DEVICES, slots=3):
+        """Performs a discovery with slot_duration optimised for the device's UWB settings."""
+        self.getInterruptStatus(SingleRegister())
+        params = Data([discovery_type, slots, 0])
+        status = self.useFunction(PozyxRegisters.DO_DISCOVERY, params)
+        if status != PozyxConstants.STATUS_SUCCESS:
+            return status
+        return self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, PozyxConstants.TIMEOUT_OPTIMAL_DISCOVERY)
+
+
     def doDiscoveryTags(self, slots=3, slot_duration=0.01, remote_id=None):
         """Performs tag discovery on the Pozyx, which will let it discover Pozyx tags with the same
         UWB settings in range.
@@ -1646,30 +1769,76 @@ class PozyxLib(PozyxCore):
             network_id = NetworkID(network_id)
         return self.setWrite(POZYX_NETWORK_ID, network_id, remote_id)
 
-    def setUWBSettings(self, UWB_settings, remote_id=None):
-        """Set the Pozyx's UWB settings.
+
+    # TODO find new group for these four functions?
+    def remoteRegFunctionWithoutCheck(self, destination, address, params):
+        send_data = Data([0, address] + params.data, 'BB' + params.data_format)
+        status = self.regFunction(PozyxRegisters.WRITE_TX_DATA, send_data, Data([]))
+        if status == POZYX_FAILURE:
+            return status
+
+        self.getInterruptStatus(SingleRegister())
+
+        status = self.sendTXFunction(destination)
+        if status == POZYX_FAILURE:
+            return status
+
+        self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, 0.02)
+
+        return status
+
+    def setUWBSettings(self, uwb_settings: UWBSettings, remote_id=None):
+        """
+        Set the Pozyx's UWB settings.
 
         If using this remotely, remember to change the local UWB settings as well
         to make sure you are still able to communicate with the remote device.
 
         Args:
-            UWB_settings: The new UWB settings. UWBSettings() or [channel, bitrate, prf, plen, gain_db]
-            remote_id (optional): Remote Pozyx ID.
+            uwb_settings: The new UWB settings. UWBSettings() or [channel, bitrate, prf, plen, gain_db]
+
+        Kwargs:
+            remote_id: Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        if not dataCheck(UWB_settings):
-            UWB_settings = UWBSettings(UWB_settings[0], UWB_settings[1],
-                                       UWB_settings[2], UWB_settings[3], UWB_settings[4])
-        gain = Data([UWB_settings.gain_db], 'f')
-        UWB = Data([UWB_settings.channel, UWB_settings.bitrate +
-                    (UWB_settings.prf << 6), UWB_settings.plen])
-        status = self.setWrite(POZYX_UWB_CHANNEL, UWB, remote_id,
-                               2 * POZYX_DELAY_LOCAL_WRITE, 2 * POZYX_DELAY_REMOTE_WRITE)
-        if status == POZYX_FAILURE:
-            return status
-        return self.setUWBGain(gain, remote_id)
+        if not dataCheck(uwb_settings):
+            uwb_settings = UWBSettings(uwb_settings[0], uwb_settings[1],
+                                       uwb_settings[2], uwb_settings[3], uwb_settings[4])
+        gain = Data([uwb_settings.gain_db], 'f')
+        uwb = Data([uwb_settings.channel, uwb_settings.bitrate +
+                    (uwb_settings.prf << 6), uwb_settings.plen])
+
+        self.setWrite(PozyxRegisters.UWB_CHANNEL, uwb, remote_id,
+                      2 * PozyxConstants.DELAY_LOCAL_WRITE, 2 * PozyxConstants.DELAY_REMOTE_WRITE)
+
+        if remote_id is None:
+            return self.setUWBGain(gain, remote_id)
+        else:
+            return self.doFunctionOnDifferentUWB(self.setUWBGain, uwb_settings, gain, remote_id=remote_id)
+
+    def checkUWBSettings(self, suspected_uwb_settings, remote_id=None, equal_gain=True):
+        uwb = UWBSettings()
+
+        if remote_id is None:
+            self.getUWBSettings(uwb)
+        else:
+            self.doFunctionOnDifferentUWB(self.getUWBSettings, suspected_uwb_settings, uwb, remote_id=remote_id)
+
+        if equal_gain is not True:
+            uwb.gain_db = suspected_uwb_settings.gain_db
+        return uwb == suspected_uwb_settings
+
+    def doFunctionOnDifferentUWB(self, function, uwb_settings, *args, **kwargs):
+        original_uwb_settings = UWBSettings()
+        self.getUWBSettings(original_uwb_settings)
+
+        self.setUWBSettings(uwb_settings)
+        return_value = function(*args, **kwargs)
+        self.setUWBSettings(original_uwb_settings)
+
+        return return_value
 
     def setUWBChannel(self, channel_num, remote_id=None):
         """Set the Pozyx's UWB channel.
@@ -1687,8 +1856,7 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(channel_num):
             channel_num = SingleRegister(channel_num)
-        assert channel_num[0] >= 1 and channel_num[0] <= 7 and channel_num[
-            0] != 6, 'setUWBChannel: %i is wrong channel number' % channel_num[0]
+        assert channel_num.value in PozyxConstants.ALL_UWB_CHANNELS, 'setUWBChannel: %i is wrong channel number' % channel_num[0]
 
         return self.setWrite(POZYX_UWB_CHANNEL, channel_num, remote_id)
 

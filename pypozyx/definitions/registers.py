@@ -18,9 +18,9 @@ class PozyxRegisters:
     CALIBRATION_STATUS = 0x6  # Returns the calibration status.
 
     # Configuration registers
-    CONFIGURE_INTERRUPT_MASK = 0x10  # Indicates which interrupts are enabled.
-    CONFIGURE_INTERRUPT_PIN = 0x11  # Configure the interrupt pin
-    CONFIGURE_LEDS = 0x15  # Configure the LEDs
+    INTERRUPT_MASK = 0x10  # Indicates which interrupts are enabled.
+    INTERRUPT_PIN = 0x11  # Configure the interrupt pin
+    LEDS_CONFIGURATION = 0x15  # Configure the LEDs
     POSITIONING_FILTER = 0x14  # Filter used for positioning
     POSITIONING_ALGORITHM = 0x16  # Algorithm used for positioning
     # Configure the number of anchors and selection procedure
@@ -47,6 +47,7 @@ class PozyxRegisters:
     POSITION_X = 0x30  # x-coordinate of the device in mm.
     POSITION_Y = 0x34  # y-coordinate of the device in mm.
     POSITION_Z = 0x38  # z-coordinate of the device in mm.
+    HEIGHT = 0x38  # z-coordinate of the device in mm.
     POSITIONING_ERROR_X = 0x3C  # estimated error covariance of x
     POSITIONING_ERROR_Y = 0x3E  # estimated error covariance of y
     POSITIONING_ERROR_Z = 0x40  # estimated error covariance of z
@@ -70,7 +71,7 @@ class PozyxRegisters:
     EULER_ANGLE_HEADING = 0x66
     EULER_ANGLE_YAW = 0x66
     EULER_ANGLE_ROLL = 0x68  # Euler angles roll ( 1 degree = 16 LSB )
-    EULER_PITCH = 0x6A  # Euler angles pitch ( 1 degree = 16 LSB )
+    EULER_ANGLE_PITCH = 0x6A  # Euler angles pitch ( 1 degree = 16 LSB )
     QUATERNION_W = 0x6C  # Weight of quaternion.
     QUATERNION_X = 0x6E  # x of quaternion
     QUATERNION_Y = 0x70  # y of quaternion
@@ -85,9 +86,9 @@ class PozyxRegisters:
 
     # General data
     # Returns the number of devices stored internally
-    GET_DEVICE_LIST_SIZE = 0x81
-    GET_RX_NETWORK_ID = 0x82  # The network id of the latest received message
-    GET_RX_DATA_LENGTH = 0x84  # The length of the latest received message
+    DEVICE_LIST_SIZE = 0x81
+    RX_NETWORK_ID = 0x82  # The network id of the latest received message
+    RX_DATA_LENGTH = 0x84  # The length of the latest received message
     GPIO_1 = 0x85  # Value of the GPIO pin 1
     GPIO_2 = 0x86  # Value of the GPIO pin 2
     GPIO_3 = 0x87  # Value of the GPIO pin 3

@@ -77,7 +77,7 @@ class PozyxCore:
             return POZYX_FAILURE
 
         send_data = Data([0, address] + data.data, 'BB' + data.data_format)
-        status = self.regFunction(PozyxRegisters.POZYX_TX_DATA, send_data, Data([]))
+        status = self.regFunction(PozyxRegisters.WRITE_TX_DATA, send_data, Data([]))
         if status != POZYX_SUCCESS:
             return status
 
@@ -85,7 +85,7 @@ class PozyxCore:
         status = self.sendTXWrite(destination)
         if status != POZYX_SUCCESS:
             return status
-        return self.checkForFlag(PozyxBitmasks.POZYX_INT_STATUS_FUNC, 0.5)
+        return self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, 0.5)
 
     def remoteRegRead(self, destination, address, data):
         """Performs regRead on a remote Pozyx device.
@@ -106,7 +106,7 @@ class PozyxCore:
             return POZYX_FAILURE
 
         send_data = Data([0, address, data.byte_size])
-        status = self.regFunction(PozyxRegisters.POZYX_TX_DATA, send_data, Data([]))
+        status = self.regFunction(PozyxRegisters.WRITE_TX_DATA, send_data, Data([]))
         if status != POZYX_SUCCESS:
             return status
 
@@ -115,7 +115,7 @@ class PozyxCore:
         if status != POZYX_SUCCESS:
             return status
 
-        status = self.checkForFlag(PozyxBitmasks.POZYX_INT_STATUS_FUNC, 1)
+        status = self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, 1)
         if status == POZYX_SUCCESS:
             rx_info = RXInfo()
             self.getRxInfo(rx_info)
@@ -139,7 +139,7 @@ class PozyxCore:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         send_data = Data([0, address] + params.data, 'BB' + params.data_format)
-        status = self.regFunction(PozyxRegisters.POZYX_TX_DATA, send_data, Data([]))
+        status = self.regFunction(PozyxRegisters.WRITE_TX_DATA, send_data, Data([]))
         if status != POZYX_SUCCESS:
             return status
 
@@ -148,7 +148,7 @@ class PozyxCore:
         if status != POZYX_SUCCESS:
             return status
 
-        status = self.checkForFlag(PozyxBitmasks.POZYX_INT_STATUS_FUNC, 1)
+        status = self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, 1)
         if status == POZYX_SUCCESS:
             rx_info = RXInfo()
             self.getRxInfo(rx_info)
@@ -197,14 +197,14 @@ class PozyxCore:
             status = self.getInterruptStatus(interrupt)
             if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
                 return True
-            sleep(PozyxConstants.POZYX_DELAY_POLLING)
+            sleep(PozyxConstants.DELAY_POLLING)
         return False
 
     ## \addtogroup core
     # @{
 
-    def setWrite(self, address, data, remote_id=None, local_delay=PozyxConstants.POZYX_DELAY_LOCAL_WRITE,
-                 remote_delay=PozyxConstants.POZYX_DELAY_REMOTE_WRITE):
+    def setWrite(self, address, data, remote_id=None, local_delay=PozyxConstants.DELAY_LOCAL_WRITE,
+                 remote_delay=PozyxConstants.DELAY_REMOTE_WRITE):
         """Writes data to Pozyx registers either locally or remotely.
 
         Args:
@@ -221,7 +221,7 @@ class PozyxCore:
 
         Examples:
             >>> leds = SingleRegister(0xFF)
-            >>> self.setWrite(POZYX_LED_CTRL, leds)
+            >>> self.setWrite(PozyxRegisters.LED_CONTROL, leds)
         """
         if not is_reg_writable(address):
             if not self.suppress_warnings:
@@ -249,7 +249,7 @@ class PozyxCore:
 
         Example:
             >>> who_am_i = SingleRegister()
-            >>> self.getRead(POZYX_WHO_AM_I, who_am_i)
+            >>> self.getRead(PozyxRegisters.WHO_AM_I, who_am_i)
             >>> print(who_am_i)
             67
         """
@@ -276,7 +276,7 @@ class PozyxCore:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
 
         Example:
-            >>> self.useFunction(POZYX_DEVICES_CLEAR)
+            >>> self.useFunction(PozyxRegisters.CLEAR_DEVICES)
         """
         if not is_functioncall(function):
             if not self.suppress_warnings:
@@ -309,7 +309,7 @@ class PozyxCore:
         """
         if interrupt is None:
             interrupt = SingleRegister()
-        error_interrupt_mask = PozyxBitmasks.POZYX_INT_MASK_ERR
+        error_interrupt_mask = PozyxBitmasks.INT_MASK_ERR
         if self.waitForFlagSafe(interrupt_flag | error_interrupt_mask, timeout_s, interrupt):
             if (interrupt[0] & error_interrupt_mask) == error_interrupt_mask:
                 return POZYX_FAILURE
@@ -345,11 +345,11 @@ class PozyxCore:
         total_byte_data = ""
         for i in range(runs):
             partial_data = Data([0] * _MAX_SERIAL_SIZE)
-            status &= self.regFunction(PozyxRegisters.POZYX_RX_DATA, Data([offset + i * _MAX_SERIAL_SIZE,
+            status &= self.regFunction(PozyxRegisters.READ_RX_DATA, Data([offset + i * _MAX_SERIAL_SIZE,
                                                             partial_data.byte_size]), partial_data)
             total_byte_data += partial_data.byte_data
         partial_data = Data([0] * (data.byte_size - runs * _MAX_SERIAL_SIZE))
-        status &= self.regFunction(PozyxRegisters.POZYX_RX_DATA, Data([offset + runs * _MAX_SERIAL_SIZE,
+        status &= self.regFunction(PozyxRegisters.READ_RX_DATA, Data([offset + runs * _MAX_SERIAL_SIZE,
                                                         partial_data.byte_size]), partial_data)
         total_byte_data += partial_data.byte_data
         data.load_bytes(total_byte_data)
@@ -380,9 +380,9 @@ class PozyxCore:
         data = Data(data.transform_to_bytes())
         runs = int(data.byte_size / _MAX_SERIAL_SIZE)
         for i in range(runs):
-            status &= self.regFunction(PozyxRegisters.POZYX_TX_DATA, Data([offset + i * _MAX_SERIAL_SIZE]
+            status &= self.regFunction(PozyxRegisters.WRITE_TX_DATA, Data([offset + i * _MAX_SERIAL_SIZE]
                                        + data[i * _MAX_SERIAL_SIZE: (i + 1) * _MAX_SERIAL_SIZE]), Data([]))
-        return status & self.regFunction(PozyxRegisters.POZYX_TX_DATA, Data([offset + runs * _MAX_SERIAL_SIZE]
+        return status & self.regFunction(PozyxRegisters.WRITE_TX_DATA, Data([offset + runs * _MAX_SERIAL_SIZE]
                                                              + data[runs * _MAX_SERIAL_SIZE:]), Data([]))
 
     def sendTXBufferData(self, destination):
@@ -394,7 +394,7 @@ class PozyxCore:
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
         """
-        return self.sendTX(destination, PozyxBitmasks.POZYX_REMOTE_DATA)
+        return self.sendTX(destination, PozyxConstants.REMOTE_DATA)
 
     def sendTXRead(self, destination):
         """Sends the read operation's data in the transmit buffer to the destination device.
@@ -405,7 +405,7 @@ class PozyxCore:
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
         """
-        return self.sendTX(destination, PozyxBitmasks.POZYX_REMOTE_READ)
+        return self.sendTX(destination, PozyxConstants.REMOTE_READ)
 
     def sendTXWrite(self, destination):
         """Sends the write operation's data in the transmit buffer to the destination device.
@@ -416,7 +416,7 @@ class PozyxCore:
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
         """
-        return self.sendTX(destination, PozyxBitmasks.POZYX_REMOTE_WRITE)
+        return self.sendTX(destination, PozyxConstants.REMOTE_WRITE)
 
     def sendTXFunction(self, destination):
         """Sends the function parameters in the transmit buffer to the destination device.
@@ -427,14 +427,14 @@ class PozyxCore:
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
         """
-        return self.sendTX(destination, PozyxBitmasks.POZYX_REMOTE_FUNCTION)
+        return self.sendTX(destination, PozyxConstants.REMOTE_FUNCTION)
 
     # Not a TODO but see if these can be chained to make huge and slow DIY chains by adding remote_id
     # make wrapper for this remote remote communication?
     def sendTX(self, destination, operation):
         if dataCheck(destination):
             destination = destination[0]
-        return self.regFunction(PozyxRegisters.POZYX_TX_SEND, TXInfo(destination, operation), Data([]))
+        return self.regFunction(PozyxRegisters.SEND_TX_DATA, TXInfo(destination, operation), Data([]))
 
     def sendData(self, destination, data):
         """Stores the data in the transmit buffer and then sends it to the device with ID destination.
@@ -470,7 +470,7 @@ class PozyxCore:
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(PozyxRegisters.POZYX_INT_STATUS, interrupts, remote_id)
+        return self.getRead(PozyxRegisters.INTERRUPT_STATUS, interrupts, remote_id)
 
     def getRxInfo(self, rx_info, remote_id=None):
         """Obtain's information on the data the Pozyx received over UWB
@@ -484,6 +484,6 @@ class PozyxCore:
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(PozyxRegisters.POZYX_RX_NETWORK_ID, rx_info, remote_id)
+        return self.getRead(PozyxRegisters.RX_NETWORK_ID, rx_info, remote_id)
 
 ## @}

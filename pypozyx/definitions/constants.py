@@ -51,13 +51,13 @@ class PozyxConstants:
 
     # The GPIO modes
     GPIO_DIGITAL_INPUT = 0
-    GPIO_PUSHPULL = 1
-    GPIO_OPENDRAIN = 1
+    GPIO_PUSH_PULL = 1
+    GPIO_OPEN_DRAIN = 1
 
     # The GPIO pull resistor configuration
-    GPIO_NOPULL = 0
-    GPIO_PULLUP = 1
-    GPIO_PULLDOWN = 2
+    GPIO_NO_PULL = 0
+    GPIO_PULL_UP = 1
+    GPIO_PULL_DOWN = 2
 
     # anchor selection modes
     ANCHOR_SEL_MANUAL = 0
@@ -69,13 +69,13 @@ class PozyxConstants:
     DISCOVERY_ALL_DEVICES = 2
 
     # Pozyx positioning dimensions
-    DIM_3D = 3
-    DIM_2D = 2
-    DIM_2_5D = 1
+    DIMENSION_3D = 3
+    DIMENSION_2D = 2
+    DIMENSION_2_5D = 1
 
     # positioning algorithm options
-    POS_ALG_UWB_ONLY = 0
-    POS_ALG_TRACKING = 4
+    POSITIONING_ALGORITHM_UWB_ONLY = 0
+    POSITIONING_ALGORITHM_TRACKING = 4
 
     # ranging protocol options
     RANGE_PROTOCOL_PRECISION = 0x00

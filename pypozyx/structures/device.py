@@ -16,7 +16,7 @@ UWBSettings
     contains all of the UWB settings: channel, bitrate, prf, plen, and gain.
 """
 
-from pypozyx.definitions.bitmasks import PozyxBitmasks
+from pypozyx.definitions.constants import PozyxConstants
 from pypozyx.structures.byte_structure import ByteStructure
 from pypozyx.structures.generic import Data
 from pypozyx.structures.sensor_data import Coordinates
@@ -171,7 +171,6 @@ class DeviceList(Data):
             self.data[i] = data[i]
 
 
-
 class RXInfo(ByteStructure):
     byte_size = 3
     data_format = 'HB'
@@ -205,7 +204,7 @@ class TXInfo(ByteStructure):
     byte_size = 3
     data_format = 'HB'
 
-    def __init__(self, remote_id, operation=PozyxBitmasks.POZYX_REMOTE_DATA):
+    def __init__(self, remote_id, operation=PozyxConstants.REMOTE_DATA):
         self.remote_id = remote_id
         self.operation = operation
         self.data = [self.remote_id, self.operation]

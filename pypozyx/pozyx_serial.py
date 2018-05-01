@@ -195,7 +195,6 @@ class PozyxSerial(PozyxLib):
         whoami = SingleRegister()
         if self.getWhoAmI(whoami) != POZYX_SUCCESS:
             raise PozyxConnectionError("Connected to device, but couldn't read serial data. Is it a Pozyx?")
-
         if whoami.value != 0x43:
             raise PozyxConnectionError("POZYX_WHO_AM_I returned 0x%0.2x, something is wrong with Pozyx." % whoami.value)
 
