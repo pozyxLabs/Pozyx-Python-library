@@ -927,9 +927,16 @@ class PozyxLib(PozyxCore):
                 height = Data([height], 'i')
             status = self.setWrite(POZYX_POS_Z, height, remote_id)
 
-        self.getInterruptStatus(SingleRegister())
+        firmware_version = SingleRegister()
+        self.getFirmwareVersion(firmware_version)
+        if firmware_version.value == 0x13:
+            position_data = PositioningData(0b1)
+            status = self.doPositioningWithData(position_data, remote_id=remote_id)
+            if status == POZYX_SUCCESS:
+                position.load_bytes(position_data.byte_data)
+            return status
 
-        status = self.useFunction(POZYX_DO_POSITIONING, remote_id=remote_id)
+        status = self.useFunction(POZYX_DO_POSITIONING, remote_id=remote_id, params=Data([1], "H"))
         if status != POZYX_SUCCESS:
             return POZYX_FAILURE
 
@@ -1021,7 +1028,11 @@ class PozyxLib(PozyxCore):
             else:
                 return POZYX_SUCCESS
         else:
-            return PozyxConstants.TIMEOUT
+            return PozyxConstants.STATUS_TIMEOUT
+
+
+    def getReceivedData(self, destination, address, params, data):
+        pass
 
     def remoteRegFunctionOnlyData(self, destination, address, params, data):
         send_data = Data([0, address] + params.data, 'BB' + params.data_format)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """pypozyx.definitions.bitmasks - contains all bitmasks used in Pozyx functionality, such as interrupt flags."""
 
+
 class PozyxBitmasks:
     # Pozyx firmware identifiers
     FIRMWARE_MAJOR = 0xF0

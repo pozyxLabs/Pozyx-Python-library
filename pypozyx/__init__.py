@@ -87,6 +87,8 @@ version = __version__
 
 
 from pypozyx.definitions.constants import *
+from pypozyx.definitions.bitmasks import PozyxBitmasks
+from pypozyx.definitions.registers import PozyxRegisters
 from pypozyx.pozyx_serial import *
 from pypozyx.structures.device import *
 from pypozyx.structures.generic import *
