@@ -929,7 +929,7 @@ class PozyxLib(PozyxCore):
 
         firmware_version = SingleRegister()
         self.getFirmwareVersion(firmware_version)
-        if firmware_version.value == 0x13:
+        if firmware_version.value > 0x11:
             position_data = PositioningData(0b1)
             status = self.doPositioningWithData(position_data, remote_id=remote_id)
             if status == POZYX_SUCCESS:
