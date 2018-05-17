@@ -25,6 +25,7 @@ class PozyxRegisters:
     POSITIONING_ALGORITHM = 0x16  # Algorithm used for positioning
     # Configure the number of anchors and selection procedure
     POSITIONING_NUMBER_OF_ANCHORS = 0x17
+    ALL_POSITIONING_REGISTERS = [0x14, 0x16, 0x21, 0x38]
     # Defines the update interval in ms in continuous positioning.
     POSITIONING_INTERVAL = 0x18
     NETWORK_ID = 0x1A  # The network id.
@@ -33,6 +34,7 @@ class PozyxRegisters:
     UWB_RATES = 0x1D
     UWB_PLEN = 0x1E  # Configure the UWB preamble length.
     UWB_GAIN = 0x1F  # Configure the power gain for the UWB transmitter
+    ALL_UWB_REGISTERS = [0x1C, 0x1D, 0x1E, 0x1F]
     UWB_CRYSTAL_TRIM = 0x20  # Trimming value for the uwb crystal.
     RANGING_PROTOCOL = 0x21  # The ranging protocol
     # Configure the mode of operation of the pozyx device

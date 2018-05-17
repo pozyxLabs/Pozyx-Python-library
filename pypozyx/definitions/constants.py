@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 """pypozyx.definitions.constants - contains all Pozyx constants, such as error definitions, delays, physical convertions."""
 
+# Pozyx status returns
+POZYX_FAILURE = 0x0
+POZYX_SUCCESS = 0x1
+POZYX_TIMEOUT = 0x8
+
 
 class PozyxConstants:
     # Pozyx serial buffer sizes
@@ -151,11 +156,6 @@ POZYX_DELAY_REMOTE_RANGING = 0.1
 POZYX_DELAY_POSITIONING = 0.2
 POZYX_DELAY_REMOTE_POSITIONING = 0.4
 POZYX_DELAY_FLASH = 0.5
-
-# Pozyx status returns
-POZYX_FAILURE = 0x0
-POZYX_SUCCESS = 0x1
-POZYX_TIMEOUT = 0x8
 
 # Pozyx positioning dimensions
 POZYX_3D = 3
@@ -338,3 +338,5 @@ ERROR_CODES = {
     PozyxErrorCodes.POZYX_ERROR_UNRECDEV: "ERROR 0xFE: Hardware not recognized. Please contact support@pozyx.io",
     PozyxErrorCodes.POZYX_ERROR_GENERAL: "ERROR 0xFF: General error",
 }
+
+ERROR_MESSAGES = ERROR_CODES
