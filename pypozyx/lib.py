@@ -29,9 +29,6 @@ class PozyxLib(PozyxCore):
     work as a great reference.
     """
 
-    def __init__(self):
-        pass
-
     # \addtogroup system_functions
     # @{
 
@@ -104,10 +101,11 @@ class PozyxLib(PozyxCore):
                 number_of_saved_registers += (details[i] >> j) & 0x1
         return number_of_saved_registers
 
-    def isRegisterSaved(self, regAddress, remote_id=None):
+    def isRegisterSaved(self, register_address, remote_id=None):
         """Returns whether the given register is saved to the Pozyx's flash memory.
 
         Args:
+            register_address: Register address to check if saved
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
@@ -116,8 +114,8 @@ class PozyxLib(PozyxCore):
         details = Data([0] * 20)
         if self.useFunction(PozyxRegisters.GET_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
             return POZYX_FAILURE
-        byte_num = int(regAddress / 8)
-        bit_num = regAddress % 8
+        byte_num = int(register_address / 8)
+        bit_num = register_address % 8
         return (details[byte_num] >> bit_num) & 0x1
 
     def setConfigGPIO(self, gpio_num, mode, pull, remote_id=None):
@@ -177,7 +175,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert led_num >= 1 and led_num <= 4, 'setLed: led number %i not in range 1-4' % led_num
+        assert 1 <= led_num <= 4, 'setLed: led number %i not in range 1-4' % led_num
         assert state is True or state is False, 'setLed: wrong state'
 
         params = Data([0x1 << (led_num - 1 + 4) |
@@ -224,17 +222,17 @@ class PozyxLib(PozyxCore):
         int_config = SingleRegister(pin + (mode << 3) + (active_high << 4) + (latch << 5))
         self.setWrite(PozyxRegisters.INTERRUPT_PIN, int_config, remote_id)
 
-    def getWhoAmI(self, whoami, remote_id=None):
+    def getWhoAmI(self, who_am_i, remote_id=None):
         """Obtains the Pozyx's WHO_AM_I.
 
         Args:
-            whoami: Container for the read data. SingleRegister or Data([0]).
+            who_am_i: Container for the read data. SingleRegister or Data([0]).
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(PozyxRegisters.WHO_AM_I, whoami, remote_id)
+        return self.getRead(PozyxRegisters.WHO_AM_I, who_am_i, remote_id)
 
     def getFirmwareVersion(self, firmware, remote_id=None):
         """Obtains the Pozyx's firmware version.
@@ -775,7 +773,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             mode: Anchor selection mode. integer mode or SingleRegister(mode).
-            number_of_anchors: Number of anchors used in positioning. integer nr_anchors or SingleRegister(nr_anchors).
+            number_of_anchors (int, SingleRegister): Number of anchors used in positioning. integer nr_anchors or SingleRegister(nr_anchors).
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
@@ -1419,7 +1417,6 @@ class PozyxLib(PozyxCore):
             return status
         return self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, PozyxConstants.TIMEOUT_OPTIMAL_DISCOVERY)
 
-
     def doDiscoveryTags(self, slots=3, slot_duration=0.01, remote_id=None):
         """Performs tag discovery on the Pozyx, which will let it discover Pozyx tags with the same
         UWB settings in range.
@@ -1559,7 +1556,7 @@ class PozyxLib(PozyxCore):
         """Configures a set of anchors as the relevant anchors on a device
 
         Args:
-            anchor_list: Python list of either DeviceCoordinates or [ID, flag, x, y, z]
+            anchor_list (list): Python list of either DeviceCoordinates or [ID, flag, x, y, z]
             anchor_select (optional): How to select the anchors in positioning
             remote_id (optional): Remote Pozyx ID
 
@@ -1580,6 +1577,7 @@ class PozyxLib(PozyxCore):
         if len(anchor_list) < 3 or len(anchor_list) > 16:
             warn("Not enough anchors to do positioning")
             return status
+
         return status & self.setSelectionOfAnchors(anchor_select, len(anchor_list), remote_id)
 
     def removeDevice(self, device_id, remote_id=None):
@@ -1680,6 +1678,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             remote_id (optional): Remote Pozyx ID
+            include_coordinates (bool, optional): Whether to include coordinates in the prints
 
         Returns:
             None
@@ -1835,30 +1834,30 @@ class PozyxLib(PozyxCore):
 
         return self.setWrite(PozyxRegisters.UWB_CHANNEL, channel_num, remote_id)
 
-    def setUWBGain(self, uwb_gain_dB, remote_id=None):
+    def setUWBGain(self, uwb_gain_db, remote_id=None):
         """Set the Pozyx's UWB transceiver gain.
 
         Args:
-            uwb_gain_dB: The new transceiver gain in dB, a value between 0.0 and 33.0.
+            uwb_gain_db: The new transceiver gain in dB, a value between 0.0 and 33.0.
                 float gain or Data([gain], 'f').
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        if not dataCheck(uwb_gain_dB):
-            uwb_gain_dB = Data([uwb_gain_dB], 'f')
-        assert uwb_gain_dB[0] >= 0.0 and uwb_gain_dB[
-            0] <= 35.0, 'setUWBGain: TX gain %0.2fdB not in range (0-35dB)' % uwb_gain_dB[0]
-        doublegain_dB = Data([int(2.0 * uwb_gain_dB[0] + 0.5)])
+        if not dataCheck(uwb_gain_db):
+            uwb_gain_db = Data([uwb_gain_db], 'f')
+        assert uwb_gain_db[0] >= 0.0 and uwb_gain_db[
+            0] <= 35.0, 'setUWBGain: TX gain %0.2fdB not in range (0-35dB)' % uwb_gain_db[0]
+        doublegain_db = Data([int(2.0 * uwb_gain_db[0] + 0.5)])
 
-        return self.setWrite(PozyxRegisters.UWB_GAIN, doublegain_dB, remote_id)
+        return self.setWrite(PozyxRegisters.UWB_GAIN, doublegain_db, remote_id)
 
-    def setTxPower(self, txgain_dB, remote_id=None):
+    def setTxPower(self, txgain_db, remote_id=None):
         """DEPRECATED: use getUWBGain instead. Set the Pozyx's UWB transceiver gain.
 
         Args:
-            txgain_dB: The new transceiver gain in dB, a value between 0.0 and 33.0.
+            txgain_db: The new transceiver gain in dB, a value between 0.0 and 33.0.
                 float gain or Data([gain], 'f').
             remote_id (optional): Remote Pozyx ID.
 
@@ -1866,14 +1865,13 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         warn("setTxPower is deprecated, use setUWBGain instead", DeprecationWarning)
-        return self.setUWBGain(txgain_dB, remote_id)
+        return self.setUWBGain(txgain_db, remote_id)
 
     def getNetworkId(self, network_id):
         """Obtains the Pozyx's network ID.
 
         Args:
             network_id: Container for the read data.  NetworkID() or SingleRegister(size=2) or Data([0], 'H').
-            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -1912,34 +1910,34 @@ class PozyxLib(PozyxCore):
             return POZYX_FAILURE
         return status
 
-    def getUWBGain(self, uwb_gain_dB, remote_id=None):
+    def getUWBGain(self, uwb_gain_db, remote_id=None):
         """Obtains the Pozyx's transmitter UWB gain in dB, as a float.
 
         Args:
-            uwb_gain_dB: Container for the read data. Data([0], 'f').
+            uwb_gain_db: Container for the read data. Data([0], 'f').
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        doublegain_dB = SingleRegister()
+        doublegain_db = SingleRegister()
         status = self.getRead(
-            PozyxRegisters.UWB_GAIN, doublegain_dB, remote_id)
-        uwb_gain_dB[0] = 0.5 * doublegain_dB[0]
+            PozyxRegisters.UWB_GAIN, doublegain_db, remote_id)
+        uwb_gain_db[0] = 0.5 * doublegain_db[0]
         return status
 
-    def getTxPower(self, txgain_dB, remote_id=None):
+    def getTxPower(self, txgain_db, remote_id=None):
         """DEPRECATED: use getUWBGain instead. Obtains the Pozyx's transmitter UWB gain in dB, as a float.
 
         Args:
-            txgain_dB: Container for the read data. Data([0], 'f').
+            txgain_db: Container for the read data. Data([0], 'f').
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         warn("getTxPower is deprecated, use getUWBGain instead", DeprecationWarning)
-        return self.getUWBGain(txgain_dB, remote_id)
+        return self.getUWBGain(txgain_db, remote_id)
 
     def getLastNetworkId(self, network_id, remote_id=None):
         """Obtain the network ID of the last device Pozyx communicated with.
@@ -1994,7 +1992,8 @@ class PozyxLib(PozyxCore):
             registers = Data([])
         if not dataCheck(registers):
             registers = Data(registers)
-        assert save_type in [PozyxConstants.FLASH_SAVE_REGISTERS, PozyxConstants.FLASH_SAVE_ANCHOR_IDS, PozyxConstants.FLASH_SAVE_NETWORK], 'saveConfiguration: invalid type'
+        assert save_type in [PozyxConstants.FLASH_SAVE_REGISTERS, PozyxConstants.FLASH_SAVE_ANCHOR_IDS,
+                             PozyxConstants.FLASH_SAVE_NETWORK], 'saveConfiguration: invalid type'
         assert save_type == PozyxConstants.FLASH_SAVE_REGISTERS or len(
             registers) == 0, 'saveConfiguration: #regs > 0 and not a reg save'
         assert save_type != PozyxConstants.FLASH_SAVE_REGISTERS or len(
