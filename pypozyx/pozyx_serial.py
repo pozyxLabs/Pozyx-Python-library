@@ -172,6 +172,10 @@ class PozyxSerial(PozyxLib):
 
     def connectToPozyx(self, port, baudrate, timeout, write_timeout):
         """Attempts to connect to the Pozyx via a serial connection"""
+        self.port = port
+        self.baudrate = baudrate
+        self.timeout = timeout
+        self.write_timeout = write_timeout
 
         try:
             if is_correct_pyserial_version():
@@ -195,7 +199,6 @@ class PozyxSerial(PozyxLib):
         whoami = SingleRegister()
         if self.getWhoAmI(whoami) != POZYX_SUCCESS:
             raise PozyxConnectionError("Connected to device, but couldn't read serial data. Is it a Pozyx?")
-
         if whoami.value != 0x43:
             raise PozyxConnectionError("POZYX_WHO_AM_I returned 0x%0.2x, something is wrong with Pozyx." % whoami.value)
 

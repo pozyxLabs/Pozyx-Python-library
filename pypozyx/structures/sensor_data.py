@@ -5,7 +5,7 @@ from math import sqrt
 
 from pypozyx.definitions.constants import PozyxConstants
 from pypozyx.structures.byte_structure import ByteStructure
-from pypozyx.structures.generic import XYZ, SingleSensorValue
+from pypozyx.structures.generic import XYZ, SingleSensorValue, SingleRegister
 
 
 class Coordinates(XYZ):
@@ -22,7 +22,7 @@ class Coordinates(XYZ):
 
 class Acceleration(XYZ):
     """Container for acceleration in x, y, and z (in mg)."""
-    physical_convert = PozyxConstants.POZYX_ACCEL_DIV_MG
+    physical_convert = PozyxConstants.ACCELERATION_DIV_MG
 
     byte_size = 6
     data_format = 'hhh'
@@ -30,7 +30,7 @@ class Acceleration(XYZ):
 
 class Magnetic(XYZ):
     """Container for coordinates in x, y, and z (in uT)."""
-    physical_convert = PozyxConstants.POZYX_MAG_DIV_UT
+    physical_convert = PozyxConstants.MAGNETOMETER_DIV_UT
 
     byte_size = 6
     data_format = 'hhh'
@@ -38,7 +38,7 @@ class Magnetic(XYZ):
 
 class AngularVelocity(XYZ):
     """Container for angular velocity in x, y, and z (in dps)."""
-    physical_convert = PozyxConstants.POZYX_GYRO_DIV_DPS
+    physical_convert = PozyxConstants.GYRO_DIV_DPS
 
     byte_size = 6
     data_format = 'hhh'
@@ -46,7 +46,7 @@ class AngularVelocity(XYZ):
 
 class LinearAcceleration(XYZ):
     """Container for linear acceleration in x, y, and z (in mg), as floats."""
-    physical_convert = PozyxConstants.POZYX_ACCEL_DIV_MG
+    physical_convert = PozyxConstants.ACCELERATION_DIV_MG
 
     byte_size = 6
     data_format = 'hhh'
@@ -95,7 +95,7 @@ class PositionError(XYZ):
 
 class Quaternion(XYZ):
     """Container for quaternion data in x, y, z and w."""
-    physical_convert = PozyxConstants.POZYX_QUAT_DIV
+    physical_convert = PozyxConstants.QUATERNION_DIV
 
     byte_size = 8
     data_format = 'hhhh'
@@ -140,14 +140,14 @@ class Quaternion(XYZ):
 
 
 class MaxLinearAcceleration(SingleSensorValue):
-    physical_convert = PozyxConstants.POZYX_MAX_LIN_ACCEL_DIV_MG
+    physical_convert = PozyxConstants.MAX_LINEAR_ACCELERATION_DIV_MG
 
     byte_size = 2
     data_format = 'h'
 
 
 class Temperature(SingleSensorValue):
-    physical_convert = PozyxConstants.POZYX_TEMP_DIV_CELSIUS
+    physical_convert = PozyxConstants.TEMPERATURE_DIV_CELSIUS
 
     byte_size = 1
     data_format = 'b'
@@ -157,7 +157,7 @@ class Temperature(SingleSensorValue):
 
 
 class Pressure(SingleSensorValue):
-    physical_convert = PozyxConstants.POZYX_PRESS_DIV_PA
+    physical_convert = PozyxConstants.PRESSURE_DIV_PA
 
     byte_size = 4
     data_format = 'I'
@@ -165,7 +165,7 @@ class Pressure(SingleSensorValue):
 
 class EulerAngles(ByteStructure):
     """Container for euler angles as heading, roll, and pitch (in degrees)."""
-    physical_convert = PozyxConstants.POZYX_EULER_DIV_DEG
+    physical_convert = PozyxConstants.EULER_ANGLES_DIV_DEG
 
     byte_size = 6
     data_format = 'hhh'
@@ -273,3 +273,113 @@ class RawSensorData(SensorData):
 
     def load(self, data):
         SensorData.load(self, data, convert=False)
+
+
+class CoordinatesWithStatus(ByteStructure):
+    """Container for coordinates in x, y, and z (in mm)."""
+    byte_size = 13
+    data_format = 'iiiB'
+
+    def __init__(self, x=0, y=0, z=0, status=False):
+        """Initializes the XYZ or XYZ-derived object."""
+        self.x = x
+        self.y = y
+        self.z = z
+        self.status = status
+        self.data = [x, y, z, status]
+
+    def load(self, data, convert=False):
+        self.data = data
+        self.x = data[0]
+        self.y = data[1]
+        self.z = data[2]
+        self.status = data[3]
+
+    def update_data(self):
+        try:
+            if self.data != [self.x, self.y, self.z, self.status]:
+                self.data = [self.x, self.y, self.z, self.status]
+        except:
+            return
+
+    def __str__(self):
+        return 'STATUS: {self.status}, X: {self.x}, Y: {self.y}, Z: {self.z}'.format(self=self)
+
+
+class RangeInformation(ByteStructure):
+    byte_size = 6
+    data_format = 'HI'
+
+    def __init__(self, device_id=0, distance=0):
+        self.device_id = device_id
+        self.distance = distance
+        self.data = [device_id, distance]
+
+    def load(self, data, convert=0):
+        self.data = data
+        self.device_id = data[0]
+        self.distance = data[1]
+
+    def update_data(self):
+        try:
+            if self.data != [self.device_id, self.distance]:
+                self.data = [self.device_id, self.distance]
+        except:
+            return
+
+    def __str__(self):
+        return "0x%0.4x: %d mm" % (self.device_id, self.distance)
+
+
+class PositioningData(ByteStructure):
+    SENSOR_ORDER = [CoordinatesWithStatus, Acceleration, AngularVelocity, Magnetic, EulerAngles, Quaternion,
+                    LinearAcceleration, Acceleration, Pressure, MaxLinearAcceleration]
+
+    def __init__(self, flags):
+        self.data = [0]
+        self.flags = flags
+        self.containers = []
+        self.byte_size = 0
+        self.data_format = ''
+
+        self.set_data_structures()
+
+    def add_sensor(self, sensor_class):
+        self.byte_size += sensor_class.byte_size
+        self.data_format += sensor_class.data_format
+        self.containers.append(sensor_class())
+
+    def set_data_structures(self):
+        self.containers = []
+        self.byte_size = 0
+        self.data_format = ''
+
+        for index, sensor in enumerate(self.SENSOR_ORDER):
+            if self.flags & (1 << index):
+                self.add_sensor(sensor)
+
+        if self.has_ranges():
+            self.byte_size += 1
+            self.data_format += 'B'
+            self.containers.append(SingleRegister())
+
+    def set_amount_of_ranges(self, amount_of_ranges):
+        if self.has_ranges():
+            for i in range(amount_of_ranges):
+                self.add_sensor(RangeInformation)
+
+    def has_ranges(self):
+        return self.flags & (1 << 15)
+
+    def load_bytes(self, byte_data):
+        """Loads a hex byte array in the structure's data"""
+        self.byte_data = byte_data
+        self.bytes_to_data()
+
+    def load(self, data, convert=0):
+        self.data = data
+        data_index = 0
+        for container in self.containers:
+            data_length = len(container.data_format)
+            container.load(data[data_index:data_index + data_length])
+            data_index += data_length
