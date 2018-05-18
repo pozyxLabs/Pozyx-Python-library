@@ -20,16 +20,15 @@ from pythonosc.udp_client import SimpleUDPClient
 class MultitagPositioning(object):
     """Continuously performs multitag positioning"""
 
-    def __init__(self, pozyx, osc_udp_client, tags, anchors, algorithm=POZYX_POS_ALG_UWB_ONLY, dimension=POZYX_3D, height=1000, remote_id=None):
+    def __init__(self, pozyx, osc_udp_client, tag_ids, anchors, algorithm=POZYX_POS_ALG_UWB_ONLY, dimension=POZYX_3D, height=1000):
         self.pozyx = pozyx
         self.osc_udp_client = osc_udp_client
 
-        self.tags = tags
+        self.tag_ids = tag_ids
         self.anchors = anchors
         self.algorithm = algorithm
         self.dimension = dimension
         self.height = height
-        self.remote_id = remote_id
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
@@ -43,31 +42,31 @@ class MultitagPositioning(object):
         print()
         print("System will auto start positioning")
         print()
-        self.pozyx.printDeviceInfo(self.remote_id)
         print()
         print("------------POZYX MULTITAG POSITIONING V1.1 ------------")
         print()
 
-
         self.setAnchorsManual()
+
         self.printPublishAnchorConfiguration()
 
     def loop(self):
         """Performs positioning and prints the results."""
-        for tag in self.tags:
+        for tag_id in self.tag_ids:
             position = Coordinates()
             status = self.pozyx.doPositioning(
-                position, self.dimension, self.height, self.algorithm, remote_id=tag)
+                position, self.dimension, self.height, self.algorithm, remote_id=tag_id)
             if status == POZYX_SUCCESS:
-                self.printPublishPosition(position, tag)
+                self.printPublishPosition(position, tag_id)
             else:
-                self.printPublishErrorCode("positioning", tag)
+                self.printPublishErrorCode("positioning", tag_id)
 
     def printPublishPosition(self, position, network_id):
         """Prints the Pozyx's position and possibly sends it as a OSC packet"""
         if network_id is None:
             network_id = 0
-        s = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}".format("0x%0.4x" % network_id, position.x, position.y, position.z)
+        s = "POS ID: {}, x(mm): {}, y(mm): {}, z(mm): {}".format("0x%0.4x" % network_id,
+                                                                 position.x, position.y, position.z)
         print(s)
         if self.osc_udp_client is not None:
             self.osc_udp_client.send_message(
@@ -75,7 +74,7 @@ class MultitagPositioning(object):
 
     def setAnchorsManual(self):
         """Adds the manually measured anchors to the Pozyx's device list one for one."""
-        for tag in self.tags:
+        for tag in self.tag_ids:
             status = self.pozyx.clearDevices(tag)
             for anchor in self.anchors:
                 status &= self.pozyx.addDevice(anchor, tag)
@@ -98,7 +97,7 @@ class MultitagPositioning(object):
     def printPublishErrorCode(self, operation, network_id):
         """Prints the Pozyx's error and possibly sends it as a OSC packet"""
         error_code = SingleRegister()
-        status = self.pozyx.getErrorCode(error_code, self.remote_id)
+        status = self.pozyx.getErrorCode(error_code, network_id)
         if network_id is None:
             network_id = 0
         if status == POZYX_SUCCESS:
@@ -130,11 +129,6 @@ if __name__ == "__main__":
         print("No Pozyx connected. Check your USB cable or your driver!")
         quit()
 
-    remote_id = 0x1000                     # remote device network ID
-    remote = False                         # whether to use a remote device
-    if not remote:
-        remote_id = None
-
     use_processing = True               # enable to send position data through OSC
     ip = "127.0.0.1"                       # IP for the OSC UDP
     network_port = 8888                    # network port for the OSC UDP
@@ -159,7 +153,7 @@ if __name__ == "__main__":
 
     pozyx = PozyxSerial(serial_port)
     r = MultitagPositioning(pozyx, osc_udp_client, tags, anchors,
-                            algorithm, dimension, height, remote_id)
+                            algorithm, dimension, height)
     r.setup()
     while True:
         r.loop()

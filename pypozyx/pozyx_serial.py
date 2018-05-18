@@ -172,6 +172,10 @@ class PozyxSerial(PozyxLib):
 
     def connectToPozyx(self, port, baudrate, timeout, write_timeout):
         """Attempts to connect to the Pozyx via a serial connection"""
+        self.port = port
+        self.baudrate = baudrate
+        self.timeout = timeout
+        self.write_timeout = write_timeout
 
         try:
             if is_correct_pyserial_version():

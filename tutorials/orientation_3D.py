@@ -20,7 +20,7 @@ The data can be viewed in the Processing sketch orientation_3D.pde
 """
 from time import time
 
-from pypozyx import SensorData, SingleRegister, POZYX_SUCCESS, get_first_pozyx_serial_port, PozyxSerial
+from pypozyx import SensorData, SingleRegister, POZYX_SUCCESS, get_first_pozyx_serial_port, PozyxSerial, get_serial_ports
 from pypozyx.definitions.bitmasks import POZYX_INT_MASK_IMU
 from pythonosc.osc_message_builder import OscMessageBuilder
 from pythonosc.udp_client import SimpleUDPClient
@@ -91,7 +91,7 @@ if __name__ == '__main__':
         print("No Pozyx connected. Check your USB cable or your driver!")
         quit()
 
-    remote_id = 0x6069                    # remote device network ID
+    remote_id = 0x6e66                    # remote device network ID
     remote = False                         # whether to use a remote device
     if not remote:
         remote_id = None
