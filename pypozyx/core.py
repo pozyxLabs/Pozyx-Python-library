@@ -173,6 +173,16 @@ class PozyxCore:
             'You need to override this function in your derived interface!')
 
     def waitForFlag_safe(self, interrupt_flag, timeout_s, interrupt=None):
+        """Performs waitForFlag in polling mode.
+
+        Args:
+            interrupt_flag: Flag of interrupt type to check the interrupt register against.
+            timeout_s: duration to wait for the interrupt in seconds.
+            interrupt (optional): Container for the interrupt status register data.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
         if not self.suppress_warnings:
             warn("waitForFlag_safe is deprecated, use waitForFlagSafe instead")
         return self.waitForFlagSafe(interrupt_flag, timeout_s, interrupt)
@@ -183,9 +193,7 @@ class PozyxCore:
         Args:
             interrupt_flag: Flag of interrupt type to check the interrupt register against.
             timeout_s: duration to wait for the interrupt in seconds.
-
-        Kwags:
-            interrupt: Container for the interrupt status register data.
+            interrupt (optional): Container for the interrupt status register data.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -210,11 +218,9 @@ class PozyxCore:
         Args:
             address: The register address
             data: A ByteStructure - derived object that contains the data to be written.
-
-        Kwargs:
-            remote_id: Remote ID for remote read.
-            local_delay: Delay after a local write
-            remote_delay: Delay after a remote write
+            remote_id (optional): Remote ID for remote read.
+            local_delay (optional): Delay after a local write
+            remote_delay (optional): Delay after a remote write
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -300,9 +306,7 @@ class PozyxCore:
         Args:
             interrupt_flag: Flag of interrupt type to check the interrupt register against.
             timeout_s: duration to wait for the interrupt in seconds
-
-        Kwargs:
-            interrupt: Container for the interrupt status register data.
+            interrupt (optional): Container for the interrupt status register data.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -328,9 +332,7 @@ class PozyxCore:
 
         Args:
             data: Container for the data to be read from the receiver buffer.
-
-        Kwargs:
-            offset: Offset of where in the RX buffer to start read
+            offset (optional): Offset of where in the RX buffer to start read
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -361,9 +363,7 @@ class PozyxCore:
 
         Args:
             data: Data to write to the Pozyx buffer. Has to be a ByteStructure derived object.
-
-        Kwargs:
-            offset: Offset in buffer to start writing data
+            offset (optional): Offset in buffer to start writing data
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
@@ -432,6 +432,15 @@ class PozyxCore:
     # Not a TODO but see if these can be chained to make huge and slow DIY chains by adding remote_id
     # make wrapper for this remote remote communication?
     def sendTX(self, destination, operation):
+        """Sends the data in the transmit buffer to destination ID. Helper for sendData.
+
+        Args:
+            destination: Network ID of destination. integer ID or NetworkID(ID)
+            operation: Type of TX operation. These vary depending on the desired operation.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
         if dataCheck(destination):
             destination = destination[0]
         return self.regFunction(PozyxRegisters.SEND_TX_DATA, TXInfo(destination, operation), Data([]))
@@ -463,9 +472,7 @@ class PozyxCore:
 
         Args:
             interrupts: Container for the read data. SingleRegister or Data([0]).
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -477,9 +484,7 @@ class PozyxCore:
 
         Args:
             rx_info: Container for the RX Info, Data or RXInfo
-
-        Kwargs:
-            remote_id: Remote Pozyx ID.
+            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
