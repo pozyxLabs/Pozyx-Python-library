@@ -13,3 +13,5 @@ use the following code:
     >>> from pypozyx.definitions.bitmasks import * # or specific bitmasks for best practice
 """
 from pypozyx.definitions.constants import *
+from pypozyx.definitions.bitmasks import PozyxBitmasks
+from pypozyx.definitions.registers import PozyxRegisters

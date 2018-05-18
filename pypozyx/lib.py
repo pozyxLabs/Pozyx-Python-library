@@ -3,12 +3,11 @@
 
 from time import sleep
 from pypozyx.core import PozyxCore
-from pypozyx.definitions.bitmasks import *
-from pypozyx.definitions.constants import *
-from pypozyx.definitions.registers import *
-from pypozyx.structures.device import *
+from pypozyx.definitions import (PozyxBitmasks, PozyxRegisters, PozyxConstants, POZYX_SUCCESS, POZYX_FAILURE,
+                                 POZYX_TIMEOUT, ERROR_MESSAGES)
+from pypozyx.structures.device import NetworkID, UWBSettings, DeviceList, Coordinates, RXInfo, DeviceCoordinates
 from pypozyx.structures.generic import Data, SingleRegister, dataCheck
-from pypozyx.structures.sensor_data import *
+from pypozyx.structures.sensor_data import PositioningData, RangeInformation
 
 from warnings import warn
 
@@ -30,9 +29,6 @@ class PozyxLib(PozyxCore):
     work as a great reference.
     """
 
-    def __init__(self):
-        pass
-
     # \addtogroup system_functions
     # @{
 
@@ -40,7 +36,7 @@ class PozyxLib(PozyxCore):
         """Set the Pozyx's sensor mode.
 
         Args:
-            sensor_mode: New sensor mode. See POZYX_SENSORS_MODE register. integer sensor_mode or SingleRegister(sensor_mode).
+            sensor_mode: New sensor mode. See PozyxRegisters.SENSORS_MODE register. integer sensor_mode or SingleRegister(sensor_mode).
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
@@ -50,9 +46,9 @@ class PozyxLib(PozyxCore):
             sensor_mode = SingleRegister(sensor_mode)
         assert sensor_mode[0] >= 0 and sensor_mode[
             0] <= 12, 'setSensorMode: mode %i not in range (0-12)' % sensor_mode
-        status = self.setWrite(POZYX_SENSORS_MODE, sensor_mode, remote_id)
+        status = self.setWrite(PozyxRegisters.SENSORS_MODE, sensor_mode, remote_id)
         # legacy delay?
-        sleep(POZYX_DELAY_MODE_CHANGE)
+        sleep(PozyxConstants.DELAY_MODE_CHANGE)
         return status
 
     def resetSystem(self, remote_id=None):
@@ -64,7 +60,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.useFunction(POZYX_RESET_SYS, remote_id=remote_id)
+        return self.useFunction(PozyxRegisters.RESET_SYSTEM, remote_id=remote_id)
 
     def saveRegisters(self, registers, remote_id=None):
         """Saves the given registers to the Pozyx's flash memory, if these are writable registers.
@@ -84,7 +80,7 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         return self.saveConfiguration(
-            POZYX_FLASH_REGS, registers, remote_id)
+            PozyxConstants.FLASH_SAVE_REGISTERS, registers, remote_id)
 
     def getNumRegistersSaved(self, remote_id=None):
         """Obtains the number of registers saved to the Pozyx's flash memory.
@@ -96,29 +92,30 @@ class PozyxLib(PozyxCore):
             The number of saved registers.
         """
         details = Data([0] * 20)
-        if self.useFunction(POZYX_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
+        if self.useFunction(PozyxRegisters.GET_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
             return POZYX_FAILURE
 
-        num = 0
+        number_of_saved_registers = 0
         for i in range(20):
             for j in range(8):
-                num += (details[i] >> j) & 0x1
-        return num
+                number_of_saved_registers += (details[i] >> j) & 0x1
+        return number_of_saved_registers
 
-    def isRegisterSaved(self, regAddress, remote_id=None):
+    def isRegisterSaved(self, register_address, remote_id=None):
         """Returns whether the given register is saved to the Pozyx's flash memory.
 
         Args:
+            register_address: Register address to check if saved
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             1 if the register is saved, 0 if it's not.
         """
         details = Data([0] * 20)
-        if self.useFunction(POZYX_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
+        if self.useFunction(PozyxRegisters.GET_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
             return POZYX_FAILURE
-        byte_num = int(regAddress / 8)
-        bit_num = regAddress % 8
+        byte_num = int(register_address / 8)
+        bit_num = register_address % 8
         return (details[byte_num] >> bit_num) & 0x1
 
     def setConfigGPIO(self, gpio_num, mode, pull, remote_id=None):
@@ -137,13 +134,13 @@ class PozyxLib(PozyxCore):
             mode = SingleRegister(mode)
         if not dataCheck(pull):
             pull = SingleRegister(pull)
-        assert gpio_num > 0 and gpio_num <= 4, 'setConfigGPIO: GPIO number %i not in range' % gpio_num
-        assert mode[0] == POZYX_GPIO_DIGITAL_INPUT or mode[0] == POZYX_GPIO_PUSHPULL or mode[
-            0] == POZYX_GPIO_OPENDRAIN, 'setConfigGPIO: wrong mode'
-        assert pull[0] == POZYX_GPIO_NOPULL or mode[0] == POZYX_GPIO_PULLUP or mode[
-            0] == POZYX_GPIO_PULLDOWN, 'setConfigGPIO: wrong pull/mode'
+        assert 1 <= gpio_num <= 4, 'setConfigGPIO: GPIO number %i not in range' % gpio_num
+        assert mode[0] in [PozyxConstants.GPIO_DIGITAL_INPUT, PozyxConstants.GPIO_PUSH_PULL,
+                           PozyxConstants.GPIO_OPEN_DRAIN], 'setConfigGPIO: wrong mode'
+        assert pull[0] in [PozyxConstants.GPIO_NO_PULL, PozyxConstants.GPIO_PULL_UP,
+                           PozyxConstants.GPIO_PULL_DOWN], 'setConfigGPIO: wrong pull'
 
-        gpio_register = POZYX_CONFIG_GPIO1 + gpio_num - 1
+        gpio_register = PozyxRegisters.CONFIG_GPIO_1 + gpio_num - 1
         mask = Data([mode[0] + (pull[0] << 3)])
         return self.setWrite(gpio_register, mask, remote_id)
 
@@ -160,11 +157,11 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(value):
             value = SingleRegister(value)
-        assert gpio_num >= 1 and gpio_num <= 4, 'setGPIO: GPIO number %i out of bounds' % gpio_num
+        assert 1 <= gpio_num <= 4, 'setGPIO: GPIO number %i out of bounds' % gpio_num
         assert value[0] == 0 or value[
             0] == 1, 'setGPIO: wrong value %i' % value
 
-        gpio_register = POZYX_GPIO1 + gpio_num - 1
+        gpio_register = PozyxRegisters.GPIO_1 + gpio_num - 1
         return self.setWrite(gpio_register, value, remote_id)
 
     def setLed(self, led_num, state, remote_id=None):
@@ -178,12 +175,12 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert led_num >= 1 and led_num <= 4, 'setLed: led number %i not in range 1-4' % led_num
+        assert 1 <= led_num <= 4, 'setLed: led number %i not in range 1-4' % led_num
         assert state is True or state is False, 'setLed: wrong state'
 
         params = Data([0x1 << (led_num - 1 + 4) |
                        ((state << led_num - 1) % 256)])
-        return self.useFunction(POZYX_LED_CTRL, params, None, remote_id)
+        return self.useFunction(PozyxRegisters.LED_CONTROL, params, None, remote_id)
 
     def clearConfiguration(self, remote_id=None):
         """Clears the Pozyx's flash memory.
@@ -196,16 +193,16 @@ class PozyxLib(PozyxCore):
         """
         self.getInterruptStatus(SingleRegister())
         status = self.useFunction(
-            POZYX_FLASH_RESET, remote_id=remote_id)
+            PozyxRegisters.RESET_FLASH_MEMORY, remote_id=remote_id)
         if status == POZYX_FAILURE:
             print("Error clearing the flash memory")
             return status
         # give the device some time to clear the flash memory
-        sleep(POZYX_DELAY_FLASH)
+        sleep(PozyxConstants.DELAY_FLASH)
         return status
 
     def configInterruptPin(self, pin=0, mode=0, active_high=False, latch=False, remote_id=None):
-        """Configures the interrupt pin via the POZYX_INT_CONFIG register.
+        """Configures the interrupt pin via the PozyxRegisters.INTERRUPT_PIN register.
 
         Args:
             pin (optional): The Pozyx's pin ID. 1 to 4 on anchor, 1 to 6 on tag. 0 means no pin. SingleRegister or integer.
@@ -220,23 +217,22 @@ class PozyxLib(PozyxCore):
             pin = pin[0]
         if dataCheck(mode):
             mode = mode[0]
-        assert pin <= 6 and pin >= 0, 'Error: Pin number %i is incorrect, should be between 0 and 6' % pin
+        assert 0 <= pin <= 6, 'Error: Pin number %i is incorrect, should be between 0 and 6' % pin
         assert mode == 0 or mode == 1, 'Error: Mode is incorrect, should be 0 (PUSH-PULL) or 1 (PULL).'
-        int_config = SingleRegister(
-            pin + (mode << 3) + (active_high << 4) + (latch << 5))
-        self.setWrite(POZYX_INT_CONFIG, int_config, remote_id)
+        int_config = SingleRegister(pin + (mode << 3) + (active_high << 4) + (latch << 5))
+        self.setWrite(PozyxRegisters.INTERRUPT_PIN, int_config, remote_id)
 
-    def getWhoAmI(self, whoami, remote_id=None):
+    def getWhoAmI(self, who_am_i, remote_id=None):
         """Obtains the Pozyx's WHO_AM_I.
 
         Args:
-            whoami: Container for the read data. SingleRegister or Data([0]).
+            who_am_i: Container for the read data. SingleRegister or Data([0]).
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_WHO_AM_I, whoami, remote_id)
+        return self.getRead(PozyxRegisters.WHO_AM_I, who_am_i, remote_id)
 
     def getFirmwareVersion(self, firmware, remote_id=None):
         """Obtains the Pozyx's firmware version.
@@ -248,7 +244,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_FIRMWARE_VER, firmware, remote_id)
+        return self.getRead(PozyxRegisters.FIRMWARE_VERSION, firmware, remote_id)
 
     def getHardwareVersion(self, hardware, remote_id=None):
         """Obtains the Pozyx's hardware version.
@@ -260,7 +256,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_HARDWARE_VER, hardware, remote_id)
+        return self.getRead(PozyxRegisters.HARDWARE_VERSION, hardware, remote_id)
 
     def getSelftest(self, selftest, remote_id=None):
         """Obtains the Pozyx's selftest.
@@ -272,7 +268,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_ST_RESULT, selftest, remote_id)
+        return self.getRead(PozyxRegisters.SELFTEST_RESULT, selftest, remote_id)
 
     def getErrorCode(self, error_code, remote_id=None):
         """Obtains the Pozyx's error code.
@@ -284,7 +280,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_ERRORCODE, error_code, remote_id)
+        return self.getRead(PozyxRegisters.ERROR_CODE, error_code, remote_id)
 
     def getCalibrationStatus(self, calibration_status, remote_id=None):
         """Obtains the Pozyx's calibration status.
@@ -296,7 +292,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_CALIB_STATUS, calibration_status, remote_id)
+        return self.getRead(PozyxRegisters.CALIBRATION_STATUS, calibration_status, remote_id)
 
     def getInterruptMask(self, mask, remote_id=None):
         """Obtains the Pozyx's interrupt mask.
@@ -308,7 +304,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_INT_MASK, mask, remote_id)
+        return self.getRead(PozyxRegisters.INTERRUPT_MASK, mask, remote_id)
 
     def getConfigModeGPIO(self, gpio_num, mode, remote_id=None):
         """Obtain the Pozyx's configuration mode of the selected GPIO pin.
@@ -325,7 +321,7 @@ class PozyxLib(PozyxCore):
             getGPIO, getConfigPullGPIO
         """
         assert gpio_num > 0 or gpio_num <= 4, 'getConfigModeGPIO: GPIO number incorrect'
-        gpio_register = POZYX_CONFIG_GPIO1 + gpio_num - 1
+        gpio_register = PozyxRegisters.CONFIG_GPIO_1 + gpio_num - 1
         status = self.getRead(gpio_register, mode, remote_id)
         mode[0] &= 0x7
         return status
@@ -345,7 +341,7 @@ class PozyxLib(PozyxCore):
             getGPIO, getConfigModeGPIO
         """
         assert gpio_num > 0 or gpio_num <= 4, 'getConfigPullGPIO: GPIO number incorrect'
-        gpio_register = POZYX_CONFIG_GPIO1 + gpio_num - 1
+        gpio_register = PozyxRegisters.CONFIG_GPIO_1 + gpio_num - 1
         status = self.getRead(gpio_register, pull, remote_id)
         pull[0] = (pull[0] & 0x18) >> 3
         return status
@@ -365,7 +361,7 @@ class PozyxLib(PozyxCore):
             getConfigPullGPIO, getConfigModeGPIO
         """
         assert gpio_num > 0 or gpio_num <= 4, 'getGPIO: GPIO number incorrect'
-        gpio_register = POZYX_GPIO1 + gpio_num - 1
+        gpio_register = PozyxRegisters.GPIO_1 + gpio_num - 1
         return self.getRead(gpio_register, value, remote_id)
 
     def getErrorMessage(self, error_code):
@@ -382,7 +378,7 @@ class PozyxLib(PozyxCore):
         """
         if dataCheck(error_code):
             error_code = error_code.value
-        return ERROR_CODES.get(error_code, "Unknown error 0x%0.02x" % error_code)
+        return ERROR_MESSAGES.get(error_code, "Unknown error 0x%0.02x" % error_code)
 
     def getSystemError(self, remote_id=None):
         """Returns the Pozyx's system error string.
@@ -407,7 +403,7 @@ class PozyxLib(PozyxCore):
         """Set the Pozyx's interrupt mask.
 
         Args:
-            mask: Interrupt mask. See POZYX_INT_MASK register. integer mask or SingleRegister(mask)
+            mask: Interrupt mask. See PozyxRegisters.INTERRUPT_MASK register. integer mask or SingleRegister(mask)
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
@@ -415,13 +411,13 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(mask):
             mask = SingleRegister(mask)
-        return self.setWrite(POZYX_INT_MASK, mask, remote_id)
+        return self.setWrite(PozyxRegisters.INTERRUPT_MASK, mask, remote_id)
 
     def setLedConfig(self, config, remote_id=None):
         """Set the Pozyx's LED configuration.
 
         Args:
-            config: LED configuration. See POZYX_CONFIG_LEDS register. integer configuration or SingleRegister(configuration)
+            config: LED configuration. See PozyxRegisters.LED_CONFIGURATION register. integer configuration or SingleRegister(configuration)
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
@@ -429,7 +425,7 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(config):
             config = SingleRegister(config)
-        return self.setWrite(POZYX_CONFIG_LEDS, config, remote_id)
+        return self.setWrite(PozyxRegisters.LED_CONFIGURATION, config, remote_id)
 
     ## @}
 
@@ -447,7 +443,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        self.saveConfiguration(POZYX_FLASH_ANCHOR_IDS, remote_id=remote_id)
+        self.saveConfiguration(PozyxConstants.FLASH_SAVE_ANCHOR_IDS, remote_id=remote_id)
 
     def getUpdateInterval(self, ms, remote_id=None):
         """Obtains the Pozyx's update interval.
@@ -459,7 +455,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_POS_INTERVAL, ms, remote_id)
+        return self.getRead(PozyxRegisters.POSITIONING_INTERVAL, ms, remote_id)
 
     def getRangingProtocol(self, protocol, remote_id=None):
         """Obtains the Pozyx's ranging protocol
@@ -471,19 +467,19 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_RANGE_PROTOCOL, protocol, remote_id)
+        return self.getRead(PozyxRegisters.RANGING_PROTOCOL, protocol, remote_id)
 
     def setRangingProtocolFast(self, remote_id=None):
-        return self.setRangingProtocol(PozyxConstants.POZYX_RANGE_PROTOCOL_FAST, remote_id=remote_id)
+        return self.setRangingProtocol(PozyxConstants.RANGE_PROTOCOL_FAST, remote_id=remote_id)
 
     def setRangingProtocolPrecision(self, remote_id=None):
-        return self.setRangingProtocol(PozyxConstants.POZYX_RANGE_PROTOCOL_PRECISION, remote_id=remote_id)
+        return self.setRangingProtocol(PozyxConstants.RANGE_PROTOCOL_PRECISION, remote_id=remote_id)
 
     def setRangingProtocol(self, protocol, remote_id=None):
         """Set the Pozyx's ranging protocol.
 
         Args:
-            protocol: the new ranging protocol. See POZYX_RANGE_PROTOCOL register. integer or SingleRegister(protocol)
+            protocol: the new ranging protocol. See PozyxRegisters.RANGING_PROTOCOL register. integer or SingleRegister(protocol)
             remote_id (optional): Remote Pozyx ID
 
         Returns:
@@ -491,9 +487,9 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(protocol):
             protocol = SingleRegister(protocol)
-        assert protocol[0] >= 0 and protocol[0] <= 2, 'setRangingProtocol: wrong protocol %i' % protocol[0]
+        assert 0 <= protocol[0] <= 2, 'setRangingProtocol: wrong protocol %i' % protocol[0]
 
-        return self.setWrite(POZYX_RANGE_PROTOCOL, protocol, remote_id)
+        return self.setWrite(PozyxRegisters.RANGING_PROTOCOL, protocol, remote_id)
 
     def getPositionAlgorithm(self, algorithm, remote_id=None):
         """Obtains the Pozyx's positioning algorithm.
@@ -505,7 +501,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        status = self.getRead(POZYX_POS_ALG, algorithm, remote_id)
+        status = self.getRead(PozyxRegisters.POSITIONING_ALGORITHM, algorithm, remote_id)
         algorithm[0] &= 0xF
         return status
 
@@ -519,7 +515,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        status = self.getRead(POZYX_POS_ALG, dimension, remote_id)
+        status = self.getRead(PozyxRegisters.POSITIONING_ALGORITHM, dimension, remote_id)
         dimension[0] = (dimension[0] & 0x30) >> 4
         return status
 
@@ -533,7 +529,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        status = self.getRead(POZYX_POS_NUM_ANCHORS, mode, remote_id)
+        status = self.getRead(PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS, mode, remote_id)
         mode[0] = (mode[0] & 0x80) >> 7
         return status
 
@@ -547,7 +543,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        status = self.getRead(POZYX_POS_NUM_ANCHORS, nr_anchors, remote_id)
+        status = self.getRead(PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS, nr_anchors, remote_id)
         nr_anchors[0] &= 0xF
         return status
 
@@ -561,7 +557,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_OPERATION_MODE, mode, remote_id)
+        return self.getRead(PozyxRegisters.OPERATION_MODE, mode, remote_id)
 
     def getCoordinates(self, coordinates, remote_id=None):
         """Obtains the Pozyx's coordinates. These are either set manually or by positioning.
@@ -573,7 +569,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_POS_X, coordinates, remote_id)
+        return self.getRead(PozyxRegisters.POSITION_X, coordinates, remote_id)
 
     def getHeight(self, height, remote_id=None):
         """Obtains the Pozyx's height coordinate.
@@ -585,7 +581,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_POS_Z, height, remote_id)
+        return self.getRead(PozyxRegisters.POSITION_Z, height, remote_id)
 
     def getPositionError(self, pos_error, remote_id=None):
         """Obtains the Pozyx's positioning error.
@@ -597,7 +593,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_POS_ERR_X, pos_error, remote_id)
+        return self.getRead(PozyxRegisters.POSITIONING_ERROR_X, pos_error, remote_id)
 
     def getPositioningAnchorIds(self, anchors, remote_id=None):
         """Obtain the IDs of the anchors in the Pozyx's device list used for positioning.
@@ -631,7 +627,7 @@ class PozyxLib(PozyxCore):
         status = self.getDeviceListSize(device_list_size, remote_id)
         if len(anchors) < device_list_size[0] or status == POZYX_FAILURE:
             return POZYX_FAILURE
-        return self.useFunction(POZYX_POS_GET_ANCHOR_IDS, Data([]), anchors, remote_id)
+        return self.useFunction(PozyxRegisters.GET_POSITIONING_ANCHOR_IDS, Data([]), anchors, remote_id)
 
     def getDeviceRangeInfo(self, device_id, device_range, remote_id=None):
         """Obtain the range information of the device with selected ID in the Pozyx's device list.
@@ -648,7 +644,7 @@ class PozyxLib(PozyxCore):
         if not dataCheck(device_id):
             device_id = NetworkID(device_id)
         assert device_id[0] != 0, 'getDeviceRangeInfo: device ID = 0'
-        return self.useFunction(POZYX_DEVICE_GETRANGEINFO, device_id, device_range, remote_id)
+        return self.useFunction(PozyxRegisters.GET_DEVICE_RANGE_INFO, device_id, device_range, remote_id)
 
     def setUpdateInterval(self, ms, remote_id=None):
         """Set the Pozyx's update interval in ms(milliseconds).
@@ -664,7 +660,7 @@ class PozyxLib(PozyxCore):
             ms = SingleRegister(ms, size=2)
         assert ms[0] > 100 and ms[
             0] <= 600000, 'setUpdateInterval: ms not 100<ms<60000'
-        return self.setWrite(POZYX_POS_INTERVAL, ms, remote_id)
+        return self.setWrite(PozyxRegisters.POSITIONING_INTERVAL, ms, remote_id)
 
     def setCoordinates(self, coordinates, remote_id=None):
         """Set the Pozyx's coordinates.
@@ -679,7 +675,7 @@ class PozyxLib(PozyxCore):
         if not dataCheck(coordinates):
             coordinates = Coordinates(
                 coordinates[0], coordinates[1], coordinates[2])
-        return self.setWrite(POZYX_POS_X, coordinates, remote_id)
+        return self.setWrite(PozyxRegisters.POSITION_X, coordinates, remote_id)
 
     def setHeight(self, height, remote_id=None):
         """Sets the Pozyx device's height.
@@ -693,34 +689,7 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(height):
             height = Data([height], 'i')
-        return self.setWrite(POZYX_POS_Z, height, remote_id=remote_id)
-
-
-    def setConfigGPIO(self, gpio_num, mode, pull, remote_id=None):
-        """Set the Pozyx's selected GPIO pin configuration(mode and pull).
-
-        Args:
-            gpio_num: GPIO pin number, 1 to 4.
-            mode: GPIO configuration mode. integer mode or SingleRegister(mode)
-            pull: GPIO configuration pull. integer pull or SingleRegister(pull)
-            remote_id (optional): Remote Pozyx ID.
-
-        Returns:
-            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
-        """
-        if not dataCheck(mode):
-            mode = SingleRegister(mode)
-        if not dataCheck(pull):
-            pull = SingleRegister(pull)
-        assert gpio_num > 0 and gpio_num <= 4, 'setConfigGPIO: GPIO number %i not in range' % gpio_num
-        assert mode[0] == POZYX_GPIO_DIGITAL_INPUT or mode[0] == POZYX_GPIO_PUSHPULL or mode[
-            0] == POZYX_GPIO_OPENDRAIN, 'setConfigGPIO: wrong mode'
-        assert pull[0] == POZYX_GPIO_NOPULL or mode[0] == POZYX_GPIO_PULLUP or mode[
-            0] == POZYX_GPIO_PULLDOWN, 'setConfigGPIO: wrong pull/mode'
-
-        gpio_register = POZYX_CONFIG_GPIO1 + gpio_num - 1
-        mask = Data([mode[0] + (pull[0] << 3)])
-        return self.setWrite(gpio_register, mask, remote_id)
+        return self.setWrite(PozyxRegisters.POSITION_Z, height, remote_id=remote_id)
 
     def setPositioningFilterNone(self, remote_id=None):
         return self.setPositionFilter(PozyxConstants.FILTER_TYPE_NONE, SingleRegister(), remote_id=remote_id)
@@ -729,15 +698,15 @@ class PozyxLib(PozyxCore):
         return self.setPositionFilter(PozyxConstants.FILTER_TYPE_FIR, filter_strength, remote_id=remote_id)
 
     def setPositioningFilterMovingMedian(self, filter_strength, remote_id=None):
-        return self.setPositionFilter(PozyxConstants.FILTER_TYPE_MOVINGMEDIAN, filter_strength, remote_id=remote_id)
+        return self.setPositionFilter(PozyxConstants.FILTER_TYPE_MOVING_MEDIAN, filter_strength, remote_id=remote_id)
 
     def setPositioningFilterMovingAverage(self, filter_strength, remote_id=None):
-        return self.setPositionFilter(PozyxConstants.FILTER_TYPE_MOVINGAVERAGE, filter_strength, remote_id=remote_id)
+        return self.setPositionFilter(PozyxConstants.FILTER_TYPE_MOVING_AVERAGE, filter_strength, remote_id=remote_id)
 
     def setPositionFilter(self, filter_type, filter_strength, remote_id=None):
         """Set the Pozyx's positioning filter.
 
-        Note that currently only FILTER_TYPE_MOVINGAVERAGE, FILTER_TYPE_MOVINGMEDIAN and FILTER_TYPE_FIR are implemented.
+        Note that currently only PozyxConstants.FILTER_TYPE_MOVING_AVERAGE, PozyxConstants.FILTER_TYPE_MOVING_MEDIAN and PozyxConstants.FILTER_TYPE_FIR are implemented.
 
         Args:
             filter_type: Positioning filter type. Integer or SingleRegister.
@@ -751,27 +720,27 @@ class PozyxLib(PozyxCore):
             filter_strength = SingleRegister(filter_strength)
         if not dataCheck(filter_type):
             filter_type = SingleRegister(filter_type)
-        assert filter_type[0] == FILTER_TYPE_MOVINGAVERAGE or filter_type[
-            0] == FILTER_TYPE_MOVINGMEDIAN or filter_type[0] == FILTER_TYPE_FIR or filter_type[0] == FILTER_TYPE_NONE, 'setPositionFilter: wrong filter type'
-        assert filter_strength[0] >= 0 or filter_strength[0] < 16, 'setPositionFilter: wrong strength'
+        assert filter_type[0] in [PozyxConstants.FILTER_TYPE_MOVING_AVERAGE, PozyxConstants.FILTER_TYPE_MOVING_MEDIAN,
+                                  PozyxConstants.FILTER_TYPE_FIR, PozyxConstants.FILTER_TYPE_NONE], 'setPositionFilter: wrong filter type'
+        assert 0 <= filter_strength[0] <= 15, 'setPositionFilter: wrong strength'
 
         params = Data([filter_type[0] + (filter_strength[0] << 4)])
-        return self.setWrite(POZYX_POS_FILTER, params, remote_id)
+        return self.setWrite(PozyxRegisters.POSITIONING_FILTER, params, remote_id)
 
     def setPositionAlgorithmNormal(self, remote_id=None):
         dimension = SingleRegister()
         self.getPositionDimension(dimension, remote_id=remote_id)
-        return self.setPositionAlgorithm(PozyxConstants.POZYX_POS_ALG_UWB_ONLY, dimension, remote_id=remote_id)
+        return self.setPositionAlgorithm(PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY, dimension, remote_id=remote_id)
 
     def setPositionAlgorithmTracking(self, remote_id=None):
         dimension = SingleRegister()
         self.getPositionDimension(dimension, remote_id=remote_id)
-        return self.setPositionAlgorithm(PozyxConstants.POZYX_POS_ALG_TRACKING, dimension, remote_id=remote_id)
+        return self.setPositionAlgorithm(PozyxConstants.POSITIONING_ALGORITHM_TRACKING, dimension, remote_id=remote_id)
 
     def setPositionAlgorithm(self, algorithm, dimension, remote_id=None):
         """Set the Pozyx's positioning algorithm.
 
-        Note that currently only POZYX_POS_ALG_UWB_ONLY and POZYX_POS_ALG_TRACKING are implemented.
+        Note that currently only PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY and PozyxConstants.POSITIONING_ALGORITHM_TRACKING are implemented.
 
         Args:
             algorithm: Positioning algorithm. integer algorithm or SingleRegister(algorithm).
@@ -785,31 +754,26 @@ class PozyxLib(PozyxCore):
             algorithm = SingleRegister(algorithm)
         if not dataCheck(dimension):
             dimension = SingleRegister(dimension)
-        assert algorithm[0] == POZYX_POS_ALG_UWB_ONLY or algorithm[0] == POZYX_POS_ALG_TRACKING, 'setPositionAlgorithm: wrong algorithm'
-        assert dimension[0] == POZYX_3D or dimension[0] == POZYX_2D or dimension[
-            0] == POZYX_2_5D, 'setPositionAlgorithm: wrong dimension'
+        assert algorithm[0] in [PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY,
+                                PozyxConstants.POSITIONING_ALGORITHM_TRACKING], 'setPositionAlgorithm: wrong algorithm'
+        assert dimension[0] in [PozyxConstants.DIMENSION_3D, PozyxConstants.DIMENSION_2D,
+                                PozyxConstants.DIMENSION_2_5D], 'setPositionAlgorithm: wrong dimension'
 
         params = Data([algorithm[0] + (dimension[0] << 4)])
-        return self.setWrite(POZYX_POS_ALG, params, remote_id)
-
-    def savePositioningSettings(self, remote_id=None):
-        # Height is included because it will be overwritten if not 2.5D and used if 2.5D.
-        registers_to_save = [PozyxRegisters.POZYX_POS_FILTER, PozyxRegisters.POZYX_POS_ALG,
-                             PozyxRegisters.POZYX_RANGE_PROTOCOL, PozyxRegisters.POZYX_POS_Z]
-        return self.saveRegisters(registers_to_save, remote_id=remote_id)
+        return self.setWrite(PozyxRegisters.POSITIONING_ALGORITHM, params, remote_id)
 
     def setSelectionOfAnchorsAutomatic(self, number_of_anchors, remote_id=None):
-        return self.setSelectionOfAnchors(PozyxConstants.POZYX_ANCHOR_SEL_AUTO, number_of_anchors, remote_id=remote_id)
+        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SEL_AUTO, number_of_anchors, remote_id=remote_id)
 
     def setSelectionOfAnchorsManual(self, number_of_anchors, remote_id=None):
-        return self.setSelectionOfAnchors(PozyxConstants.POZYX_ANCHOR_SEL_MANUAL, number_of_anchors, remote_id=remote_id)
+        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SEL_MANUAL, number_of_anchors, remote_id=remote_id)
 
     def setSelectionOfAnchors(self, mode, number_of_anchors, remote_id=None):
         """Set the Pozyx's coordinates.
 
         Args:
             mode: Anchor selection mode. integer mode or SingleRegister(mode).
-            number_of_anchors: Number of anchors used in positioning. integer nr_anchors or SingleRegister(nr_anchors).
+            number_of_anchors (int, SingleRegister): Number of anchors used in positioning. integer nr_anchors or SingleRegister(nr_anchors).
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
@@ -819,13 +783,12 @@ class PozyxLib(PozyxCore):
             mode = SingleRegister(mode)
         if not dataCheck(number_of_anchors):
             number_of_anchors = SingleRegister(number_of_anchors)
-        assert mode[0] == POZYX_ANCHOR_SEL_MANUAL or mode[
-            0] == POZYX_ANCHOR_SEL_AUTO, 'setSelectionOfAnchors: wrong mode'
-        assert number_of_anchors[0] > 2 and number_of_anchors[
-            0] <= 16, 'setSelectionOfAnchors: num anchors %i not in range 3-16' % number_of_anchors[0]
+        assert mode[0] == PozyxConstants.ANCHOR_SEL_MANUAL or mode[
+            0] == PozyxConstants.ANCHOR_SEL_AUTO, 'setSelectionOfAnchors: wrong mode'
+        assert 2 < number_of_anchors[0] <= 16, 'setSelectionOfAnchors: num anchors %i not in range 3-16' % number_of_anchors[0]
 
         params = Data([(mode[0] << 7) + number_of_anchors[0]])
-        return self.setWrite(POZYX_POS_NUM_ANCHORS, params, remote_id)
+        return self.setWrite(PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS, params, remote_id)
 
     def setPositioningAnchorIds(self, anchors, remote_id=None):
         """Set the anchors the Pozyx will use for positioning.
@@ -842,7 +805,7 @@ class PozyxLib(PozyxCore):
         assert len(anchors) > 0 and len(
             anchors) <= 10, 'setPositioningAnchorIds: anchor_num %i out of range' % len(anchors)
 
-        return self.useFunction(POZYX_POS_SET_ANCHOR_IDS, anchors, None, remote_id)
+        return self.useFunction(PozyxRegisters.SET_POSITIONING_ANCHOR_IDS, anchors, None, remote_id)
 
     def doRanging(self, destination, device_range, remote_id=None):
         """Performs ranging with another destination device, resulting in range information.
@@ -872,20 +835,20 @@ class PozyxLib(PozyxCore):
         if not dataCheck(destination):
             destination = NetworkID(destination)
 
-        int_flag = POZYX_INT_STATUS_FUNC
+        int_flag = PozyxBitmasks.INT_STATUS_FUNC
         if remote_id is not None:
-            int_flag = POZYX_INT_STATUS_RX_DATA
+            int_flag = PozyxBitmasks.INT_STATUS_RX_DATA
 
         status = self.useFunction(
-            POZYX_DO_RANGING, destination, Data([]), remote_id)
+            PozyxRegisters.DO_RANGING, destination, Data([]), remote_id)
         if status == POZYX_SUCCESS:
-            status = self.checkForFlag(int_flag, POZYX_DELAY_INTERRUPT)
+            status = self.checkForFlag(int_flag, PozyxConstants.DELAY_INTERRUPT)
             if status == POZYX_SUCCESS:
                 self.getDeviceRangeInfo(destination, device_range, remote_id)
             return status
         return POZYX_FAILURE
 
-    def doPositioning(self, position, dimension=POZYX_3D, height=Data([0], 'i'), algorithm=None, remote_id=None):
+    def doPositioning(self, position, dimension=PozyxConstants.DIMENSION_3D, height=Data([0], 'i'), algorithm=None, remote_id=None):
         """Performs positioning with the Pozyx. This is probably why you're using Pozyx.
 
         This function only performs the positioning and doesn't take care of the previous steps
@@ -916,33 +879,40 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert algorithm == POZYX_POS_ALG_UWB_ONLY or algorithm == POZYX_POS_ALG_TRACKING or algorithm is None, 'doPositioning: wrong algorithm'
-        assert dimension == POZYX_3D or dimension == POZYX_2D or dimension == POZYX_2_5D, 'doPositioning: wrong dimension'
+        assert algorithm in [PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY, PozyxConstants.POSITIONING_ALGORITHM_TRACKING, None], 'doPositioning: wrong algorithm'
+        assert dimension in [PozyxConstants.DIMENSION_3D, PozyxConstants.DIMENSION_2D, PozyxConstants.DIMENSION_2_5D], 'doPositioning: wrong dimension'
 
         if algorithm is not None:
             alg_options = Data([dimension << 4 | algorithm])
-            status = self.setWrite(POZYX_POS_ALG, alg_options, remote_id)
-        if dimension == POZYX_2_5D:
+            self.setWrite(PozyxRegisters.POSITIONING_ALGORITHM, alg_options, remote_id)
+        if dimension == PozyxConstants.DIMENSION_2_5D:
             if not dataCheck(height):
                 height = Data([height], 'i')
-            status = self.setWrite(POZYX_POS_Z, height, remote_id)
+            self.setWrite(PozyxRegisters.POSITION_Z, height, remote_id)
 
-        self.getInterruptStatus(SingleRegister())
+        firmware_version = SingleRegister()
+        self.getFirmwareVersion(firmware_version)
+        if firmware_version.value > 0x11:
+            position_data = PositioningData(0b1)
+            status = self.doPositioningWithData(position_data, remote_id=remote_id)
+            if status == POZYX_SUCCESS:
+                position.load_bytes(position_data.byte_data)
+            return status
 
-        status = self.useFunction(POZYX_DO_POSITIONING, remote_id=remote_id)
+        status = self.useFunction(PozyxRegisters.DO_POSITIONING, remote_id=remote_id, params=Data([1], "H"))
         if status != POZYX_SUCCESS:
             return POZYX_FAILURE
 
         if remote_id is None:
             status = self.checkForFlag(
-                POZYX_INT_STATUS_POS, POZYX_DELAY_POSITIONING)
+                PozyxBitmasks.INT_STATUS_POS, PozyxConstants.TIMEOUT_POSITIONING)
             if status == POZYX_SUCCESS:
                 return self.getCoordinates(position)
             return status
         else:
-            if self.waitForFlag(POZYX_INT_STATUS_RX_DATA, POZYX_DELAY_REMOTE_POSITIONING) == POZYX_SUCCESS:
+            if self.waitForFlag(PozyxBitmasks.INT_STATUS_RX_DATA, PozyxConstants.TIMEOUT_REMOTE_POSITIONING) == POZYX_SUCCESS:
                 rx_info = Data([0, 0], 'HB')
-                self.getRead(POZYX_RX_NETWORK_ID, rx_info)
+                self.getRead(PozyxRegisters.RX_NETWORK_ID, rx_info)
                 if rx_info[0] == remote_id and rx_info[1] == position.byte_size:
                     status = self.readRXBufferData(position)
                     # necessary to update x, y, z variables of position.
@@ -952,7 +922,124 @@ class PozyxLib(PozyxCore):
                     return POZYX_FAILURE
         return POZYX_TIMEOUT
 
+    def getPositioningData(self, positioning_data: PositioningData):
+        flags = Data([positioning_data.flags], 'H')
+        flags.load_hex_string()
+        s = 'F,%0.2x,%s,%i\r' % (PozyxRegisters.DO_POSITIONING_WITH_DATA, flags.byte_data, positioning_data.byte_size + 61)
+        # very custom solution...
+        r = self.serialExchange(s)
+        if positioning_data.has_ranges():
+            amount_of_ranges = int(r[2 * positioning_data.byte_size:2 * positioning_data.byte_size + 2], 16)
+            positioning_data.set_amount_of_ranges(amount_of_ranges)
+            r = r[: positioning_data.byte_size * 2 + 2]
+        if len(positioning_data) > 0:
+            positioning_data.load_bytes(r[2:])
+        return int(r[0:2], 16)
+
+    def doPositioningWithData(self, positioning_data, remote_id=None):
+        if remote_id is None:
+            status = self.useFunction(PozyxRegisters.DO_POSITIONING)
+
+            if status != POZYX_SUCCESS:
+                return POZYX_FAILURE
+            status = self.checkForFlag(PozyxBitmasks.INT_STATUS_POS, PozyxConstants.TIMEOUT_POSITIONING)
+            if status == POZYX_SUCCESS:
+                return self.getPositioningData(positioning_data)
+            return status
+        else:
+            flags_data = Data([positioning_data.flags], 'H')
+            self.remoteRegFunctionWithoutCheck(remote_id, PozyxRegisters.DO_POSITIONING, flags_data)
+
+            status = self.waitForFlag(PozyxBitmasks.INT_STATUS_RX_DATA, PozyxConstants.TIMEOUT_POSITIONING)
+            if status == POZYX_SUCCESS:
+                rx_info = RXInfo()
+                self.getRxInfo(rx_info)
+
+                if positioning_data.has_ranges():
+                    amount_of_ranges = int(
+                        (rx_info.amount_of_bytes - positioning_data.byte_size) / RangeInformation.byte_size)
+                    positioning_data.set_amount_of_ranges(amount_of_ranges)
+
+                if rx_info.remote_id == remote_id:
+                    status = self.readRXBufferData(positioning_data)
+                    return status
+                else:
+                    return POZYX_FAILURE
+            return status
+
     ## @}
+
+    def waitForFlagSafeFast(self, interrupt_flag, timeout_s, interrupt=None):
+        from time import time, sleep
+        if interrupt is None:
+            interrupt = SingleRegister()
+        start = time()
+        while (time() - start) < timeout_s:
+            sleep(PozyxConstants.DELAY_POLLING * 0.33)
+            status = self.getInterruptStatus(interrupt)
+            if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
+                return True
+        return False
+
+    def checkForFlagFast(self, interrupt_flag, timeout_s, interrupt=None):
+        if interrupt is None:
+            interrupt = SingleRegister()
+        error_interrupt_mask = PozyxBitmasks.INT_MASK_ERR
+        if self.waitForFlagSafeFast(interrupt_flag | error_interrupt_mask, timeout_s, interrupt):
+            if (interrupt[0] & error_interrupt_mask) == error_interrupt_mask:
+                return POZYX_FAILURE
+            else:
+                return POZYX_SUCCESS
+        else:
+            return PozyxConstants.STATUS_TIMEOUT
+
+
+    def getReceivedData(self, destination, address, params, data):
+        pass
+
+    def remoteRegFunctionOnlyData(self, destination, address, params, data):
+        send_data = Data([0, address] + params.data, 'BB' + params.data_format)
+        status = self.regFunction(PozyxRegisters.WRITE_TX_DATA, send_data, Data([]))
+        if status != POZYX_SUCCESS:
+            return status
+
+        self.getInterruptStatus(SingleRegister())
+        status = self.sendTXFunction(destination)
+        if status != POZYX_SUCCESS:
+            return status
+
+        status = self.checkForFlagFast(PozyxBitmasks.INT_STATUS_RX_DATA, 1)
+        if status == POZYX_SUCCESS:
+            rx_info = RXInfo()
+            self.getRxInfo(rx_info)
+            if rx_info.remote_id == destination and rx_info.amount_of_bytes == 4:
+                return_data = Data([0], 'I')
+                self.readRXBufferData(return_data)
+                return return_data[0]
+
+        status = self.checkForFlagFast(PozyxBitmasks.INT_STATUS_RX_DATA, 1)
+        if status == POZYX_SUCCESS:
+            rx_info = RXInfo()
+            self.getRxInfo(rx_info)
+            if rx_info.remote_id == destination and rx_info.amount_of_bytes == 4:
+                return_data = Data([0], 'I')
+                self.readRXBufferData(return_data)
+                return return_data[0]
+
+    def rangingWithoutCheck(self, destination, device_range, remote_id=None):
+        assert destination != 0, "doRanging: destination can't equal zero"
+        if not dataCheck(destination):
+            destination = NetworkID(destination)
+
+        if remote_id is None:
+            return self.doRanging(destination, device_range, remote_id=remote_id)
+
+        distance = self.remoteRegFunctionOnlyData(remote_id, PozyxRegisters.DO_RANGING, destination, Data([]))
+
+        if distance is not None:
+            device_range.distance = distance
+            return POZYX_SUCCESS
+        return POZYX_FAILURE
 
     ## \addtogroup sensor_data
     # @{
@@ -967,7 +1054,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_SENSORS_MODE, sensor_mode, remote_id)
+        return self.getRead(PozyxRegisters.SENSORS_MODE , sensor_mode, remote_id)
 
     def getAllSensorData(self, sensor_data, remote_id=None):
         """Obtains all the Pozyx's sensor data in their default units.
@@ -979,7 +1066,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_PRESSURE, sensor_data, remote_id)
+        return self.getRead(PozyxRegisters.PRESSURE, sensor_data, remote_id)
 
     def getPressure_Pa(self, pressure, remote_id=None):
         """Obtain the Pozyx's pressure sensor data in Pa(pascal).
@@ -991,11 +1078,11 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        status = self.getRead(POZYX_PRESSURE, pressure, remote_id)
+        status = self.getRead(PozyxRegisters.PRESSURE, pressure, remote_id)
         if pressure.__class__.__name__ == "Data":
             warn("Using Data instance in getPressure_Pa is deprecated, use Pressure instead",
                  DeprecationWarning)
-            pressure[0] = pressure[0] / POZYX_PRESS_DIV_PA
+            pressure[0] = pressure[0] / PozyxConstants.PRESSURE_DIV_PA
         return status
 
     def getMaxLinearAcceleration_mg(self, max_linear_acceleration, remote_id=None):
@@ -1008,7 +1095,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_ACCEL_X, max_linear_acceleration, remote_id)
+        return self.getRead(PozyxRegisters.MAX_LINEAR_ACCELERATION, max_linear_acceleration, remote_id)
 
     def getAcceleration_mg(self, acceleration, remote_id=None):
         """Obtain the Pozyx's acceleration sensor data in mg.
@@ -1020,7 +1107,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_ACCEL_X, acceleration, remote_id)
+        return self.getRead(PozyxRegisters.ACCELERATION_X, acceleration, remote_id)
 
     def getMagnetic_uT(self, magnetic, remote_id=None):
         """Obtain the Pozyx's magnetic sensor data in uT(microtesla).
@@ -1032,7 +1119,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_MAGN_X, magnetic, remote_id)
+        return self.getRead(PozyxRegisters.MAGNETIC_X, magnetic, remote_id)
 
     def getAngularVelocity_dps(self, angular_vel, remote_id=None):
         """Obtain the Pozyx's angular velocity sensor data in dps(degrees per second).
@@ -1044,7 +1131,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_GYRO_X, angular_vel, remote_id)
+        return self.getRead(PozyxRegisters.GYRO_X, angular_vel, remote_id)
 
     def getEulerAngles_deg(self, euler_angles, remote_id=None):
         """Obtain the Pozyx's euler angles sensor data in degrees(heading, roll, pitch).
@@ -1056,7 +1143,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_EUL_HEADING, euler_angles, remote_id)
+        return self.getRead(PozyxRegisters.EULER_ANGLE_HEADING, euler_angles, remote_id)
 
     def getNormalizedQuaternion(self, quaternion, remote_id=None):
         """Obtain the Pozyx's normalized quaternion sensor data that is required for ROS.
@@ -1083,7 +1170,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_QUAT_W, quaternion, remote_id)
+        return self.getRead(PozyxRegisters.QUATERNION_W, quaternion, remote_id)
 
     def getLinearAcceleration_mg(self, linear_acceleration, remote_id=None):
         """Obtain the Pozyx's linear acceleration sensor data in mg.
@@ -1095,7 +1182,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_LIA_X, linear_acceleration, remote_id)
+        return self.getRead(PozyxRegisters.LINEAR_ACCELERATION_X, linear_acceleration, remote_id)
 
     def getGravityVector_mg(self, gravity_vector, remote_id=None):
         """Obtain the Pozyx's gravity vector sensor data in mg.
@@ -1107,7 +1194,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_GRAV_X, gravity_vector, remote_id)
+        return self.getRead(PozyxRegisters.GRAVITY_VECTOR_X, gravity_vector, remote_id)
 
     def getTemperature_c(self, temperature, remote_id=None):
         """Obtain the Pozyx's temperature sensor data in C(celsius).
@@ -1120,11 +1207,11 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         status = self.getRead(
-            POZYX_TEMPERATURE, temperature, remote_id)
+            PozyxRegisters.TEMPERATURE, temperature, remote_id)
         if temperature.__class__.__name__ == "Data" or temperature.__class__.__name__ == "SingleRegister":
             warn("Using Data or SingleRegister instance in getTemperature_c is deprecated, use Temperature instead",
                  DeprecationWarning)
-            temperature[0] = temperature[0] / POZYX_TEMP_DIV_CELSIUS
+            temperature[0] = temperature[0] / PozyxConstants.TEMPERATURE_DIV_CELSIUS
         return status
 
     ##  @}
@@ -1142,7 +1229,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_DEVICE_LIST_SIZE, device_list_size, remote_id)
+        return self.getRead(PozyxRegisters.DEVICE_LIST_SIZE, device_list_size, remote_id)
 
     def getDeviceIds(self, devices, remote_id=None):
         """Obtain the IDs of all devices in the Pozyx's device list.
@@ -1182,7 +1269,7 @@ class PozyxLib(PozyxCore):
         params = Data([0, list_size[0]])
 
         return self.useFunction(
-            POZYX_DEVICES_GETIDS, params, devices, remote_id)
+            PozyxRegisters.GET_DEVICE_LIST_IDS, params, devices, remote_id)
 
     def getAnchorIds(self, anchors, remote_id=None):
         """Obtain the IDs of the anchors in the Pozyx's device list.
@@ -1208,7 +1295,7 @@ class PozyxLib(PozyxCore):
             return POZYX_FAILURE
         devices = DeviceList(list_size=list_size)
         status = self.useFunction(
-            POZYX_DEVICES_GETIDS, Data([]), devices, remote_id)
+            PozyxRegisters.GET_DEVICE_LIST_IDS, Data([]), devices, remote_id)
 
         if status == POZYX_SUCCESS:
             for i in range(len(anchors)):
@@ -1217,9 +1304,9 @@ class PozyxLib(PozyxCore):
             for i in range(list_size[0]):
                 data = Data([0] * 3)
                 status &= self.useFunction(
-                    POZYX_DEVICE_GETINFO, NetworkID(devices[i]), data)
+                    PozyxRegisters.GET_DEVICE_INFO, NetworkID(devices[i]), data)
                 # why + 1?
-                if data[2] == POZYX_ANCHOR_MODE + 1:
+                if data[2] == PozyxConstants.ANCHOR_MODE + 1:
                     anchors[j] = devices[i]
                     j += 1
             # didn't find enough anchors, so the function failed.
@@ -1251,7 +1338,7 @@ class PozyxLib(PozyxCore):
             return POZYX_FAILURE
         devices = DeviceList(list_size=list_size[0])
         status = self.useFunction(
-            POZYX_DEVICES_GETIDS, Data([]), devices, remote_id)
+            PozyxRegisters.GET_DEVICE_LIST_IDS, Data([]), devices, remote_id)
 
         if status == POZYX_SUCCESS:
             for i in range(len(tags)):
@@ -1260,9 +1347,9 @@ class PozyxLib(PozyxCore):
             for i in range(list_size[0]):
                 data = Data([0] * 3)
                 status &= self.useFunction(
-                    POZYX_DEVICE_GETINFO, NetworkID(devices[i]), data)
+                    PozyxRegisters.GET_DEVICE_INFO, NetworkID(devices[i]), data)
                 # why + 1?
-                if data[2] == POZYX_TAG_MODE + 1:
+                if data[2] == PozyxConstants.TAG_MODE + 1:
                     tags[j] = devices[i]
                     j += 1
             # didn't find enough tags, so the function failed.
@@ -1286,15 +1373,15 @@ class PozyxLib(PozyxCore):
             device_id = NetworkID(device_id)
         assert device_id[0] != 0, 'getDeviceCoordinates: device ID = 0'
         return self.useFunction(
-            POZYX_DEVICE_GETCOORDS, device_id, coordinates, remote_id)
+            PozyxRegisters.GET_DEVICE_COORDINATES, device_id, coordinates, remote_id)
 
-    def doDiscovery(self, discovery_type=POZYX_DISCOVERY_ANCHORS_ONLY, slots=3, slot_duration=0.01, remote_id=None):
+    def doDiscovery(self, discovery_type=PozyxConstants.DISCOVERY_ANCHORS_ONLY, slots=3, slot_duration=0.01, remote_id=None):
         """Performs discovery on the Pozyx, which will let it discover other Pozyx devices with the same
         UWB settings in range.
 
         Args:
-            discovery_type (optional): Type of devices to discover, defaults to discovering the anchors. POZYX_DISCOVERY_ALL_DEVICES,
-                POZYX_DISCOVERY_TAGS_ONLY are alternatives.
+            discovery_type (optional): Type of devices to discover, defaults to discovering the anchors. PozyxConstants.DISCOVERY_ALL_DEVICES,
+                PozyxConstants.DISCOVERY_TAGS_ONLY are alternatives.
             slots (optional): Number of timeslots used in attempt to discover devices. Default is 3 slots.
             slot_duration (optional): Duration in seconds of each timeslot used in the discovery process. Default is 10 ms.
             remote_id (optional): Remote Pozyx ID.
@@ -1302,24 +1389,33 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert discovery_type == POZYX_DISCOVERY_TAGS_ONLY or discovery_type == POZYX_DISCOVERY_ANCHORS_ONLY or discovery_type == POZYX_DISCOVERY_ALL_DEVICES, 'doDiscovery: wrong type of discovery'
-        assert slots > 1 and slots < 10, 'doDiscovery: number of slots %i out of range' % slots
+        assert discovery_type == PozyxConstants.DISCOVERY_TAGS_ONLY or discovery_type == PozyxConstants.DISCOVERY_ANCHORS_ONLY or discovery_type == PozyxConstants.DISCOVERY_ALL_DEVICES, 'doDiscovery: wrong type of discovery'
+        assert 1 < slots < 10, 'doDiscovery: number of slots %i out of range' % slots
         assert slot_duration == 0 or int(slot_duration * 1000) > 5, 'doDiscovery: slot duration too short'
 
         self.getInterruptStatus(SingleRegister())
         params = Data([discovery_type, slots, int(slot_duration * 1000)])
 
         status = self.useFunction(
-            POZYX_DEVICES_DISCOVER, params, remote_id=remote_id)
+            PozyxRegisters.DO_DISCOVERY, params, remote_id=remote_id)
         if status == POZYX_FAILURE:
             return status
         timeout_s = slot_duration * (slots + 20)
         if remote_id is None:
-            return self.checkForFlag(POZYX_INT_STATUS_FUNC, timeout_s)
+            return self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, timeout_s)
         else:
             # give the remote device some time to perform its discovery.
             sleep(timeout_s)
         return status
+
+    def doOptimalDiscovery(self, discovery_type=PozyxConstants.DISCOVERY_ALL_DEVICES, slots=3):
+        """Performs a discovery with slot_duration optimised for the device's UWB settings."""
+        self.getInterruptStatus(SingleRegister())
+        params = Data([discovery_type, slots, 0])
+        status = self.useFunction(PozyxRegisters.DO_DISCOVERY, params)
+        if status != PozyxConstants.STATUS_SUCCESS:
+            return status
+        return self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, PozyxConstants.TIMEOUT_OPTIMAL_DISCOVERY)
 
     def doDiscoveryTags(self, slots=3, slot_duration=0.01, remote_id=None):
         """Performs tag discovery on the Pozyx, which will let it discover Pozyx tags with the same
@@ -1333,7 +1429,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.doDiscovery(discovery_type=POZYX_DISCOVERY_TAGS_ONLY, slots=slots,
+        return self.doDiscovery(discovery_type=PozyxConstants.DISCOVERY_TAGS_ONLY, slots=slots,
                                 slot_duration=slot_duration, remote_id=remote_id)
 
     def doDiscoveryAnchors(self, slots=3, slot_duration=0.01, remote_id=None):
@@ -1348,7 +1444,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.doDiscovery(discovery_type=POZYX_DISCOVERY_ANCHORS_ONLY, slots=slots,
+        return self.doDiscovery(discovery_type=PozyxConstants.DISCOVERY_ANCHORS_ONLY, slots=slots,
                                 slot_duration=slot_duration, remote_id=remote_id)
 
     def doDiscoveryAll(self, slots=3, slot_duration=0.01, remote_id=None):
@@ -1363,7 +1459,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.doDiscovery(discovery_type=POZYX_DISCOVERY_ALL_DEVICES, slots=slots,
+        return self.doDiscovery(discovery_type=PozyxConstants.DISCOVERY_ALL_DEVICES, slots=slots,
                                 slot_duration=slot_duration, remote_id=remote_id)
 
     def doAnchorCalibration(self, dimension, num_measurements, anchors, heights=None, remote_id=None):
@@ -1386,13 +1482,14 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert dimension == POZYX_2D or dimension == POZYX_2_5D, 'doAnchorCalibration: wrong dimension'
+        warn("Autocalibration will be removed from the library in favor of the much better external functionality in the Pozyx webapp.")
+        assert dimension == PozyxConstants.DIMENSION_2D or dimension == PozyxConstants.DIMENSION_2_5D, 'doAnchorCalibration: wrong dimension'
         assert num_measurements > 0, 'doAnchorCalibration: a negative number of measurements isn\'t allowed'
         assert len(anchors) >= 3 and len(
             anchors) <= 6, 'doAnchorCalibration: num anchors %i out of range 3-6' % len(anchors)
         if not dataCheck(anchors):
             anchors = DeviceList(anchors)
-        if dimension == POZYX_2_5D:
+        if dimension == PozyxConstants.DIMENSION_2_5D:
             if heights is None:
                 heights = [2000] * len(anchors)
             for i in range(len(anchors)):
@@ -1403,16 +1500,14 @@ class PozyxLib(PozyxCore):
         self.getInterruptStatus(SingleRegister())
         params = Data([dimension, num_measurements] +
                       anchors.data, 'BB' + anchors.data_format)
-        status = self.useFunction(
-            POZYX_DEVICES_CALIBRATE, params, remote_id=remote_id)
+        status = self.useFunction(0xC2, params, remote_id=remote_id)
 
         if remote_id is None:
-            return self.checkForFlag(POZYX_INT_STATUS_FUNC, 25000)
+            return self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, 25000)
         else:
             # give the remote device some time to perform calibration
             # has to be thoroughly tested
-            sleep(POZYX_DELAY_CALIBRATION *
-                  len(anchors) * num_measurements / 20)
+            sleep(1 * len(anchors) * num_measurements / 20)
         return status
 
     def clearDevices(self, remote_id=None):
@@ -1424,7 +1519,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.useFunction(POZYX_DEVICES_CLEAR, remote_id=remote_id)
+        return self.useFunction(PozyxRegisters.CLEAR_DEVICES, remote_id=remote_id)
 
     def addDevice(self, device_coordinates, remote_id=None):
         """Adds a device to the Pozyx's device list. Can be either a tag or anchor.
@@ -1440,7 +1535,7 @@ class PozyxLib(PozyxCore):
             device_coordinates = DeviceCoordinates(device_coordinates[0], device_coordinates[
                 1], Coordinates(device_coordinates[2], device_coordinates[3], device_coordinates[4]))
 
-        return self.useFunction(POZYX_DEVICE_ADD, device_coordinates, Data([]), remote_id)
+        return self.useFunction(PozyxRegisters.ADD_DEVICE, device_coordinates, Data([]), remote_id)
 
     def saveNetwork(self, remote_id=None):
         """Saves the Pozyx's device list to its flash memory.
@@ -1453,15 +1548,15 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        status = self.saveConfiguration(POZYX_FLASH_NETWORK, remote_id=remote_id)
-        status &= self.saveRegisters([POZYX_POS_NUM_ANCHORS],remote_id=remote_id)
+        status = self.saveConfiguration(PozyxConstants.FLASH_SAVE_NETWORK, remote_id=remote_id)
+        status &= self.saveRegisters([PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS],remote_id=remote_id)
         return status
 
-    def configureAnchors(self, anchor_list, anchor_select=POZYX_ANCHOR_SEL_AUTO, remote_id=None):
+    def configureAnchors(self, anchor_list, anchor_select=PozyxConstants.ANCHOR_SEL_AUTO, remote_id=None):
         """Configures a set of anchors as the relevant anchors on a device
 
         Args:
-            anchor_list: Python list of either DeviceCoordinates or [ID, flag, x, y, z]
+            anchor_list (list): Python list of either DeviceCoordinates or [ID, flag, x, y, z]
             anchor_select (optional): How to select the anchors in positioning
             remote_id (optional): Remote Pozyx ID
 
@@ -1482,6 +1577,7 @@ class PozyxLib(PozyxCore):
         if len(anchor_list) < 3 or len(anchor_list) > 16:
             warn("Not enough anchors to do positioning")
             return status
+
         return status & self.setSelectionOfAnchors(anchor_select, len(anchor_list), remote_id)
 
     def removeDevice(self, device_id, remote_id=None):
@@ -1582,6 +1678,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             remote_id (optional): Remote Pozyx ID
+            include_coordinates (bool, optional): Whether to include coordinates in the prints
 
         Returns:
             None
@@ -1617,7 +1714,7 @@ class PozyxLib(PozyxCore):
         """Saves the Pozyx's UWB settings to its flash memory.
 
         This means that upon a reset, the Pozyx will still have the same configured UWB settings.
-        As of writing, POZYX_UWB_GAIN is not savable yet.
+        As of writing, PozyxRegisters.UWB_GAIN is not savable yet.
 
         Args:
             remote_id (optional): Remote Pozyx ID.
@@ -1625,9 +1722,10 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        registers = [POZYX_UWB_CHANNEL, POZYX_UWB_RATES,
-                     POZYX_UWB_PLEN, POZYX_UWB_GAIN]
-        return self.saveRegisters(registers, remote_id)
+        return self.saveRegisters(PozyxRegisters.ALL_UWB_REGISTERS, remote_id)
+
+    def savePositioningSettings(self, remote_id=None):
+        return self.saveRegisters(PozyxRegisters.ALL_POSITIONING_REGISTERS, remote_id)
 
     def setNetworkId(self, network_id, remote_id=None):
         """Set the Pozyx's network ID.
@@ -1644,32 +1742,77 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(network_id):
             network_id = NetworkID(network_id)
-        return self.setWrite(POZYX_NETWORK_ID, network_id, remote_id)
+        return self.setWrite(PozyxRegisters.NETWORK_ID, network_id, remote_id)
 
-    def setUWBSettings(self, UWB_settings, remote_id=None):
-        """Set the Pozyx's UWB settings.
+    # TODO find new group for these four functions?
+    def remoteRegFunctionWithoutCheck(self, destination, address, params):
+        send_data = Data([0, address] + params.data, 'BB' + params.data_format)
+        status = self.regFunction(PozyxRegisters.WRITE_TX_DATA, send_data, Data([]))
+        if status == POZYX_FAILURE:
+            return status
+
+        self.getInterruptStatus(SingleRegister())
+
+        status = self.sendTXFunction(destination)
+        if status == POZYX_FAILURE:
+            return status
+
+        self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, 0.02)
+
+        return status
+
+    def setUWBSettings(self, uwb_settings: UWBSettings, remote_id=None):
+        """
+        Set the Pozyx's UWB settings.
 
         If using this remotely, remember to change the local UWB settings as well
         to make sure you are still able to communicate with the remote device.
 
         Args:
-            UWB_settings: The new UWB settings. UWBSettings() or [channel, bitrate, prf, plen, gain_db]
-            remote_id (optional): Remote Pozyx ID.
+            uwb_settings: The new UWB settings. UWBSettings() or [channel, bitrate, prf, plen, gain_db]
+
+        Kwargs:
+            remote_id: Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        if not dataCheck(UWB_settings):
-            UWB_settings = UWBSettings(UWB_settings[0], UWB_settings[1],
-                                       UWB_settings[2], UWB_settings[3], UWB_settings[4])
-        gain = Data([UWB_settings.gain_db], 'f')
-        UWB = Data([UWB_settings.channel, UWB_settings.bitrate +
-                    (UWB_settings.prf << 6), UWB_settings.plen])
-        status = self.setWrite(POZYX_UWB_CHANNEL, UWB, remote_id,
-                               2 * POZYX_DELAY_LOCAL_WRITE, 2 * POZYX_DELAY_REMOTE_WRITE)
-        if status == POZYX_FAILURE:
-            return status
-        return self.setUWBGain(gain, remote_id)
+        if not dataCheck(uwb_settings):
+            uwb_settings = UWBSettings(uwb_settings[0], uwb_settings[1],
+                                       uwb_settings[2], uwb_settings[3], uwb_settings[4])
+        gain = Data([uwb_settings.gain_db], 'f')
+        uwb = Data([uwb_settings.channel, uwb_settings.bitrate +
+                    (uwb_settings.prf << 6), uwb_settings.plen])
+
+        self.setWrite(PozyxRegisters.UWB_CHANNEL, uwb, remote_id,
+                      2 * PozyxConstants.DELAY_LOCAL_WRITE, 2 * PozyxConstants.DELAY_REMOTE_WRITE)
+
+        if remote_id is None:
+            return self.setUWBGain(gain, remote_id)
+        else:
+            return self.doFunctionOnDifferentUWB(self.setUWBGain, uwb_settings, gain, remote_id=remote_id)
+
+    def checkUWBSettings(self, suspected_uwb_settings, remote_id=None, equal_gain=True):
+        uwb = UWBSettings()
+
+        if remote_id is None:
+            self.getUWBSettings(uwb)
+        else:
+            self.doFunctionOnDifferentUWB(self.getUWBSettings, suspected_uwb_settings, uwb, remote_id=remote_id)
+
+        if equal_gain is not True:
+            uwb.gain_db = suspected_uwb_settings.gain_db
+        return uwb == suspected_uwb_settings
+
+    def doFunctionOnDifferentUWB(self, function, uwb_settings, *args, **kwargs):
+        original_uwb_settings = UWBSettings()
+        self.getUWBSettings(original_uwb_settings)
+
+        self.setUWBSettings(uwb_settings)
+        return_value = function(*args, **kwargs)
+        self.setUWBSettings(original_uwb_settings)
+
+        return return_value
 
     def setUWBChannel(self, channel_num, remote_id=None):
         """Set the Pozyx's UWB channel.
@@ -1679,7 +1822,7 @@ class PozyxLib(PozyxCore):
 
         Args:
             channel_num: The new UWB channel, being either 1, 2, 3, 4, 5 or 7.
-                See POZYX_UWB_CHANNEL register. integer channel or SingleRegister(channel)
+                See PozyxRegisters.UWB_CHANNEL register. integer channel or SingleRegister(channel)
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
@@ -1687,35 +1830,34 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(channel_num):
             channel_num = SingleRegister(channel_num)
-        assert channel_num[0] >= 1 and channel_num[0] <= 7 and channel_num[
-            0] != 6, 'setUWBChannel: %i is wrong channel number' % channel_num[0]
+        assert channel_num.value in PozyxConstants.ALL_UWB_CHANNELS, 'setUWBChannel: %i is wrong channel number' % channel_num[0]
 
-        return self.setWrite(POZYX_UWB_CHANNEL, channel_num, remote_id)
+        return self.setWrite(PozyxRegisters.UWB_CHANNEL, channel_num, remote_id)
 
-    def setUWBGain(self, uwb_gain_dB, remote_id=None):
+    def setUWBGain(self, uwb_gain_db, remote_id=None):
         """Set the Pozyx's UWB transceiver gain.
 
         Args:
-            uwb_gain_dB: The new transceiver gain in dB, a value between 0.0 and 33.0.
+            uwb_gain_db: The new transceiver gain in dB, a value between 0.0 and 33.0.
                 float gain or Data([gain], 'f').
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        if not dataCheck(uwb_gain_dB):
-            uwb_gain_dB = Data([uwb_gain_dB], 'f')
-        assert uwb_gain_dB[0] >= 0.0 and uwb_gain_dB[
-            0] <= 35.0, 'setUWBGain: TX gain %0.2fdB not in range (0-35dB)' % uwb_gain_dB[0]
-        doublegain_dB = Data([int(2.0 * uwb_gain_dB[0] + 0.5)])
+        if not dataCheck(uwb_gain_db):
+            uwb_gain_db = Data([uwb_gain_db], 'f')
+        assert uwb_gain_db[0] >= 0.0 and uwb_gain_db[
+            0] <= 35.0, 'setUWBGain: TX gain %0.2fdB not in range (0-35dB)' % uwb_gain_db[0]
+        doublegain_db = Data([int(2.0 * uwb_gain_db[0] + 0.5)])
 
-        return self.setWrite(POZYX_UWB_GAIN, doublegain_dB, remote_id)
+        return self.setWrite(PozyxRegisters.UWB_GAIN, doublegain_db, remote_id)
 
-    def setTxPower(self, txgain_dB, remote_id=None):
+    def setTxPower(self, txgain_db, remote_id=None):
         """DEPRECATED: use getUWBGain instead. Set the Pozyx's UWB transceiver gain.
 
         Args:
-            txgain_dB: The new transceiver gain in dB, a value between 0.0 and 33.0.
+            txgain_db: The new transceiver gain in dB, a value between 0.0 and 33.0.
                 float gain or Data([gain], 'f').
             remote_id (optional): Remote Pozyx ID.
 
@@ -1723,19 +1865,18 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         warn("setTxPower is deprecated, use setUWBGain instead", DeprecationWarning)
-        return self.setUWBGain(txgain_dB, remote_id)
+        return self.setUWBGain(txgain_db, remote_id)
 
     def getNetworkId(self, network_id):
         """Obtains the Pozyx's network ID.
 
         Args:
             network_id: Container for the read data.  NetworkID() or SingleRegister(size=2) or Data([0], 'H').
-            remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
         """
-        return self.regRead(POZYX_NETWORK_ID, network_id)
+        return self.regRead(PozyxRegisters.NETWORK_ID, network_id)
 
     def getUWBSettings(self, UWB_settings, remote_id=None):
         """Obtains the Pozyx's UWB settings.
@@ -1749,7 +1890,7 @@ class PozyxLib(PozyxCore):
         """
         # The UWB data register size is 4.
         tmp_data = Data([0] * 4)
-        status = self.getRead(POZYX_UWB_CHANNEL, tmp_data, remote_id)
+        status = self.getRead(PozyxRegisters.UWB_CHANNEL, tmp_data, remote_id)
         UWB_settings.load(tmp_data.data)
         return status
 
@@ -1764,39 +1905,39 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         channel_num[0] = 0
-        status = self.getRead(POZYX_UWB_CHANNEL, channel_num, remote_id)
+        status = self.getRead(PozyxRegisters.UWB_CHANNEL, channel_num, remote_id)
         if channel_num[0] == 0 or status == POZYX_FAILURE:
             return POZYX_FAILURE
         return status
 
-    def getUWBGain(self, uwb_gain_dB, remote_id=None):
+    def getUWBGain(self, uwb_gain_db, remote_id=None):
         """Obtains the Pozyx's transmitter UWB gain in dB, as a float.
 
         Args:
-            uwb_gain_dB: Container for the read data. Data([0], 'f').
+            uwb_gain_db: Container for the read data. Data([0], 'f').
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        doublegain_dB = SingleRegister()
+        doublegain_db = SingleRegister()
         status = self.getRead(
-            POZYX_UWB_GAIN, doublegain_dB, remote_id)
-        uwb_gain_dB[0] = 0.5 * doublegain_dB[0]
+            PozyxRegisters.UWB_GAIN, doublegain_db, remote_id)
+        uwb_gain_db[0] = 0.5 * doublegain_db[0]
         return status
 
-    def getTxPower(self, txgain_dB, remote_id=None):
+    def getTxPower(self, txgain_db, remote_id=None):
         """DEPRECATED: use getUWBGain instead. Obtains the Pozyx's transmitter UWB gain in dB, as a float.
 
         Args:
-            txgain_dB: Container for the read data. Data([0], 'f').
+            txgain_db: Container for the read data. Data([0], 'f').
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         warn("getTxPower is deprecated, use getUWBGain instead", DeprecationWarning)
-        return self.getUWBGain(txgain_dB, remote_id)
+        return self.getUWBGain(txgain_db, remote_id)
 
     def getLastNetworkId(self, network_id, remote_id=None):
         """Obtain the network ID of the last device Pozyx communicated with.
@@ -1808,7 +1949,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_RX_NETWORK_ID, network_id, remote_id)
+        return self.getRead(PozyxRegisters.RX_NETWORK_ID, network_id, remote_id)
 
     def getLastDataLength(self, data_length, remote_id=None):
         """Obtain the size of the most recent data packet received by the Pozyx.
@@ -1820,7 +1961,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(POZYX_RX_DATA_LEN, data_length, remote_id)
+        return self.getRead(PozyxRegisters.RX_DATA_LENGTH, data_length, remote_id)
 
     ## @}
 
@@ -1829,7 +1970,7 @@ class PozyxLib(PozyxCore):
 
         This constitutes three different Pozyx configurations to save, and each have their specialised derived function:
             POZYX_FLASH_REGS: This saves the passed Pozyx registers if they're writable, see saveRegisters.
-            POZYX_FLASH_ANCHOR_IDS: This saves the anchors used during positioning, see saveAnchorIds.
+            PozyxConstants.FLASH_SAVE_ANCHOR_IDS: This saves the anchors used during positioning, see saveAnchorIds.
             POZYX_FLASH_NETWORK: This saves the device list to the Pozyx device, see saveNetwork.
 
         It is recommended to use the derived functions, as these are not just easier to use, but also
@@ -1851,19 +1992,20 @@ class PozyxLib(PozyxCore):
             registers = Data([])
         if not dataCheck(registers):
             registers = Data(registers)
-        assert save_type == POZYX_FLASH_REGS or save_type == POZYX_FLASH_ANCHOR_IDS or save_type == POZYX_FLASH_NETWORK, 'saveConfiguration: invalid type'
-        assert save_type == POZYX_FLASH_REGS or len(
+        assert save_type in [PozyxConstants.FLASH_SAVE_REGISTERS, PozyxConstants.FLASH_SAVE_ANCHOR_IDS,
+                             PozyxConstants.FLASH_SAVE_NETWORK], 'saveConfiguration: invalid type'
+        assert save_type == PozyxConstants.FLASH_SAVE_REGISTERS or len(
             registers) == 0, 'saveConfiguration: #regs > 0 and not a reg save'
-        assert save_type != POZYX_FLASH_REGS or len(
+        assert save_type != PozyxConstants.FLASH_SAVE_REGISTERS or len(
             registers) > 0, 'saveConfiguration: #regs > 0 and not a reg save'
 
         self.getInterruptStatus(SingleRegister())
         params = Data([save_type] + registers.data)
         status = self.useFunction(
-            POZYX_FLASH_SAVE, params, remote_id=remote_id)
+            PozyxRegisters.SAVE_FLASH_MEMORY, params, remote_id=remote_id)
         if status == POZYX_FAILURE:
             print("Error saving to flash memory")
             return status
         # give the device some time to save to flash memory
-        sleep(POZYX_DELAY_FLASH)
+        sleep(PozyxConstants.DELAY_FLASH)
         return status

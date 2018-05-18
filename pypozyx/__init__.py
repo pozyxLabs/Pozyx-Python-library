@@ -80,13 +80,13 @@ switch at some point.
 
 """
 
-__version__ = '1.1.6'
+__version__ = '1.2.0'
 
 VERSION = __version__
 version = __version__
 
 
-from pypozyx.definitions.constants import *
+from pypozyx.definitions import *
 from pypozyx.pozyx_serial import *
 from pypozyx.structures.device import *
 from pypozyx.structures.generic import *
