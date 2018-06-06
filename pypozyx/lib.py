@@ -922,7 +922,7 @@ class PozyxLib(PozyxCore):
                     return POZYX_FAILURE
         return POZYX_TIMEOUT
 
-    def getPositioningData(self, positioning_data: PositioningData):
+    def getPositioningData(self, positioning_data):
         flags = Data([positioning_data.flags], 'H')
         flags.load_hex_string()
         s = 'F,%0.2x,%s,%i\r' % (PozyxRegisters.DO_POSITIONING_WITH_DATA, flags.byte_data, positioning_data.byte_size + 61)
@@ -1761,7 +1761,7 @@ class PozyxLib(PozyxCore):
 
         return status
 
-    def setUWBSettings(self, uwb_settings: UWBSettings, remote_id=None):
+    def setUWBSettings(self, uwb_settings, remote_id=None):
         """
         Set the Pozyx's UWB settings.
 
