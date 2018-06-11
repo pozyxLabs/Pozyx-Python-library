@@ -6,18 +6,23 @@
 Welcome to pypozyx's documentation!
 ===================================
 
+This module provides wrappers for interfacing with a Pozyx device over a serial connection.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   pypozyx
+   overview/index
+   tutorials/index
+   pypozyx_api/index
+   troubleshooting/index
 
 
+Indices and tables
+==================
 
-.. Indices and tables
-   ==================
-   * :ref:`genindex`
-   * :ref:`modindex`
-   * :ref:`search`
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
 
 
