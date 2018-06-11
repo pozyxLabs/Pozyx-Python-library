@@ -13,12 +13,7 @@ from warnings import warn
 
 
 class PozyxCore:
-    """PozyxCore
-
-    PozyxCore
-    =========
-
-    Implements virtual core Pozyx interfacing functions such as regRead,
+    """Implements virtual core Pozyx interfacing functions such as regRead,
     regWrite and regFunction, which have to be implemented in the derived interface.
     Auxiliary functions for core functionality, getRead, setWrite, useFunction,
     and checkForFlag, are also included in PozyxCore.

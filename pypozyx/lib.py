@@ -13,12 +13,7 @@ from warnings import warn
 
 
 class PozyxLib(PozyxCore):
-    """PozyxLib
-
-    PozyxLib
-    ========
-
-    Implements the functionality users expect from Pozyx, using the methods from PozyxCore
+    """Implements the functionality users expect from Pozyx, using the methods from PozyxCore
     to communicate and interface with Pozyx both locally and remotely.
     This does not limit itself to positioning, ranging, and reading the sensor data of
     the various Pozyx sensors, but also features an assortment of troubleshooting functions,
@@ -853,15 +848,15 @@ class PozyxLib(PozyxCore):
 
         This function only performs the positioning and doesn't take care of the previous steps
         required to get this operational, so be sure to adhere to this checklist:
-            - while you can perform automatic calibration, manual calibration is much more stable and reliable.
-            - when using manual calibration, add all anchors using addDevice.
-            - all anchors are on the same UWB settings as the device performing positioning.
-            - if you're using more than four anchors, be sure to set this with setSelectionOfAnchors.
+        - while you can perform automatic calibration, manual calibration is much more stable and reliable.
+        - when using manual calibration, add all anchors using addDevice.
+        - all anchors are on the same UWB settings as the device performing positioning.
+        - if you're using more than four anchors, be sure to set this with setSelectionOfAnchors.
 
         Basic troubleshooting:
-            - try to perform ranging with all devices
-            - are you using a Coordinates object for your position?
-            - if you perform getDeviceListSize and subsequently getDeviceIds, are these your anchors?
+        - try to perform ranging with all devices
+        - are you using a Coordinates object for your position?
+        - if you perform getDeviceListSize and subsequently getDeviceIds, are these your anchors?
 
         While in the Arduino library doRemotePositioning is used for remote ranging, this function
         follows the library's convention to add remote_id as a keyword argument.

@@ -383,3 +383,7 @@ class PositioningData(ByteStructure):
             data_length = len(container.data_format)
             container.load(data[data_index:data_index + data_length])
             data_index += data_length
+
+    # TODO
+    def __str__(self):
+        return 'TODO'
