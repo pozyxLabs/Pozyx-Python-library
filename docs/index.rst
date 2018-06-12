@@ -13,6 +13,7 @@ This module provides wrappers for interfacing with a Pozyx device over a serial 
    :caption: Contents:
 
    overview/index
+   getting_started/index
    tutorials/index
    pypozyx_api/index
    troubleshooting/index
