@@ -182,6 +182,10 @@ class PozyxCore:
             warn("waitForFlag_safe is deprecated, use waitForFlagSafe instead")
         return self.waitForFlagSafe(interrupt_flag, timeout_s, interrupt)
 
+    def clearInterruptStatus(self):
+        interrupt = SingleRegister()
+        return self.getInterruptStatus(interrupt)
+
     def waitForFlagSafe(self, interrupt_flag, timeout_s, interrupt=None):
         """Performs waitForFlag in polling mode.
 

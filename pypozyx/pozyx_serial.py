@@ -108,10 +108,13 @@ def is_correct_pyserial_version():
 
 class PozyxException(IOError):
     """Base class for Pozyx related exceptions"""
+    pass
 
 
 class PozyxConnectionError(PozyxException):
     """Bad connection to Pozyx gives an exception"""
+    pass
+        
 
 # @}
 
@@ -149,6 +152,7 @@ class PozyxSerial(PozyxLib):
                  print_output=False, debug_trace=False, show_trace=False,
                  suppress_warnings=False):
         """Initializes the PozyxSerial object. See above for details."""
+        super(PozyxSerial, self).__init__(self)
         self.print_output = print_output
         if debug_trace is True or show_trace is True:
             if not suppress_warnings:

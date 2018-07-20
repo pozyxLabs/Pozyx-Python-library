@@ -364,6 +364,7 @@ class PositioningData(ByteStructure):
             self.containers.append(SingleRegister())
 
     def set_amount_of_ranges(self, amount_of_ranges):
+        self.amount_of_ranges = amount_of_ranges
         if self.has_ranges():
             for i in range(amount_of_ranges):
                 self.add_sensor(RangeInformation)
@@ -375,6 +376,15 @@ class PositioningData(ByteStructure):
         """Loads a hex byte array in the structure's data"""
         self.byte_data = byte_data
         self.bytes_to_data()
+
+    @property
+    def number_of_ranges(self):
+        if self.has_ranges():
+            return self.amount_of_ranges
+        else:
+            # TODO right error?
+            raise ValueError("Ranges not given as a flag")
+
 
     def load(self, data, convert=0):
         self.data = data

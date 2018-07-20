@@ -12,6 +12,38 @@ from pypozyx.structures.sensor_data import PositioningData, RangeInformation
 from warnings import warn
 
 
+class Device(object):
+    def __init__(self, id_):
+        self._id = id_
+        self._firmware_version = None
+    
+    @property
+    def firmware_version(self):
+        return self._firmware_version
+
+    @firmware_version.setter
+    def firmware_version(self, new_firmware_version):
+        if dataCheck(new_firmware_version):
+            self._firmware_version = new_firmware_version[0]
+        else:
+            self._firmware_version = new_firmware_version
+
+    def has_firmware_version(self):
+        return self._firmware_version is not None
+
+    def has_cloud_firmware(self):
+        if not self.has_firmware_version():
+            print("Device 0x%0.4x has no firmware version" % (self._id))
+
+        return self._firmware_version > 0x11
+
+    def __str__(self):
+        if self._id is None:
+            return "local device"
+        else:
+            return "device with ID 0x%0.4x" % self._id
+
+
 class PozyxLib(PozyxCore):
     """Implements the functionality users expect from Pozyx, using the methods from PozyxCore
     to communicate and interface with Pozyx both locally and remotely.
@@ -23,6 +55,26 @@ class PozyxLib(PozyxCore):
     'system functions', etc, but will be in the future. For now, the Arduino library should
     work as a great reference.
     """
+
+    def __init__(self):
+        super(PozyxLib, self).__init__(self)
+
+        self._device_mesh = dict()
+
+    def addIdToDeviceMesh(self, id_=None):
+        if id_ in self._device_mesh:
+            if self._device_mesh[id_].has_firmware_version():
+                return
+        else:
+            self._device_mesh[id_] = Device(id_)
+        device = self._device_mesh[id_]
+        firmware_version = SingleRegister()
+        status = self.getFirmwareVersion(firmware_version, id_)
+        if status == POZYX_SUCCESS:
+            device.firmware_version = firmware_version
+        else:
+            print("Could not obtain firmware version for {}".format(device))
+        return status
 
     # \addtogroup system_functions
     # @{
@@ -802,7 +854,7 @@ class PozyxLib(PozyxCore):
 
         return self.useFunction(PozyxRegisters.SET_POSITIONING_ANCHOR_IDS, anchors, None, remote_id)
 
-    def doRanging(self, destination, device_range, remote_id=None):
+    def doRanging(self, destination_id, device_range, remote_id=None):
         """Performs ranging with another destination device, resulting in range information.
 
         This is pretty straightforward, the range information consists of the following:
@@ -819,27 +871,29 @@ class PozyxLib(PozyxCore):
         and the ready_to_range.py example found in this library's tutorial folder.
 
         Args:
-            destination: Network ID of the destination, to perform ranging with. integer ID or NetworkID(ID)
+            destination_id: Network ID of the destination, to perform ranging with. integer ID or NetworkID(ID)
             device_range: Container for device range measurement data. DeviceRange object.
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert destination != 0, 'doRanging: destination can\'t equal zero'
-        if not dataCheck(destination):
-            destination = NetworkID(destination)
+        assert destination_id != 0, 'doRanging: destination can\'t equal zero'
+        if not dataCheck(destination_id):
+            destination_id = NetworkID(destination_id)
+
+        self.clearInterruptStatus()
 
         int_flag = PozyxBitmasks.INT_STATUS_FUNC
         if remote_id is not None:
             int_flag = PozyxBitmasks.INT_STATUS_RX_DATA
 
         status = self.useFunction(
-            PozyxRegisters.DO_RANGING, destination, Data([]), remote_id)
+            PozyxRegisters.DO_RANGING, destination_id, Data([]), remote_id)
         if status == POZYX_SUCCESS:
             status = self.checkForFlag(int_flag, PozyxConstants.DELAY_INTERRUPT)
             if status == POZYX_SUCCESS:
-                self.getDeviceRangeInfo(destination, device_range, remote_id)
+                self.getDeviceRangeInfo(destination_id, device_range, remote_id)
             return status
         return POZYX_FAILURE
 
@@ -885,9 +939,13 @@ class PozyxLib(PozyxCore):
                 height = Data([height], 'i')
             self.setWrite(PozyxRegisters.POSITION_Z, height, remote_id)
 
-        firmware_version = SingleRegister()
-        self.getFirmwareVersion(firmware_version)
-        if firmware_version.value > 0x11:
+        if remote_id not in self._device_mesh:
+            status = self.addIdToDeviceMesh(remote_id)
+            if status != POZYX_SUCCESS:
+                del self._device_mesh[remote_id]
+                return status
+            
+        if self._device_mesh[remote_id].has_cloud_firmware():
             position_data = PositioningData(0b1)
             status = self.doPositioningWithData(position_data, remote_id=remote_id)
             if status == POZYX_SUCCESS:
@@ -931,6 +989,7 @@ class PozyxLib(PozyxCore):
             positioning_data.load_bytes(r[2:])
         return int(r[0:2], 16)
 
+    # TODO needs a lot of refactoring...
     def doPositioningWithData(self, positioning_data, remote_id=None):
         if remote_id is None:
             status = self.useFunction(PozyxRegisters.DO_POSITIONING)
