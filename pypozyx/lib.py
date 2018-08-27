@@ -988,8 +988,10 @@ class PozyxLib(PozyxCore):
                 return status
             
         if self._device_mesh[remote_id].has_cloud_firmware():
+            if timeout is None:
+                timeout = PozyxConstants.TIMEOUT_POSITIONING if remote_id is None else PozyxConstants.TIMEOUT_REMOTE_POSITIONING
             position_data = PositioningData(0b1)
-            status = self.doPositioningWithData(position_data, remote_id=remote_id)
+            status = self.doPositioningWithData(position_data, remote_id=remote_id, timeout=timeout)
             if status == POZYX_SUCCESS:
                 position.load_bytes(position_data.byte_data)
             return status
@@ -999,13 +1001,14 @@ class PozyxLib(PozyxCore):
             return POZYX_FAILURE
 
         if remote_id is None:
-            status = self.checkForFlag(
-                PozyxBitmasks.INT_STATUS_POS, PozyxConstants.TIMEOUT_POSITIONING)
+            timeout = PozyxConstants.TIMEOUT_POSITIONING if timeout is None else timeout
+            status = self.checkForFlag(PozyxBitmasks.INT_STATUS_POS, timeout)
             if status == POZYX_SUCCESS:
                 return self.getCoordinates(position)
             return status
         else:
-            if self.waitForFlag(PozyxBitmasks.INT_STATUS_RX_DATA, PozyxConstants.TIMEOUT_REMOTE_POSITIONING) == POZYX_SUCCESS:
+            timeout = PozyxConstants.TIMEOUT_REMOTE_POSITIONING if timeout is None else timeout
+            if self.waitForFlag(PozyxBitmasks.INT_STATUS_RX_DATA, timeout) == POZYX_SUCCESS:
                 rx_info = Data([0, 0], 'HB')
                 self.getRead(PozyxRegisters.RX_NETWORK_ID, rx_info)
                 if rx_info[0] == remote_id and rx_info[1] == position.byte_size:
@@ -1032,21 +1035,24 @@ class PozyxLib(PozyxCore):
         return int(r[0:2], 16)
 
     # TODO needs a lot of refactoring...
-    def doPositioningWithData(self, positioning_data, remote_id=None):
+    def doPositioningWithData(self, positioning_data, remote_id=None, timeout=None):
         if remote_id is None:
             status = self.useFunction(PozyxRegisters.DO_POSITIONING)
 
+            timeout = PozyxConstants.TIMEOUT_POSITIONING_DATA if timeout is None else timeout
+
             if status != POZYX_SUCCESS:
-                return POZYX_FAILURE
-            status = self.checkForFlag(PozyxBitmasks.INT_STATUS_POS, PozyxConstants.TIMEOUT_POSITIONING)
+                return status
+            status = self.checkForFlag(PozyxBitmasks.INT_STATUS_POS, timeout)
             if status == POZYX_SUCCESS:
                 return self.getPositioningData(positioning_data)
             return status
         else:
+            timeout = PozyxConstants.TIMEOUT_REMOTE_POSITIONING_DATA if timeout is None else timeout
             flags_data = Data([positioning_data.flags], 'H')
             self.remoteRegFunctionWithoutCheck(remote_id, PozyxRegisters.DO_POSITIONING, flags_data)
 
-            status = self.waitForFlag(PozyxBitmasks.INT_STATUS_RX_DATA, PozyxConstants.TIMEOUT_POSITIONING)
+            status = self.waitForFlag(PozyxBitmasks.INT_STATUS_RX_DATA, timeout)
             if status == POZYX_SUCCESS:
                 rx_info = RXInfo()
                 self.getRxInfo(rx_info)
@@ -1504,14 +1510,15 @@ class PozyxLib(PozyxCore):
             sleep(timeout_s)
         return status
 
-    def doOptimalDiscovery(self, discovery_type=PozyxConstants.DISCOVERY_ALL_DEVICES, slots=3):
+    def doOptimalDiscovery(self, discovery_type=PozyxConstants.DISCOVERY_ALL_DEVICES, slots=3, timeout=None):
         """Performs a discovery with slot_duration optimised for the device's UWB settings."""
         self.getInterruptStatus(SingleRegister())
+        timeout = PozyxConstants.TIMEOUT_OPTIMAL_DISCOVERY if timeout is None else timeout
         params = Data([discovery_type, slots, 0])
         status = self.useFunction(PozyxRegisters.DO_DISCOVERY, params)
         if status != PozyxConstants.STATUS_SUCCESS:
             return status
-        return self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, PozyxConstants.TIMEOUT_OPTIMAL_DISCOVERY)
+        return self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, timeout)
 
     def doDiscoveryTags(self, slots=3, slot_duration=0.01, remote_id=None):
         """Performs tag discovery on the Pozyx, which will let it discover Pozyx tags with the same
