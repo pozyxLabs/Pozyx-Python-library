@@ -251,12 +251,13 @@ class SingleSensorValue(ByteStructure):
         self.value = value
         self.load([value])
 
-    def load(self, data=[0], convert=True):
-        self.data = data
+    def load(self, data=None, convert=True):
+        self.data = [0] if data is None else data
+
         if convert:
-            self.value = float(data[0]) / self.physical_convert
+            self.value = float(self.data[0]) / self.physical_convert
         else:
-            self.value = data[0]
+            self.value = self.data[0]
 
     def update_data(self):
         try:

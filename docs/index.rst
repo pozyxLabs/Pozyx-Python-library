@@ -14,16 +14,8 @@ This module provides wrappers for interfacing with a Pozyx device over a serial 
 
    overview/index
    getting_started/index
-   tutorials/index
+   examples/index
    pypozyx_api/index
    troubleshooting/index
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
 

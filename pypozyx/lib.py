@@ -5,7 +5,7 @@ from time import sleep
 from pypozyx.core import PozyxCore
 from pypozyx.definitions import (PozyxBitmasks, PozyxRegisters, PozyxConstants, POZYX_SUCCESS, POZYX_FAILURE,
                                  POZYX_TIMEOUT, ERROR_MESSAGES)
-from pypozyx.structures.device import NetworkID, UWBSettings, DeviceList, Coordinates, RXInfo, DeviceCoordinates
+from pypozyx.structures.device import NetworkID, UWBSettings, DeviceList, Coordinates, RXInfo, DeviceCoordinates, FilterData, AlgorithmData
 from pypozyx.structures.generic import Data, SingleRegister, dataCheck
 from pypozyx.structures.sensor_data import PositioningData, RangeInformation
 
@@ -630,17 +630,17 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(PozyxRegisters.POSITION_Z, height, remote_id)
 
-    def getPositionError(self, pos_error, remote_id=None):
+    def getPositionError(self, positioning_error, remote_id=None):
         """Obtains the Pozyx's positioning error.
 
         Args:
-            pos_error: Container for the read data. PositionError().
+            positioning_error: Container for the read data. PositionError().
             remote_id (optional): Remote Pozyx ID.
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        return self.getRead(PozyxRegisters.POSITIONING_ERROR_X, pos_error, remote_id)
+        return self.getRead(PozyxRegisters.POSITIONING_ERROR_X, positioning_error, remote_id)
 
     def getPositioningAnchorIds(self, anchors, remote_id=None):
         """Obtain the IDs of the anchors in the Pozyx's device list used for positioning.
@@ -774,6 +774,46 @@ class PozyxLib(PozyxCore):
         params = Data([filter_type[0] + (filter_strength[0] << 4)])
         return self.setWrite(PozyxRegisters.POSITIONING_FILTER, params, remote_id)
 
+    def getPositionFilterData(self, filter_data, remote_id=None):
+        """**NEW**! Get the positioning filter data.
+
+        Use FilterData if you want to have a ready to go container for this data.
+
+        Args:
+            filter_data: Container for filter data. SingleRegister or FilterData
+            remote_id (optional): Remote Pozyx ID.
+
+        Example:
+            >>> pozyx = PozyxLib()  # PozyxSerial has PozyxLib's functions, just for generality
+            >>> filter_data = FilterData()
+            >>> pozyx.getPositionFilter(filter_data)
+            >>> print(filter_data)  # "Moving average filter with strength 10"
+            >>> print(filter_data.get_filter_name())  # "Moving average filter"
+            >>> print(filter_data.filter_type)  # "3"
+            >>> print(filter_data.filter_strength())  # "10"
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        return self.getRead(PozyxRegisters.POSITIONING_FILTER, filter_data, remote_id=remote_id)
+
+    def getPositionFilterStrength(self, remote_id=None):
+        """**NEW**! Get the positioning filter strength.
+
+        Args:
+            remote_id (optional): Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        filter_data = FilterData()
+        status = self.getPositionFilter(filter_data, remote_id=remote_id)
+
+        if status != POZYX_SUCCESS:
+            warn("Wasn't able to get filter data, returning -1 as strength")
+            return -1
+        return filter_data.filter_strength
+
     def setPositionAlgorithmNormal(self, remote_id=None):
         dimension = SingleRegister()
         self.getPositionDimension(dimension, remote_id=remote_id)
@@ -897,7 +937,7 @@ class PozyxLib(PozyxCore):
             return status
         return POZYX_FAILURE
 
-    def doPositioning(self, position, dimension=PozyxConstants.DIMENSION_3D, height=Data([0], 'i'), algorithm=None, remote_id=None):
+    def doPositioning(self, position, dimension=PozyxConstants.DIMENSION_3D, height=Data([0], 'i'), algorithm=None, remote_id=None, timeout=None):
         """Performs positioning with the Pozyx. This is probably why you're using Pozyx.
 
         This function only performs the positioning and doesn't take care of the previous steps
@@ -928,8 +968,10 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert algorithm in [PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY, PozyxConstants.POSITIONING_ALGORITHM_TRACKING, None], 'doPositioning: wrong algorithm'
-        assert dimension in [PozyxConstants.DIMENSION_3D, PozyxConstants.DIMENSION_2D, PozyxConstants.DIMENSION_2_5D], 'doPositioning: wrong dimension'
+        if algorithm not in [PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY, PozyxConstants.POSITIONING_ALGORITHM_TRACKING, None]:
+            warn("doPositioning: not existing algorithm {}".format(algorithm))
+        if dimension not in [PozyxConstants.DIMENSION_3D, PozyxConstants.DIMENSION_2D, PozyxConstants.DIMENSION_2_5D]:
+            warn("doPositioning: not existing dimension {}".format(dimension))
 
         if algorithm is not None:
             alg_options = Data([dimension << 4 | algorithm])
@@ -1815,7 +1857,7 @@ class PozyxLib(PozyxCore):
 
         return status
 
-    def setUWBSettings(self, uwb_settings, remote_id=None):
+    def setUWBSettings(self, uwb_settings, remote_id=None, save_to_flash=False):
         """
         Set the Pozyx's UWB settings.
 
@@ -1834,17 +1876,22 @@ class PozyxLib(PozyxCore):
         if not dataCheck(uwb_settings):
             uwb_settings = UWBSettings(uwb_settings[0], uwb_settings[1],
                                        uwb_settings[2], uwb_settings[3], uwb_settings[4])
-        gain = Data([uwb_settings.gain_db], 'f')
-        uwb = Data([uwb_settings.channel, uwb_settings.bitrate +
+        gain_register = Data([uwb_settings.gain_db], 'f')
+        uwb_registers = Data([uwb_settings.channel, uwb_settings.bitrate +
                     (uwb_settings.prf << 6), uwb_settings.plen])
 
-        self.setWrite(PozyxRegisters.UWB_CHANNEL, uwb, remote_id,
+        self.setWrite(PozyxRegisters.UWB_CHANNEL, uwb_registers, remote_id,
                       2 * PozyxConstants.DELAY_LOCAL_WRITE, 2 * PozyxConstants.DELAY_REMOTE_WRITE)
 
         if remote_id is None:
-            return self.setUWBGain(gain, remote_id)
+            status = self.setUWBGain(gain_register, remote_id)
+            if save_to_flash:
+                status &= self.saveUWBSettings()
         else:
-            return self.doFunctionOnDifferentUWB(self.setUWBGain, uwb_settings, gain, remote_id=remote_id)
+            status = self.doFunctionOnDifferentUWB(self.setUWBGain, uwb_settings, gain_register, remote_id=remote_id)
+            if save_to_flash:
+                status &= self.doFunctionOnDifferentUWB(self.saveUWBSettings, uwb_settings, remote_id=remote_id)
+        return status
 
     def checkUWBSettings(self, suspected_uwb_settings, remote_id=None, equal_gain=True):
         uwb = UWBSettings()
@@ -1901,8 +1948,10 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(uwb_gain_db):
             uwb_gain_db = Data([uwb_gain_db], 'f')
-        assert uwb_gain_db[0] >= 0.0 and uwb_gain_db[
-            0] <= 35.0, 'setUWBGain: TX gain %0.2fdB not in range (0-35dB)' % uwb_gain_db[0]
+
+        if not uwb_gain_db[0] >= 0.0 and uwb_gain_db[0] <= 33:
+            warn("setUWBGain: TX gain {}dB not in range (0-33dB)".format(uwb_gain_db[0]))
+
         doublegain_db = Data([int(2.0 * uwb_gain_db[0] + 0.5)])
 
         return self.setWrite(PozyxRegisters.UWB_GAIN, doublegain_db, remote_id)

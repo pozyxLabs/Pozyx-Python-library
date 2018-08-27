@@ -16,6 +16,11 @@ Functions
 
 Do a split like in the current library documentation here?
 
+.. automodule:: pypozyx.lib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Data structures
 ---------------

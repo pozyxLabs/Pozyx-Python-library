@@ -296,3 +296,89 @@ class UWBSettings(ByteStructure):
 
     def __str__(self):
         return "CH: {}, bitrate: {}, prf: {}, plen: {}, gain: {} dB".format(self.channel, self.parse_bitrate(), self.parse_prf(), self.parse_plen(), self.gain_db)
+
+
+# TODO maybe change with properties one day?
+class FilterData(ByteStructure):
+    byte_size = 1
+    data_format = 'B'
+
+    def __init__(self, filter_type=0, filter_strength=0):
+        self.filter_type = filter_type
+        self.filter_strength = filter_strength
+        # TODO add type validation?
+
+        self.value = self.filter_type + self.filter_strength << 4
+        self.load([self.value])
+
+    def load(self, data=None, convert=False):
+        self.data = [0] if data is None else data
+
+        self.filter_type = self.data[0] & 0xF
+        self.filter_strength = self.data[0] >> 4
+        self.value = self.filter_type + self.filter_strength << 4
+
+    def update_data(self):
+        try:
+            if self.data != [self.value]:
+                self.data = [self.value]
+        except:
+            return
+
+    def get_filter_name(self):
+        filter_types = {
+            PozyxConstants.FILTER_TYPE_NONE: "No filter",
+            PozyxConstants.FILTER_TYPE_FIR: "FIR filter",
+            PozyxConstants.FILTER_TYPE_MOVING_AVERAGE: "Moving average filter",
+            PozyxConstants.FILTER_TYPE_MOVING_MEDIAN: "Moving median filter",
+        }
+        return filter_types.get(self.filter_type, "Unknown filter {}".format(self.filter_type))
+
+    def __str__(self):
+        return "{} with strength {}".format(self.get_filter_name(), self.filter_strength)
+
+
+class AlgorithmData(ByteStructure):
+    byte_size = 1
+    data_format = 'B'
+
+    def __init__(self, algorithm=0, dimension=0):
+        self.algorithm = algorithm
+        self.dimension = dimension
+        # TODO add type validation?
+
+        self.value = self.algorithm + self.dimension << 4
+        self.load([self.value])
+
+    def load(self, data=None, convert=False):
+        self.data = [0] if data is None else data
+
+        self.value = self.data[0]
+        self.algorithm = self.data[0] & 0xF
+        self.dimension = self.data[0] >> 4
+
+    def update_data(self):
+        try:
+            if self.data != [self.value]:
+                self.data = [self.value]
+        except:
+            return
+
+    def get_algorithm_name(self):
+        algorithms = {
+            PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY: "UWB only",
+            PozyxConstants.POSITIONING_ALGORITHM_TRACKING: "Tracking",
+            PozyxConstants.POSITIONING_ALGORITHM_NONE: "None",
+        }
+        return algorithms.get(self.algorithm, "Unknown filter {}".format(self.algorithm))
+
+    def get_dimension_name(self):
+        dimensions = {
+            PozyxConstants.DIMENSION_2D: "2D",
+            PozyxConstants.DIMENSION_2_5D: "2.5D",
+            PozyxConstants.DIMENSION_3D: "3D",
+        }
+        return dimensions.get(self.dimension, "Unknown filter {}".format(self.algorithm))
+
+    def __str__(self):
+        return "Algorithm {}, dimension {}".format(self.get_algorithm_name(), self.get_dimension_name())
