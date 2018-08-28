@@ -12,7 +12,7 @@ from pypozyx.structures.device import RXInfo, TXInfo
 from warnings import warn
 
 
-class PozyxCore:
+class PozyxCore(object):
     """Implements virtual core Pozyx interfacing functions such as regRead,
     regWrite and regFunction, which have to be implemented in the derived interface.
     Auxiliary functions for core functionality, getRead, setWrite, useFunction,

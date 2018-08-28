@@ -68,8 +68,8 @@ class PozyxConstants:
     GPIO_PULL_DOWN = 2
 
     # anchor selection modes
-    ANCHOR_SEL_MANUAL = 0
-    ANCHOR_SEL_AUTO = 1
+    ANCHOR_SELECT_MANUAL = 0
+    ANCHOR_SELECT_AUTO = 1
 
     # discovery options
     DISCOVERY_ANCHORS_ONLY = 0
@@ -84,9 +84,9 @@ class PozyxConstants:
     # positioning algorithm options
     POSITIONING_ALGORITHM_UWB_ONLY = 0
     POSITIONING_ALGORITHM_TRACKING = 4
-    POSITIONING_ALGORITHM_NONE = 2
+    POSITIONING_ALGORITHM_NONE = 3
 
-    POSITIONING_ALGORITHMS = [POSITIONING_ALGORITHM_UWB_ONLY, POSITIONING_ALGORITHM_TRACKING]
+    POSITIONING_ALGORITHMS = [POSITIONING_ALGORITHM_UWB_ONLY, POSITIONING_ALGORITHM_TRACKING, POSITIONING_ALGORITHM_NONE]
 
     # ranging protocol options
     RANGE_PROTOCOL_PRECISION = 0x00
@@ -131,10 +131,47 @@ class PozyxConstants:
     PIN_ACTIVE_HIGH = 1
 
     # Possible UWB settings
+
+    UWB_BITRATE_110_KBPS = 0
+    UWB_BITRATE_850_KBPS = 1
+    UWB_BITRATE_6810_KBPS = 2
+
+    UWB_PRF_16_MHZ = 1
+    UWB_PRF_64_MHZ = 2
+
+    UWB_PLEN_64 = 0x04
+    UWB_PLEN_128 = 0x14
+    UWB_PLEN_256 = 0x24
+    UWB_PLEN_512 = 0x34
+    UWB_PLEN_1024 = 0x08
+    UWB_PLEN_1536 = 0x18
+    UWB_PLEN_2048 = 0x28
+    UWB_PLEN_4096 = 0x0C
+
     ALL_UWB_CHANNELS = [1, 2, 3, 4, 5, 7]
-    ALL_UWB_BITRATES = [0, 1, 2]
-    ALL_UWB_PRFS = [1, 2]
-    ALL_UWB_PLENS = [0x04, 0x14, 0x24, 0x34, 0x08, 0x18, 0x28, 0x0C]
+
+    ALL_UWB_BITRATES = [
+        UWB_BITRATE_110_KBPS,
+        UWB_BITRATE_850_KBPS,
+        UWB_BITRATE_6810_KBPS,
+    ]
+
+    ALL_UWB_PRFS = [
+        UWB_PRF_16_MHZ,
+        UWB_PRF_64_MHZ,
+    ]
+
+    ALL_UWB_PLENS = [
+        UWB_PLEN_64,
+        UWB_PLEN_128,
+        UWB_PLEN_256,
+        UWB_PLEN_512,
+        UWB_PLEN_1024,
+        UWB_PLEN_1536,
+        UWB_PLEN_2048,
+        UWB_PLEN_4096,
+    ]
+
 
 # Pozyx firmware identifiers
 POZYX_FW_MAJOR = 0xF0

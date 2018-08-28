@@ -57,7 +57,7 @@ class PozyxLib(PozyxCore):
     """
 
     def __init__(self):
-        super(PozyxLib, self).__init__(self)
+        super(PozyxLib, self).__init__()
 
         self._device_mesh = dict()
 
@@ -850,10 +850,10 @@ class PozyxLib(PozyxCore):
         return self.setWrite(PozyxRegisters.POSITIONING_ALGORITHM, params, remote_id)
 
     def setSelectionOfAnchorsAutomatic(self, number_of_anchors, remote_id=None):
-        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SEL_AUTO, number_of_anchors, remote_id=remote_id)
+        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, number_of_anchors, remote_id=remote_id)
 
     def setSelectionOfAnchorsManual(self, number_of_anchors, remote_id=None):
-        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SEL_MANUAL, number_of_anchors, remote_id=remote_id)
+        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_MANUAL, number_of_anchors, remote_id=remote_id)
 
     def setSelectionOfAnchors(self, mode, number_of_anchors, remote_id=None):
         """Set the Pozyx's coordinates.
@@ -870,8 +870,8 @@ class PozyxLib(PozyxCore):
             mode = SingleRegister(mode)
         if not dataCheck(number_of_anchors):
             number_of_anchors = SingleRegister(number_of_anchors)
-        assert mode[0] == PozyxConstants.ANCHOR_SEL_MANUAL or mode[
-            0] == PozyxConstants.ANCHOR_SEL_AUTO, 'setSelectionOfAnchors: wrong mode'
+        assert mode[0] == PozyxConstants.ANCHOR_SELECT_MANUAL or mode[
+            0] == PozyxConstants.ANCHOR_SELECT_AUTO, 'setSelectionOfAnchors: wrong mode'
         assert 2 < number_of_anchors[0] <= 16, 'setSelectionOfAnchors: num anchors %i not in range 3-16' % number_of_anchors[0]
 
         params = Data([(mode[0] << 7) + number_of_anchors[0]])
@@ -1655,7 +1655,7 @@ class PozyxLib(PozyxCore):
         status &= self.saveRegisters([PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS],remote_id=remote_id)
         return status
 
-    def configureAnchors(self, anchor_list, anchor_select=PozyxConstants.ANCHOR_SEL_AUTO, remote_id=None):
+    def configureAnchors(self, anchor_list, anchor_select=PozyxConstants.ANCHOR_SELECT_AUTO, remote_id=None):
         """Configures a set of anchors as the relevant anchors on a device
 
         Args:
@@ -1768,13 +1768,18 @@ class PozyxLib(PozyxCore):
         firmware = SingleRegister()
         status = self.getFirmwareVersion(firmware, remote_id)
 
-        print("- Device information")
+        if remote_id is None:
+            network_id = NetworkID()
+            self.getNetworkId(network_id)
+        else:
+            network_id = NetworkID(remote_id)
+
+        print("Device information for device 0x%0.4x" % network_id.id)
         if status != POZYX_SUCCESS:
             print("\t- Error: Couldn't retrieve device information")
             return
 
-        print("\t-firmware version %i.%i" %
-              (firmware.value >> 4, firmware.value % 0x10))
+        print("\t- Firmware version %i.%i" % (firmware.value >> 4, firmware.value % 0x10))
 
     def printDeviceList(self, remote_id=None, include_coordinates=True):
         """Prints a Pozyx's device list.
