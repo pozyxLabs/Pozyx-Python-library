@@ -6,14 +6,20 @@ If you're experiencing trouble with Pozyx, this should be your first step to che
 Please read the article on https://www.pozyx.io/Documentation/Tutorials/troubleshoot_basics/Python
 """
 
-from pypozyx import PozyxSerial, get_first_pozyx_serial_port, PozyxConstants, POZYX_SUCCESS
+from pypozyx import PozyxSerial, get_first_pozyx_serial_port, PozyxConstants, POZYX_SUCCESS, UWBSettings
 from pypozyx.structures.device_information import DeviceDetails
 from pypozyx.definitions.registers import POZYX_WHO_AM_I
+from pypozyx.tools.discover_all_devices import all_discovery_uwb_settings
 
 
 def device_check(pozyx, remote_id=None):
+    # pozyx.resetSystem()
+
     system_details = DeviceDetails()
-    pozyx.getDeviceDetails(system_details, remote_id=remote_id)
+    status = pozyx.getDeviceDetails(system_details, remote_id=remote_id)
+    if status != POZYX_SUCCESS:
+        print("Unable to get device details for device with id 0x%0.4x" % remote_id)
+        return
 
     if remote_id is None:
         print("Local %s with id 0x%0.4x" % (system_details.device_name, system_details.id))
@@ -27,12 +33,29 @@ def device_check(pozyx, remote_id=None):
     print("\tError: 0x%0.2x" % system_details.error_code)
     print("\tError message: %s" % system_details.error_message)
 
+    uwb_settings = UWBSettings()
+
+    pozyx.getUWBSettings(uwb_settings, remote_id=remote_id)
+
+    print("\tUWB settings: %s" % uwb_settings)
+
+    print("\t%s" % pozyx.getNumRegistersSaved(remote_id=remote_id))
+
+    if system_details.device_name == "tag":
+        print("Devices for positioning:")
+        pozyx.printDeviceList(remote_id, include_coordinates=True)
+
 
 def network_check_discovery(pozyx, remote_id=None):
     pozyx.clearDevices(remote_id)
     if pozyx.doDiscovery(discovery_type=PozyxConstants.DISCOVERY_ALL_DEVICES, remote_id=remote_id) == POZYX_SUCCESS:
         print("Found devices:")
         pozyx.printDeviceList(remote_id, include_coordinates=False)
+
+
+def discover_all_devices(pozyx):
+    for uwb_setting in all_discovery_uwb_settings():
+        print(uwb_setting)
 
 
 if __name__ == '__main__':

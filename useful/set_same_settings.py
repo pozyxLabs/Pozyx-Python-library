@@ -7,7 +7,6 @@ of the devices whose IDs match the included ones, saving to flash if required.
 # CURRENTLY IN DEV, WON'T WORK
 raise NotImplementedError
 
-from pypozyx import *
 from pypozyx.definitions.registers import POZYX_UWB_CHANNEL, POZYX_UWB_RATES, POZYX_UWB_PLEN, POZYX_UWB_GAIN
 
 port = 'COM12'
@@ -27,6 +26,7 @@ class PozyxDevice:
 
 class SetSameUWBSettings:
     """Goes through the process of setting all IDs on same UWB settings"""
+    max_fails = 3
 
     def __init__(self, pozyx, uwb_settings, devices, set_local=True, save_to_flash=True, slow_settings=False):
         """"""
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     # list of IDs to set UWB settings for. example devices = [0x6001, 0x6002,
     # 0x6799]
-    devices = []
+    devices = [0x1, 0x2, 0x3]
 
     # serial port
     serial_port = get_first_pozyx_serial_port()

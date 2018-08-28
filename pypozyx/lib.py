@@ -341,6 +341,27 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(PozyxRegisters.CALIBRATION_STATUS, calibration_status, remote_id)
 
+    def getDeviceDetails(self, system_details, remote_id=None):
+        """
+
+        Args:
+            system_details: Container for the read data. DeviceDetails.
+            remote_id (optional): Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        status = self.getWhoAmI(system_details, remote_id=remote_id)
+        if system_details.id is None:
+            if remote_id is None:
+                network_id = NetworkID()
+                status &= self.getNetworkId(network_id)
+                system_details.id = network_id.id
+            else:
+                system_details.id = remote_id
+        return status
+
+
     def getInterruptMask(self, mask, remote_id=None):
         """Obtains the Pozyx's interrupt mask.
 
@@ -1068,6 +1089,14 @@ class PozyxLib(PozyxCore):
                 else:
                     return POZYX_FAILURE
             return status
+
+
+    def doPositioningSlave(self, position):
+        pass
+
+
+    def doPositioningWithDataSlave(self, positioning_data):
+        pass
 
     ## @}
 

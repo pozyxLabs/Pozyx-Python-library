@@ -1,5 +1,6 @@
 """pypozyx.pozyx_serial - contains the serial interface with Pozyx through PozyxSerial."""
 from time import sleep
+from pypozyx.core import PozyxConnectionError
 
 from pypozyx.definitions.constants import (POZYX_SUCCESS, POZYX_FAILURE,
                                            MAX_SERIAL_SIZE)
@@ -105,16 +106,6 @@ def is_correct_pyserial_version():
         return True
     return False
 
-
-class PozyxException(IOError):
-    """Base class for Pozyx related exceptions"""
-    pass
-
-
-class PozyxConnectionError(PozyxException):
-    """Bad connection to Pozyx gives an exception"""
-    pass
-        
 
 # @}
 

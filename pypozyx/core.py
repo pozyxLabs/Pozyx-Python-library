@@ -491,3 +491,13 @@ class PozyxCore(object):
         return self.getRead(PozyxRegisters.RX_NETWORK_ID, rx_info, remote_id)
 
 ## @}
+
+
+class PozyxException(IOError):
+    """Base class for Pozyx related exceptions"""
+    pass
+
+
+class PozyxConnectionError(PozyxException):
+    """Bad connection to Pozyx gives an exception"""
+    pass
