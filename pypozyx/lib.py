@@ -165,6 +165,12 @@ class PozyxLib(PozyxCore):
         bit_num = register_address % 8
         return (details[byte_num] >> bit_num) & 0x1
 
+    def getSavedRegisters(self, remote_id=None):
+        details = Data([0] * 20)
+        if self.useFunction(PozyxRegisters.GET_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
+            return POZYX_FAILURE
+        return details
+
     def setConfigGPIO(self, gpio_num, mode, pull, remote_id=None):
         """Set the Pozyx's selected GPIO pin configuration(mode and pull).
 
@@ -1810,12 +1816,13 @@ class PozyxLib(PozyxCore):
 
         print("\t- Firmware version %i.%i" % (firmware.value >> 4, firmware.value % 0x10))
 
-    def printDeviceList(self, remote_id=None, include_coordinates=True):
+    def printDeviceList(self, remote_id=None, include_coordinates=True, prefix="\t- "):
         """Prints a Pozyx's device list.
 
         Args:
             remote_id (optional): Remote Pozyx ID
             include_coordinates (bool, optional): Whether to include coordinates in the prints
+            prefix (str, optional): Prefix to prepend the device list
 
         Returns:
             None
@@ -1824,7 +1831,6 @@ class PozyxLib(PozyxCore):
         status = self.getDeviceListSize(list_size, remote_id)
 
         if list_size[0] == 0:
-            print("No devices were found")
             return
 
         device_list = DeviceList(list_size=list_size[0])
@@ -1838,9 +1844,9 @@ class PozyxLib(PozyxCore):
             if include_coordinates:
                 coordinates = Coordinates()
                 self.getDeviceCoordinates(device_id, coordinates, remote_id)
-                print("\t- %s" % DeviceCoordinates(device_id, 0x1, coordinates))
+                print("%s %s" % (prefix, DeviceCoordinates(device_id, 0x1, coordinates)))
             else:
-                print("\t- 0x%0.4x" % device_id)
+                print("%s 0x%0.4x" % (prefix, device_id))
 
     ## @}
 
