@@ -10,9 +10,11 @@ parameters and upload this sketch. Watch the coordinates change as you move your
 """
 from time import sleep
 
-from pypozyx import (POZYX_POS_ALG_UWB_ONLY, POZYX_3D, Coordinates, POZYX_SUCCESS, POZYX_ANCHOR_SEL_AUTO,
+from pypozyx import (POZYX_POS_ALG_UWB_ONLY, POZYX_3D, Coordinates, POZYX_SUCCESS, PozyxConstants, version,
                      DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister, DeviceList)
 from pythonosc.udp_client import SimpleUDPClient
+
+from pypozyx.tools.version_check import perform_latest_version_check
 
 
 class ReadyToLocalize(object):
@@ -30,21 +32,24 @@ class ReadyToLocalize(object):
 
     def setup(self):
         """Sets up the Pozyx for positioning by calibrating its anchor list."""
-        print("------------POZYX POSITIONING V1.1 -------------")
-        print("NOTES: ")
-        print("- No parameters required.")
-        print()
-        print("- System will auto start configuration")
-        print()
+        print("------------POZYX POSITIONING V{} -------------".format(version))
+        print("")
+        print("- System will manually configure tag")
+        print("")
         print("- System will auto start positioning")
-        print()
-        self.pozyx.printDeviceInfo(self.remote_id)
-        print()
-        print("------------POZYX POSITIONING V1.1 --------------")
-        print()
-        self.pozyx.clearDevices(self.remote_id)
+        print("")
+        if self.remote_id is None:
+            self.pozyx.printDeviceInfo(self.remote_id)
+        else:
+            for device_id in [None, self.remote_id]:
+                self.pozyx.printDeviceInfo(device_id)
+        print("")
+        print("------------POZYX POSITIONING V{} -------------".format(version))
+        print("")
 
-        self.setAnchorsManual()
+        # self.pozyx.clearDevices(self.remote_id)
+        #
+        # self.setAnchorsManual()
         self.printPublishConfigurationResult()
 
     def loop(self):
@@ -99,7 +104,7 @@ class ReadyToLocalize(object):
         for anchor in self.anchors:
             status &= self.pozyx.addDevice(anchor, self.remote_id)
         if len(self.anchors) > 4:
-            status &= self.pozyx.setSelectionOfAnchors(POZYX_ANCHOR_SEL_AUTO, len(self.anchors))
+            status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(self.anchors))
         return status
 
     def printPublishConfigurationResult(self):
@@ -137,32 +142,45 @@ class ReadyToLocalize(object):
 
 
 if __name__ == "__main__":
+    # Check for the latest PyPozyx version. Skip if this takes too long or is not needed by setting to False.
+    check_pypozyx_version = True
+    if check_pypozyx_version:
+        perform_latest_version_check()
+
     # shortcut to not have to find out the port yourself
     serial_port = get_first_pozyx_serial_port()
     if serial_port is None:
         print("No Pozyx connected. Check your USB cable or your driver!")
         quit()
 
-    remote_id = 0x6069                 # remote device network ID
+    remote_id = 0x6e66                 # remote device network ID
     remote = False                   # whether to use a remote device
     if not remote:
         remote_id = None
 
-    use_processing = True             # enable to send position data through OSC
-    ip = "127.0.0.1"                   # IP for the OSC UDP
-    network_port = 8888                # network port for the OSC UDP
+    # enable to send position data through OSC
+    use_processing = True
+
+    # configure if you want to route OSC to outside your localhost. Networking knowledge is required.
+    ip = "127.0.0.1"
+    network_port = 8888
+
     osc_udp_client = None
     if use_processing:
         osc_udp_client = SimpleUDPClient(ip, network_port)
-    # necessary data for calibration, change the IDs and coordinates yourself
+
+    # necessary data for calibration, change the IDs and coordinates yourself according to your measurement
     anchors = [DeviceCoordinates(0xA001, 1, Coordinates(0, 0, 2790)),
                DeviceCoordinates(0xA002, 1, Coordinates(10490, 0, 2790)),
                DeviceCoordinates(0xA003, 1, Coordinates(-405, 6000, 2790)),
                DeviceCoordinates(0xA004, 1, Coordinates(10490, 6500, 2790))]
 
-    algorithm = POZYX_POS_ALG_UWB_ONLY  # positioning algorithm to use
-    dimension = POZYX_3D               # positioning dimension
-    height = 1000                      # height of device, required in 2.5D positioning
+    # positioning algorithm to use, other is PozyxConstants.POSITIONING_ALGORITHM_TRACKING
+    algorithm = PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY
+    # positioning dimension. Others are PozyxConstants.DIMENSION_2D, PozyxConstants.DIMENSION_2_5D
+    dimension = PozyxConstants.DIMENSION_3D
+    # height of device, required in 2.5D positioning
+    height = 1000
 
     pozyx = PozyxSerial(serial_port)
     r = ReadyToLocalize(pozyx, osc_udp_client, anchors, algorithm, dimension, height, remote_id)

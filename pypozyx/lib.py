@@ -57,7 +57,7 @@ class PozyxLib(PozyxCore):
     """
 
     def __init__(self):
-        super(PozyxLib, self).__init__(self)
+        super(PozyxLib, self).__init__()
 
         self._device_mesh = dict()
 
@@ -91,8 +91,8 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(sensor_mode):
             sensor_mode = SingleRegister(sensor_mode)
-        assert sensor_mode[0] >= 0 and sensor_mode[
-            0] <= 12, 'setSensorMode: mode %i not in range (0-12)' % sensor_mode
+        if sensor_mode < 0 or sensor_mode > 12:
+            warn("setSensorMode: mode {} not valid".format(sensor_mode))
         status = self.setWrite(PozyxRegisters.SENSORS_MODE, sensor_mode, remote_id)
         # legacy delay?
         sleep(PozyxConstants.DELAY_MODE_CHANGE)
@@ -165,6 +165,12 @@ class PozyxLib(PozyxCore):
         bit_num = register_address % 8
         return (details[byte_num] >> bit_num) & 0x1
 
+    def getSavedRegisters(self, remote_id=None):
+        details = Data([0] * 20)
+        if self.useFunction(PozyxRegisters.GET_FLASH_DETAILS, data=details, remote_id=remote_id) == POZYX_FAILURE:
+            return POZYX_FAILURE
+        return details
+
     def setConfigGPIO(self, gpio_num, mode, pull, remote_id=None):
         """Set the Pozyx's selected GPIO pin configuration(mode and pull).
 
@@ -181,11 +187,13 @@ class PozyxLib(PozyxCore):
             mode = SingleRegister(mode)
         if not dataCheck(pull):
             pull = SingleRegister(pull)
-        assert 1 <= gpio_num <= 4, 'setConfigGPIO: GPIO number %i not in range' % gpio_num
-        assert mode[0] in [PozyxConstants.GPIO_DIGITAL_INPUT, PozyxConstants.GPIO_PUSH_PULL,
-                           PozyxConstants.GPIO_OPEN_DRAIN], 'setConfigGPIO: wrong mode'
-        assert pull[0] in [PozyxConstants.GPIO_NO_PULL, PozyxConstants.GPIO_PULL_UP,
-                           PozyxConstants.GPIO_PULL_DOWN], 'setConfigGPIO: wrong pull'
+
+        if not 1 <= gpio_num <= 4:
+            warn("setConfigGPIO: GPIO number {} not in range".format(gpio_num))
+        if mode[0] in PozyxConstants.ALL_GPIO_MODES:
+            warn("setConfigGPIO: {} wrong GPIO mode".format(mode[0]))
+        if pull[0] in PozyxConstants.ALL_GPIO_PULLS:
+            warn("setConfigGPIO: {} wrong GPIO pull".format(pull[0]))
 
         gpio_register = PozyxRegisters.CONFIG_GPIO_1 + gpio_num - 1
         mask = Data([mode[0] + (pull[0] << 3)])
@@ -204,9 +212,11 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(value):
             value = SingleRegister(value)
-        assert 1 <= gpio_num <= 4, 'setGPIO: GPIO number %i out of bounds' % gpio_num
-        assert value[0] == 0 or value[
-            0] == 1, 'setGPIO: wrong value %i' % value
+
+        if not 1 <= gpio_num <= 4:
+            warn("setGPIO: GPIO number {} not in range".format(gpio_num))
+        if value[0] < 0 or value[0] > 1:
+            warn("setGPIO: wrong value {}, please choose integer 1 (HIGH) or 0 (LOW)".format(value[0]))
 
         gpio_register = PozyxRegisters.GPIO_1 + gpio_num - 1
         return self.setWrite(gpio_register, value, remote_id)
@@ -222,8 +232,10 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert 1 <= led_num <= 4, 'setLed: led number %i not in range 1-4' % led_num
-        assert state is True or state is False, 'setLed: wrong state'
+        if not 1 <= led_num <= 4:
+            warn("setLed: LED number {} not in range".format(led_num))
+        if not (state is True or state is False):
+            warn("setLed: wrong state {}, please choose boolean True or False".format(state))
 
         params = Data([0x1 << (led_num - 1 + 4) |
                        ((state << led_num - 1) % 256)])
@@ -248,11 +260,11 @@ class PozyxLib(PozyxCore):
         sleep(PozyxConstants.DELAY_FLASH)
         return status
 
-    def configInterruptPin(self, pin=0, mode=0, active_high=False, latch=False, remote_id=None):
+    def configInterruptPin(self, pin_number=0, mode=0, active_high=False, latch=False, remote_id=None):
         """Configures the interrupt pin via the PozyxRegisters.INTERRUPT_PIN register.
 
         Args:
-            pin (optional): The Pozyx's pin ID. 1 to 4 on anchor, 1 to 6 on tag. 0 means no pin. SingleRegister or integer.
+            pin_number (optional): The Pozyx's pin ID. 1 to 4 on anchor, 1 to 6 on tag. 0 means no pin. SingleRegister or integer.
             mode (optional): Push-pull (0) or pull (1). SingleRegister or integer. SingleRegister or integer.
             active_high (optional): Is the interrupt voltage active high or low. Boolean.
             latch (optional): Is the interrupt a short pulse or latch till read? Boolean.
@@ -260,13 +272,15 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        if dataCheck(pin):
-            pin = pin[0]
+        if dataCheck(pin_number):
+            pin_number = pin_number[0]
         if dataCheck(mode):
             mode = mode[0]
-        assert 0 <= pin <= 6, 'Error: Pin number %i is incorrect, should be between 0 and 6' % pin
-        assert mode == 0 or mode == 1, 'Error: Mode is incorrect, should be 0 (PUSH-PULL) or 1 (PULL).'
-        int_config = SingleRegister(pin + (mode << 3) + (active_high << 4) + (latch << 5))
+        if not 0 <= pin_number <= 6:
+            warn('Error: Pin number {} is invalid, should be between 0 and 6'.format(pin_number))
+        if not mode == 0 or mode == 1:
+            warn("Error: Mode {} is invalid, should be 0 (PUSH-PULL) or 1 (PULL).".format(mode))
+        int_config = SingleRegister(pin_number + (mode << 3) + (active_high << 4) + (latch << 5))
         self.setWrite(PozyxRegisters.INTERRUPT_PIN, int_config, remote_id)
 
     def getWhoAmI(self, who_am_i, remote_id=None):
@@ -341,6 +355,27 @@ class PozyxLib(PozyxCore):
         """
         return self.getRead(PozyxRegisters.CALIBRATION_STATUS, calibration_status, remote_id)
 
+    def getDeviceDetails(self, system_details, remote_id=None):
+        """
+
+        Args:
+            system_details: Container for the read data. DeviceDetails.
+            remote_id (optional): Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        status = self.getWhoAmI(system_details, remote_id=remote_id)
+        if system_details.id is None:
+            if remote_id is None:
+                network_id = NetworkID()
+                status &= self.getNetworkId(network_id)
+                system_details.id = network_id.id
+            else:
+                system_details.id = remote_id
+        return status
+
+
     def getInterruptMask(self, mask, remote_id=None):
         """Obtains the Pozyx's interrupt mask.
 
@@ -367,7 +402,8 @@ class PozyxLib(PozyxCore):
         See Also:
             getGPIO, getConfigPullGPIO
         """
-        assert gpio_num > 0 or gpio_num <= 4, 'getConfigModeGPIO: GPIO number incorrect'
+        if not 1 <= gpio_num <= 4:
+            warn("getConfigModeGPIO: GPIO number {} not in range".format(gpio_num))
         gpio_register = PozyxRegisters.CONFIG_GPIO_1 + gpio_num - 1
         status = self.getRead(gpio_register, mode, remote_id)
         mode[0] &= 0x7
@@ -387,7 +423,8 @@ class PozyxLib(PozyxCore):
         See Also:
             getGPIO, getConfigModeGPIO
         """
-        assert gpio_num > 0 or gpio_num <= 4, 'getConfigPullGPIO: GPIO number incorrect'
+        if not 1 <= gpio_num <= 4:
+            warn("getConfigPullGPIO: GPIO number {} not in range".format(gpio_num))
         gpio_register = PozyxRegisters.CONFIG_GPIO_1 + gpio_num - 1
         status = self.getRead(gpio_register, pull, remote_id)
         pull[0] = (pull[0] & 0x18) >> 3
@@ -407,7 +444,8 @@ class PozyxLib(PozyxCore):
         See Also:
             getConfigPullGPIO, getConfigModeGPIO
         """
-        assert gpio_num > 0 or gpio_num <= 4, 'getGPIO: GPIO number incorrect'
+        if not 1 <= gpio_num <= 4:
+            warn("getGPIO: GPIO number {} not in range".format(gpio_num))
         gpio_register = PozyxRegisters.GPIO_1 + gpio_num - 1
         return self.getRead(gpio_register, value, remote_id)
 
@@ -534,7 +572,8 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(protocol):
             protocol = SingleRegister(protocol)
-        assert 0 <= protocol[0] <= 2, 'setRangingProtocol: wrong protocol %i' % protocol[0]
+        if not 0 <= protocol[0] <= 1:
+            warn("setRangingProtocol: wrong protocol {}".format(protocol[0]))
 
         return self.setWrite(PozyxRegisters.RANGING_PROTOCOL, protocol, remote_id)
 
@@ -668,8 +707,9 @@ class PozyxLib(PozyxCore):
             >> > print(anchor_list)
             '0x6720, 0x6811, 0x6891'
         """
-        assert len(anchors) > 0 and len(
-            anchors) <= 10, 'getPositioningAnchorIds: Anchor number out of range'
+        # TODO remove this check altogether in 2.0
+        if not 0 < len(anchors) <= 16:
+            warn("getPositioningAnchorIds: Anchor number out of range, use between 0-10 anchors")
         device_list_size = SingleRegister()
         status = self.getDeviceListSize(device_list_size, remote_id)
         if len(anchors) < device_list_size[0] or status == POZYX_FAILURE:
@@ -680,7 +720,7 @@ class PozyxLib(PozyxCore):
         """Obtain the range information of the device with selected ID in the Pozyx's device list.
 
         Args:
-            device_id: ID of desired device whose coordinates are of interest. NetworkID()
+            device_id: ID of desired device whose range measurement is of interest. NetworkID()
             or Data([ID], 'H') or integer ID.
             device_range: Container for the read data. DeviceRange().
             remote_id (optional): Remote Pozyx ID.
@@ -690,7 +730,10 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(device_id):
             device_id = NetworkID(device_id)
-        assert device_id[0] != 0, 'getDeviceRangeInfo: device ID = 0'
+
+        if device_id[0] < 0 or device_id[0] > 0xFFFF:
+            warn("getDeviceRangeInfo: device ID should be between 0x0000 and 0xFFFF, not {}".format(device_id[0]))
+
         return self.useFunction(PozyxRegisters.GET_DEVICE_RANGE_INFO, device_id, device_range, remote_id)
 
     def setUpdateInterval(self, ms, remote_id=None):
@@ -705,8 +748,8 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(ms):
             ms = SingleRegister(ms, size=2)
-        assert ms[0] > 100 and ms[
-            0] <= 600000, 'setUpdateInterval: ms not 100<ms<60000'
+        if not 100 < ms[0] <= 60000:
+            warn("setUpdateInterval: ms not 100 < ms < 60000, is {}".format(ms[0]))
         return self.setWrite(PozyxRegisters.POSITIONING_INTERVAL, ms, remote_id)
 
     def setCoordinates(self, coordinates, remote_id=None):
@@ -767,9 +810,11 @@ class PozyxLib(PozyxCore):
             filter_strength = SingleRegister(filter_strength)
         if not dataCheck(filter_type):
             filter_type = SingleRegister(filter_type)
-        assert filter_type[0] in [PozyxConstants.FILTER_TYPE_MOVING_AVERAGE, PozyxConstants.FILTER_TYPE_MOVING_MEDIAN,
-                                  PozyxConstants.FILTER_TYPE_FIR, PozyxConstants.FILTER_TYPE_NONE], 'setPositionFilter: wrong filter type'
-        assert 0 <= filter_strength[0] <= 15, 'setPositionFilter: wrong strength'
+
+        if not filter_type[0] in PozyxConstants.FILTER_TYPES:
+            warn("setPositionFilter: invalid filter type {}".format(filter_type[0]))
+        if not 0 <= filter_strength[0] <= 15:
+            warn("setPositionFilter: invalid strength {}, keep between 0 and 15".format(filter_strength[0]))
 
         params = Data([filter_type[0] + (filter_strength[0] << 4)])
         return self.setWrite(PozyxRegisters.POSITIONING_FILTER, params, remote_id)
@@ -841,19 +886,20 @@ class PozyxLib(PozyxCore):
             algorithm = SingleRegister(algorithm)
         if not dataCheck(dimension):
             dimension = SingleRegister(dimension)
-        assert algorithm[0] in [PozyxConstants.POSITIONING_ALGORITHM_UWB_ONLY,
-                                PozyxConstants.POSITIONING_ALGORITHM_TRACKING], 'setPositionAlgorithm: wrong algorithm'
-        assert dimension[0] in [PozyxConstants.DIMENSION_3D, PozyxConstants.DIMENSION_2D,
-                                PozyxConstants.DIMENSION_2_5D], 'setPositionAlgorithm: wrong dimension'
+
+        if not algorithm[0] in PozyxConstants.POSITIONING_ALGORITHMS:
+            warn("setPositionAlgorithm: wrong algorithm {}".format(algorithm[0]))
+        if not dimension[0] in PozyxConstants.DIMENSIONS:
+            warn("setPositionAlgorithm: wrong dimension {}".format(dimension[0]))
 
         params = Data([algorithm[0] + (dimension[0] << 4)])
         return self.setWrite(PozyxRegisters.POSITIONING_ALGORITHM, params, remote_id)
 
     def setSelectionOfAnchorsAutomatic(self, number_of_anchors, remote_id=None):
-        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SEL_AUTO, number_of_anchors, remote_id=remote_id)
+        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, number_of_anchors, remote_id=remote_id)
 
     def setSelectionOfAnchorsManual(self, number_of_anchors, remote_id=None):
-        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SEL_MANUAL, number_of_anchors, remote_id=remote_id)
+        return self.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_MANUAL, number_of_anchors, remote_id=remote_id)
 
     def setSelectionOfAnchors(self, mode, number_of_anchors, remote_id=None):
         """Set the Pozyx's coordinates.
@@ -870,9 +916,11 @@ class PozyxLib(PozyxCore):
             mode = SingleRegister(mode)
         if not dataCheck(number_of_anchors):
             number_of_anchors = SingleRegister(number_of_anchors)
-        assert mode[0] == PozyxConstants.ANCHOR_SEL_MANUAL or mode[
-            0] == PozyxConstants.ANCHOR_SEL_AUTO, 'setSelectionOfAnchors: wrong mode'
-        assert 2 < number_of_anchors[0] <= 16, 'setSelectionOfAnchors: num anchors %i not in range 3-16' % number_of_anchors[0]
+
+        if not (mode[0] == PozyxConstants.ANCHOR_SELECT_MANUAL or mode[0] == PozyxConstants.ANCHOR_SELECT_AUTO):
+            warn("setSelectionOfAnchors: wrong mode {}".format(mode[0]))
+        if not 2 < number_of_anchors[0] <= 16:
+            warn("setSelectionOfAnchors: number of anchors {} not in range 3-16".format(number_of_anchors[0]))
 
         params = Data([(mode[0] << 7) + number_of_anchors[0]])
         return self.setWrite(PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS, params, remote_id)
@@ -889,8 +937,8 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(anchors):
             anchors = DeviceList(anchors)
-        assert len(anchors) > 0 and len(
-            anchors) <= 10, 'setPositioningAnchorIds: anchor_num %i out of range' % len(anchors)
+        if not 0 < len(anchors) <= 10:
+            warn("setPositioningAnchorIds: size {} not in range 1-10".format(len(anchors)))
 
         return self.useFunction(PozyxRegisters.SET_POSITIONING_ANCHOR_IDS, anchors, None, remote_id)
 
@@ -918,9 +966,10 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert destination_id != 0, 'doRanging: destination can\'t equal zero'
         if not dataCheck(destination_id):
             destination_id = NetworkID(destination_id)
+        if destination_id[0] < 0 or destination_id[0] > 0xFFFF:
+            warn("Destination ID should be between 0x0000 and 0xFFFF, not {}".format(destination_id[0]))
 
         self.clearInterruptStatus()
 
@@ -936,6 +985,28 @@ class PozyxLib(PozyxCore):
                 self.getDeviceRangeInfo(destination_id, device_range, remote_id)
             return status
         return POZYX_FAILURE
+
+    def doRangingSlave(self, destination_id, device_range):
+        """Checks whether the device has ranged and if so, reads the range.
+
+        This is useful for slave devices with a controller that needs to know the range measurements too
+
+        Args:
+            destination_id: Network ID of the destination, to perform ranging with. integer ID or NetworkID(ID)
+            device_range: Container for device range measurement data. DeviceRange object.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        if not dataCheck(destination_id):
+            destination_id = NetworkID(destination_id)
+        if destination_id[0] < 0 or destination_id[0] > 0xFFFF:
+            warn("Destination ID should be between 0x0000 and 0xFFFF, not {}".format(destination_id[0]))
+
+        status = self.checkForFlag(PozyxBitmasks.INT_MASK_FUNC, PozyxConstants.DELAY_INTERRUPT)
+        if status == POZYX_SUCCESS:
+            self.getDeviceRangeInfo(destination_id, device_range)
+        return status
 
     def doPositioning(self, position, dimension=PozyxConstants.DIMENSION_3D, height=Data([0], 'i'), algorithm=None, remote_id=None, timeout=None):
         """Performs positioning with the Pozyx. This is probably why you're using Pozyx.
@@ -1069,9 +1140,64 @@ class PozyxLib(PozyxCore):
                     return POZYX_FAILURE
             return status
 
+
+    def doPositioningSlave(self, position, timeout=None):
+        """Checks whether the device has positioned and if so, reads the position.
+
+        This is useful for slave devices with a controller that needs to know the device's positions too
+
+        Args:
+            position: Container for the positioning coordinates. Coordinates object.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        timeout = PozyxConstants.TIMEOUT_POSITIONING if timeout is None else timeout
+
+        if None not in self._device_mesh:
+            status = self.addIdToDeviceMesh(None)
+            if status != POZYX_SUCCESS:
+                del self._device_mesh[None]
+                return status
+
+        if self._device_mesh[None].has_cloud_firmware():
+            position_data = PositioningData(0b1)
+            status = self.doPositioningWithDataSlave(position_data, timeout=timeout)
+            if status == POZYX_SUCCESS:
+                position.load_bytes(position_data.byte_data)
+            return status
+        else:
+            status = self.checkForFlag(PozyxBitmasks.INT_STATUS_POS, timeout)
+            if status == POZYX_SUCCESS:
+                return self.getCoordinates(position)
+            return status
+
+    def doPositioningWithDataSlave(self, positioning_data, timeout=None):
+        """Checks whether the device has positioned and if so, reads the position with data.
+
+        This is useful for slave devices with a controller that needs to know the device's positions (with data) too
+
+        Args:
+            positioning_data: Container for the positioning coordinates. PositioningData object.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        timeout = PozyxConstants.TIMEOUT_POSITIONING_DATA if timeout is None else timeout
+
+        status = self.checkForFlag(PozyxBitmasks.INT_STATUS_POS, timeout)
+        if status == POZYX_SUCCESS:
+            return self.getPositioningData(positioning_data)
+        return status
+
     ## @}
 
     def waitForFlagSafeFast(self, interrupt_flag, timeout_s, interrupt=None):
+        """A fast variation of wait for flag, tripling the polling speed. Useful for ranging on very fast UWB settings.
+
+        Returns:
+            True, False
+        """
         from time import time, sleep
         if interrupt is None:
             interrupt = SingleRegister()
@@ -1084,6 +1210,17 @@ class PozyxLib(PozyxCore):
         return False
 
     def checkForFlagFast(self, interrupt_flag, timeout_s, interrupt=None):
+        """A fast variant of checkForFlag, using waitForFLagFast, useful for ranging on very fast UWB settings.
+
+        Args:
+            interrupt_flag: Flag of interrupt type to check the interrupt register against.
+            timeout_s: duration to wait for the interrupt in seconds
+            interrupt (optional): Container for the interrupt status register data.
+
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
         if interrupt is None:
             interrupt = SingleRegister()
         error_interrupt_mask = PozyxBitmasks.INT_MASK_ERR
@@ -1095,11 +1232,12 @@ class PozyxLib(PozyxCore):
         else:
             return PozyxConstants.STATUS_TIMEOUT
 
-
-    def getReceivedData(self, destination, address, params, data):
-        pass
-
     def remoteRegFunctionOnlyData(self, destination, address, params, data):
+        """Performs a remote function without waiting for the acknowledgement.
+
+        Advanded custom internal use only, you're not expected to use this unless you know what you're doing.
+
+        """
         send_data = Data([0, address] + params.data, 'BB' + params.data_format)
         status = self.regFunction(PozyxRegisters.WRITE_TX_DATA, send_data, Data([]))
         if status != POZYX_SUCCESS:
@@ -1128,15 +1266,17 @@ class PozyxLib(PozyxCore):
                 self.readRXBufferData(return_data)
                 return return_data[0]
 
-    def rangingWithoutCheck(self, destination, device_range, remote_id=None):
-        assert destination != 0, "doRanging: destination can't equal zero"
-        if not dataCheck(destination):
-            destination = NetworkID(destination)
+    def rangingWithoutCheck(self, destination_id, device_range, remote_id=None):
+        if not dataCheck(destination_id):
+            destination_id = NetworkID(destination_id)
+
+        if destination_id[0] < 0 or destination_id[0] > 0xFFFF:
+            warn("Destination ID should be between 0x0000 and 0xFFFF, not {}".format(destination_id[0]))
 
         if remote_id is None:
-            return self.doRanging(destination, device_range, remote_id=remote_id)
+            return self.doRanging(destination_id, device_range, remote_id=remote_id)
 
-        distance = self.remoteRegFunctionOnlyData(remote_id, PozyxRegisters.DO_RANGING, destination, Data([]))
+        distance = self.remoteRegFunctionOnlyData(remote_id, PozyxRegisters.DO_RANGING, destination_id, Data([]))
 
         if distance is not None:
             device_range.distance = distance
@@ -1359,8 +1499,8 @@ class PozyxLib(PozyxCore):
             >> > print(device_list)
             '0x60A0, 0x6070, 0x6891'
         """
-        assert len(devices) > 0 and len(
-            devices) <= 20, 'getDeviceIds: size not in range'
+        if not 0 < len(devices) <= 20:
+            warn("getDeviceIds: size {} not in range".format(len(devices)))
 
         list_size = SingleRegister()
 
@@ -1389,8 +1529,8 @@ class PozyxLib(PozyxCore):
         See Also:
             getDeviceIds, getPositioningAnchorIds, getTagIds
         """
-        assert len(anchors) > 0 and len(
-            anchors) <= 20, 'getAnchorIds: size not in range'
+        if not 0 < len(anchors) <= 20:
+            warn("getAnchorIds: size {} not in range".format(len(anchors)))
         list_size = SingleRegister()
         status = self.getDeviceListSize(list_size, remote_id)
         if list_size[0] < len(anchors) or status == POZYX_FAILURE:
@@ -1432,8 +1572,8 @@ class PozyxLib(PozyxCore):
         See Also:
             getDeviceIds, getAnchorIds, getPositioningAnchorIds
         """
-        assert len(tags) > 0 and len(
-            tags) <= 20, 'getTagIds: size not in range'
+        if not 0 < len(tags) <= 20:
+            warn("getTagIds: size {} not in range".format(len(tags)))
         list_size = SingleRegister()
         status = self.getDeviceListSize(list_size, remote_id)
         if list_size[0] < len(tags) or status == POZYX_FAILURE:
@@ -1473,7 +1613,8 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(device_id):
             device_id = NetworkID(device_id)
-        assert device_id[0] != 0, 'getDeviceCoordinates: device ID = 0'
+        if device_id[0] < 0 or device_id[0] > 0xFFFF:
+            warn("getDeviceCoordinates: device ID should be between 0x0000 and 0xFFFF, not {}".format(device_id[0]))
         return self.useFunction(
             PozyxRegisters.GET_DEVICE_COORDINATES, device_id, coordinates, remote_id)
 
@@ -1491,9 +1632,12 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
-        assert discovery_type == PozyxConstants.DISCOVERY_TAGS_ONLY or discovery_type == PozyxConstants.DISCOVERY_ANCHORS_ONLY or discovery_type == PozyxConstants.DISCOVERY_ALL_DEVICES, 'doDiscovery: wrong type of discovery'
-        assert 1 < slots < 10, 'doDiscovery: number of slots %i out of range' % slots
-        assert slot_duration == 0 or int(slot_duration * 1000) > 5, 'doDiscovery: slot duration too short'
+        if discovery_type not in PozyxConstants.DISCOVERY_TYPES:
+            warn("doDiscovery: unknown discovery type {}".format(discovery_type))
+        if not 1 < slots < 10:
+            warn("doDiscovery: slots should be between 1 and 10, not {}".format(slots))
+        if not (slot_duration == 0 or slot_duration >= 0.005):
+            warn("doDiscovery: slot duration should be higher than 5ms, not {}ms".format(slot_duration * 1000))
 
         self.getInterruptStatus(SingleRegister())
         params = Data([discovery_type, slots, int(slot_duration * 1000)])
@@ -1586,10 +1730,13 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         warn("Autocalibration will be removed from the library in favor of the much better external functionality in the Pozyx webapp.")
-        assert dimension == PozyxConstants.DIMENSION_2D or dimension == PozyxConstants.DIMENSION_2_5D, 'doAnchorCalibration: wrong dimension'
-        assert num_measurements > 0, 'doAnchorCalibration: a negative number of measurements isn\'t allowed'
-        assert len(anchors) >= 3 and len(
-            anchors) <= 6, 'doAnchorCalibration: num anchors %i out of range 3-6' % len(anchors)
+        if not dimension in PozyxConstants.DIMENSIONS:
+            warn('doAnchorCalibration: wrong dimension {}'.format(dimension))
+        if not num_measurements > 0:
+            warn("doAnchorCalibration: a negative number of measurements isn\'t allowed")
+        if not 3 <= len(anchors) <= 6:
+            warn("doAnchorCalibration: num anchors {} out of range 3-6".format(len(anchors)))
+
         if not dataCheck(anchors):
             anchors = DeviceList(anchors)
         if dimension == PozyxConstants.DIMENSION_2_5D:
@@ -1655,7 +1802,7 @@ class PozyxLib(PozyxCore):
         status &= self.saveRegisters([PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS],remote_id=remote_id)
         return status
 
-    def configureAnchors(self, anchor_list, anchor_select=PozyxConstants.ANCHOR_SEL_AUTO, remote_id=None):
+    def configureAnchors(self, anchor_list, anchor_select=PozyxConstants.ANCHOR_SELECT_AUTO, remote_id=None):
         """Configures a set of anchors as the relevant anchors on a device
 
         Args:
@@ -1768,20 +1915,26 @@ class PozyxLib(PozyxCore):
         firmware = SingleRegister()
         status = self.getFirmwareVersion(firmware, remote_id)
 
-        print("- Device information")
+        if remote_id is None:
+            network_id = NetworkID()
+            self.getNetworkId(network_id)
+        else:
+            network_id = NetworkID(remote_id)
+
+        print("Device information for device 0x%0.4x" % network_id.id)
         if status != POZYX_SUCCESS:
             print("\t- Error: Couldn't retrieve device information")
             return
 
-        print("\t-firmware version %i.%i" %
-              (firmware.value >> 4, firmware.value % 0x10))
+        print("\t- Firmware version %i.%i" % (firmware.value >> 4, firmware.value % 0x10))
 
-    def printDeviceList(self, remote_id=None, include_coordinates=True):
+    def printDeviceList(self, remote_id=None, include_coordinates=True, prefix="\t- "):
         """Prints a Pozyx's device list.
 
         Args:
             remote_id (optional): Remote Pozyx ID
             include_coordinates (bool, optional): Whether to include coordinates in the prints
+            prefix (str, optional): Prefix to prepend the device list
 
         Returns:
             None
@@ -1790,7 +1943,6 @@ class PozyxLib(PozyxCore):
         status = self.getDeviceListSize(list_size, remote_id)
 
         if list_size[0] == 0:
-            print("No devices were found")
             return
 
         device_list = DeviceList(list_size=list_size[0])
@@ -1804,9 +1956,9 @@ class PozyxLib(PozyxCore):
             if include_coordinates:
                 coordinates = Coordinates()
                 self.getDeviceCoordinates(device_id, coordinates, remote_id)
-                print("\t- %s" % DeviceCoordinates(device_id, 0x1, coordinates))
+                print("%s %s" % (prefix, DeviceCoordinates(device_id, 0x1, coordinates)))
             else:
-                print("\t- 0x%0.4x" % device_id)
+                print("%s 0x%0.4x" % (prefix, device_id))
 
     ## @}
 
@@ -1938,7 +2090,9 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(channel_num):
             channel_num = SingleRegister(channel_num)
-        assert channel_num.value in PozyxConstants.ALL_UWB_CHANNELS, 'setUWBChannel: %i is wrong channel number' % channel_num[0]
+
+        if not channel_num[0] in PozyxConstants.ALL_UWB_CHANNELS:
+            warn("setUWBChannel: {} is wrong channel number".format(channel_num[0]))
 
         return self.setWrite(PozyxRegisters.UWB_CHANNEL, channel_num, remote_id)
 
@@ -2102,19 +2256,19 @@ class PozyxLib(PozyxCore):
             registers = Data([])
         if not dataCheck(registers):
             registers = Data(registers)
-        assert save_type in [PozyxConstants.FLASH_SAVE_REGISTERS, PozyxConstants.FLASH_SAVE_ANCHOR_IDS,
-                             PozyxConstants.FLASH_SAVE_NETWORK], 'saveConfiguration: invalid type'
-        assert save_type == PozyxConstants.FLASH_SAVE_REGISTERS or len(
-            registers) == 0, 'saveConfiguration: #regs > 0 and not a reg save'
-        assert save_type != PozyxConstants.FLASH_SAVE_REGISTERS or len(
-            registers) > 0, 'saveConfiguration: #regs > 0 and not a reg save'
+
+        if save_type not in PozyxConstants.ALL_FLASH_SAVE_TYPES:
+            warn("saveConfiguration: unknown save flash type {}".format(save_type))
+        if save_type == PozyxConstants.FLASH_SAVE_REGISTERS and len(registers) == 0:
+            warn("saveConfiguration: trying to save registers but none given")
+        if save_type != PozyxConstants.FLASH_SAVE_REGISTERS and len(registers) > 0:
+            warn("saveConfiguration: registers accidentally passed as parameters for non-register save")
 
         self.getInterruptStatus(SingleRegister())
         params = Data([save_type] + registers.data)
         status = self.useFunction(
             PozyxRegisters.SAVE_FLASH_MEMORY, params, remote_id=remote_id)
-        if status == POZYX_FAILURE:
-            print("Error saving to flash memory")
+        if status != POZYX_SUCCESS:
             return status
         # give the device some time to save to flash memory
         sleep(PozyxConstants.DELAY_FLASH)

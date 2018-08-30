@@ -6,35 +6,31 @@ If you're experiencing trouble with Pozyx, this should be your first step to che
 Please read the article on https://www.pozyx.io/Documentation/Tutorials/troubleshoot_basics/Python
 """
 
-from pypozyx import *
+from pypozyx import PozyxSerial, get_first_pozyx_serial_port, PozyxConstants, POZYX_SUCCESS
+from pypozyx.structures.device_information import DeviceDetails
 from pypozyx.definitions.registers import POZYX_WHO_AM_I
 
-def get_device_type(hardware_version):
-    if hardware_version >> 5 == 1:
-        return 'tag'
-    else:
-        return 'anchor'
 
 def device_check(pozyx, remote_id=None):
-    data = Data([0] * 5)
+    system_details = DeviceDetails()
+    pozyx.getDeviceDetails(system_details, remote_id=remote_id)
 
     if remote_id is None:
-        print("local device")
+        print("Local %s with id 0x%0.4x" % (system_details.device_name, system_details.id))
     else:
-        print("device 0x%0.4x" % remote_id)
+        print("%s with id 0x%0.4x" % (system_details.device_name.capitalize(), system_details.id))
 
-    pozyx.getRead(POZYX_WHO_AM_I, data, remote_id=remote_id)
-    print("who am i: 0x%0.2x" % data[0])
-    print("firmware version: %i.%i" % (data[1] >> 4, data[1] % 0x10))
-    print("hardware: %s v1.%i" % (get_device_type(data[2]), data[2] % 0x20))
-    print("self test result: %s" % bin(data[3]))
-    print("error: 0x%0.2x" % data[4])
-    print("error message: %s" % pozyx.getErrorMessage(data[4]))
+    print("\tWho am i: 0x%0.2x" % system_details.who_am_i)
+    print("\tFirmware version: v%s" % system_details.firmware_version_string)
+    print("\tHardware version: v%s" % system_details.hardware_version_string)
+    print("\tSelftest result: %s" % system_details.selftest_string)
+    print("\tError: 0x%0.2x" % system_details.error_code)
+    print("\tError message: %s" % system_details.error_message)
 
 
 def network_check_discovery(pozyx, remote_id=None):
     pozyx.clearDevices(remote_id)
-    if pozyx.doDiscovery(discovery_type=POZYX_DISCOVERY_ALL_DEVICES, remote_id=remote_id) == POZYX_SUCCESS:
+    if pozyx.doDiscovery(discovery_type=PozyxConstants.DISCOVERY_ALL_DEVICES, remote_id=remote_id) == POZYX_SUCCESS:
         print("Found devices:")
         pozyx.printDeviceList(remote_id, include_coordinates=False)
 

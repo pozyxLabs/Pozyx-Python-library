@@ -25,6 +25,8 @@ from pypozyx.definitions.bitmasks import POZYX_INT_MASK_IMU
 from pythonosc.osc_message_builder import OscMessageBuilder
 from pythonosc.udp_client import SimpleUDPClient
 
+from pypozyx.tools.version_check import perform_latest_version_check
+
 
 class Orientation3D(object):
     """Reads out all sensor data from either a local or remote Pozyx"""
@@ -85,23 +87,33 @@ class Orientation3D(object):
 
 
 if __name__ == '__main__':
+    # Check for the latest PyPozyx version. Skip if this takes too long or is not needed by setting to False.
+    check_pypozyx_version = True
+    if check_pypozyx_version:
+        perform_latest_version_check()
+
     # shortcut to not have to find out the port yourself
     serial_port = get_first_pozyx_serial_port()
     if serial_port is None:
         print("No Pozyx connected. Check your USB cable or your driver!")
         quit()
 
-    remote_id = 0x6e66                    # remote device network ID
-    remote = False                         # whether to use a remote device
+    # remote device network ID
+    remote_id = 0x6e66
+    # whether to use a remote device. If on False, remote_id is set to None which means the local device is used
+    remote = False
     if not remote:
         remote_id = None
 
+    # configure if you want to route OSC to outside your localhost. Networking knowledge is required.
     ip = "127.0.0.1"
     network_port = 8888
 
     pozyx = PozyxSerial(serial_port)
     osc_udp_client = SimpleUDPClient(ip, network_port)
-    o = Orientation3D(pozyx, osc_udp_client, remote_id)
-    o.setup()
+
+    orientation_3d = Orientation3D(pozyx, osc_udp_client, remote_id=remote_id)
+    orientation_3d.setup()
+    print("Set up Orientation 3D")
     while True:
-        o.loop()
+        orientation_3d.loop()
