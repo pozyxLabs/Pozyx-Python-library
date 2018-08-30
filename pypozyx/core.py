@@ -12,13 +12,8 @@ from pypozyx.structures.device import RXInfo, TXInfo
 from warnings import warn
 
 
-class PozyxCore:
-    """PozyxCore
-
-    PozyxCore
-    =========
-
-    Implements virtual core Pozyx interfacing functions such as regRead,
+class PozyxCore(object):
+    """Implements virtual core Pozyx interfacing functions such as regRead,
     regWrite and regFunction, which have to be implemented in the derived interface.
     Auxiliary functions for core functionality, getRead, setWrite, useFunction,
     and checkForFlag, are also included in PozyxCore.
@@ -186,6 +181,10 @@ class PozyxCore:
         if not self.suppress_warnings:
             warn("waitForFlag_safe is deprecated, use waitForFlagSafe instead")
         return self.waitForFlagSafe(interrupt_flag, timeout_s, interrupt)
+
+    def clearInterruptStatus(self):
+        interrupt = SingleRegister()
+        return self.getInterruptStatus(interrupt)
 
     def waitForFlagSafe(self, interrupt_flag, timeout_s, interrupt=None):
         """Performs waitForFlag in polling mode.
@@ -492,3 +491,13 @@ class PozyxCore:
         return self.getRead(PozyxRegisters.RX_NETWORK_ID, rx_info, remote_id)
 
 ## @}
+
+
+class PozyxException(IOError):
+    """Base class for Pozyx related exceptions"""
+    pass
+
+
+class PozyxConnectionError(PozyxException):
+    """Bad connection to Pozyx gives an exception"""
+    pass

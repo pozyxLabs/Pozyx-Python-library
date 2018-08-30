@@ -1,5 +1,6 @@
 """pypozyx.pozyx_serial - contains the serial interface with Pozyx through PozyxSerial."""
 from time import sleep
+from pypozyx.core import PozyxConnectionError
 
 from pypozyx.definitions.constants import (POZYX_SUCCESS, POZYX_FAILURE,
                                            MAX_SERIAL_SIZE)
@@ -106,42 +107,27 @@ def is_correct_pyserial_version():
     return False
 
 
-class PozyxException(IOError):
-    """Base class for Pozyx related exceptions"""
-
-
-class PozyxConnectionError(PozyxException):
-    """Bad connection to Pozyx gives an exception"""
-
 # @}
 
 
 class PozyxSerial(PozyxLib):
-    """
-    PozyxSerial
-    ===========
-
-    This class provides the Pozyx Serial interface, and opens and locks the serial
+    """This class provides the Pozyx Serial interface, and opens and locks the serial
     port to use with Pozyx. All functionality from PozyxLib and PozyxCore is included.
 
     Args:
-        port: string name of the serial port. On UNIX this will be '/dev/ttyACMX', on
+        port (str): Name of the serial port. On UNIX this will be '/dev/ttyACMX', on
             Windows this will be 'COMX', with X a random number.
-
-    Kwargs:
-        baudrate: the baudrate of the serial port. Default value is 115200.
-        timeout: timeout for the serial port communication in seconds. Default is 0.1s or 100ms.
-        print_output: boolean for printing the serial exchanges, mainly for debugging purposes
-        debug_trace: boolean for printing the trace on bad serial init (DEPRECATED)
-        show_trace: boolean for printing the trace on bad serial init (DEPRECATED)
-        suppress_warnings: boolean for suppressing warnings in the Pozyx use, usage not recommended
+        baudrate (optional): the baudrate of the serial port. Default value is 115200.
+        timeout (optional): timeout for the serial port communication in seconds. Default is 0.1s or 100ms.
+        print_output (optional): boolean for printing the serial exchanges, mainly for debugging purposes
+        suppress_warnings (optional): boolean for suppressing warnings in the Pozyx use, usage not recommended
+        debug_trace (optional): boolean for printing the trace on bad serial init (DEPRECATED)
+        show_trace (optional): boolean for printing the trace on bad serial init (DEPRECATED)
 
     Example usage:
         >>> pozyx = PozyxSerial('COMX') # Windows
         >>> pozyx = PozyxSerial('/dev/ttyACMX', print_output=True) # Linux and OSX. Also puts debug output on.
 
-    Finding the serial port
-    =======================
     Finding the serial port can be easily done with the following code:
         >>> import serial.tools.list_ports
         >>> print serial.tools.list_ports.comports()[0]
@@ -157,6 +143,7 @@ class PozyxSerial(PozyxLib):
                  print_output=False, debug_trace=False, show_trace=False,
                  suppress_warnings=False):
         """Initializes the PozyxSerial object. See above for details."""
+        super(PozyxSerial, self).__init__()
         self.print_output = print_output
         if debug_trace is True or show_trace is True:
             if not suppress_warnings:

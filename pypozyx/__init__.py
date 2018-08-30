@@ -1,17 +1,9 @@
 #!/usr/bin/env python
-"""
-pypozyx
+"""Provides:
 
-PyPozyx
-=======
-
-Warning: This library isn't considered finished, please mail to
-support@pozyx.io or create a GitHub issue if you experience an issue.
-
-Provides:
-    - A way to interact with Pozyx over USB through PozyxSerial
-    - A solid set of easy-to-use and easy-to-expand functions for
-      working with Pozyx.
+- A way to interact with Pozyx over USB through PozyxSerial
+- A solid set of easy-to-use and easy-to-expand functions for
+  working with Pozyx.
 
 NB: At this point, documentation is planned for functions and the structures
 relevant for users. This constitutes the lib, structures.device, and
@@ -80,7 +72,7 @@ switch at some point.
 
 """
 
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 
 VERSION = __version__
 version = __version__

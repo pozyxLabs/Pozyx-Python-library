@@ -1,16 +1,15 @@
 #!/usr/bin/env python
+# TODO move this in the RST files.
 """
 pypozyx.structures.generic - introduces generic data structures derived from ByteStructure
 
 Generic Structures
-==================
 
 As the name implies, contains generic structures whose specific use is up to the
 user. You should use SingleRegister where applicable when reading/writing
 a single register, and use Data for larger data structures.
 
-Structures contained
---------------------
+Structures contained:
 Data
     THE generic data structure, a powerful way of constructing arbitrarily
     formed packed data structures
@@ -21,8 +20,7 @@ SingleRegister
 UniformData
     A variation on Data with all data being a uniform format. Questionably useful.
 
-The use of Data
----------------
+The use of Data:
 Data creates a packed data structure with size and format that is entirely the user's choice.
 The format follows the one used in struct, where b is a byte, h is a 2-byte int, and
 i is a default-sized integer, and f is a float. In capitals, these are signed.
@@ -87,8 +85,7 @@ def dataCheck(data):
     settings. When reading data from the Pozyx, you have to pass along the correct
     data structure.
 
-    Using dataCheck
-    ---------------
+    Using dataCheck:
     You might want to use this in your own function, as it makes it more robust
     to whether an int or list gets sent as a parameter to your function, or a
     ByteStructure-like object. If so, you can perform::
@@ -151,8 +148,7 @@ class Data(ByteStructure):
     The Leatherman of ByteStructure-derived classes, Data allows you to create your own
     library-compatible packed data structures. Also for empty data, this is used.
 
-    The use of Data
-    ---------------
+    The use of Data:
     Data creates a packed data structure with size and format that is entirely the user's choice.
     The format follows the one used in struct, where b is a byte, h is a 2-byte int, and
     i is a default-sized integer, and f is a float. In capitals, these are unsigned.
@@ -166,9 +162,9 @@ class Data(ByteStructure):
       >>> data_format = 'HHHHi'
       >>> d = Data([0] * len(data_format), data_format)
 
-    Kwargs:
-        data: Data contained in the data structure. When no data_format is passed, these are assumed UInt8 values.
-        data_format: Custom data format for the data passed.
+    Args:
+        data (optional): Data contained in the data structure. When no data_format is passed, these are assumed UInt8 values.
+        data_format (optional): Custom data format for the data passed.
     """
 
     def __init__(self, data=None, data_format=None):
@@ -186,18 +182,17 @@ class Data(ByteStructure):
 
 
 class SingleRegister(Data):
-    """
-    SingleRegister is container for the data from a single Pozyx register.
+    """ SingleRegister is container for the data from a single Pozyx register.
 
     By default, this represents a UInt8 register. Used for both reading and writing.
     The size and whether the data is a 'signed' integer are both changeable by the
     user using the size and signed keyword arguments.
 
-    Kwargs:
-        value: Value of the register.
-        size: Size of the register. 1, 2, or 4. Default 1.
-        signed: Whether the data is signed. unsigned by default.
-        print_hex: How to print the register output. Hex by default. Special options are 'hex' and 'bin'
+    Args:
+        value (optional): Value of the register.
+        size (optional): Size of the register. 1, 2, or 4. Default 1.
+        signed (optional): Whether the data is signed. unsigned by default.
+        print_hex (optional): How to print the register output. Hex by default. Special options are 'hex' and 'bin'
             other things, such as 'dec', will return decimal output.
     """
     byte_size = 1
@@ -256,12 +251,13 @@ class SingleSensorValue(ByteStructure):
         self.value = value
         self.load([value])
 
-    def load(self, data=[0], convert=True):
-        self.data = data
+    def load(self, data=None, convert=True):
+        self.data = [0] if data is None else data
+
         if convert:
-            self.value = float(data[0]) / self.physical_convert
+            self.value = float(self.data[0]) / self.physical_convert
         else:
-            self.value = data[0]
+            self.value = self.data[0]
 
     def update_data(self):
         try:
