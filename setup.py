@@ -12,7 +12,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as readme:
 
 setup(
     name='pypozyx',
-    packages=['pypozyx', 'pypozyx.definitions',
+    packages=['pypozyx', 'pypozyx.definitions', 'pypozyx.tools',
               'pypozyx.structures'],
     version=PYPOZYX_VERSION,
     description='Python library for Pozyx devices',
