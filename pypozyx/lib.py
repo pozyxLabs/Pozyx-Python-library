@@ -852,7 +852,7 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         filter_data = FilterData()
-        status = self.getPositionFilter(filter_data, remote_id=remote_id)
+        status = self.getPositionFilterData(filter_data, remote_id=remote_id)
 
         if status != POZYX_SUCCESS:
             warn("Wasn't able to get filter data, returning -1 as strength")
