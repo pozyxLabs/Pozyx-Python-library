@@ -204,7 +204,7 @@ class PozyxCore(object):
             status = self.getInterruptStatus(interrupt)
             if (interrupt[0] & interrupt_flag) and status == POZYX_SUCCESS:
                 return True
-            sleep(PozyxConstants.DELAY_POLLING)
+            sleep(PozyxConstants.DELAY_POLLING_FAST)
         return False
 
     ## \addtogroup core
