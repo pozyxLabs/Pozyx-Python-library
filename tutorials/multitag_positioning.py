@@ -12,7 +12,7 @@ parameters and upload this sketch. Watch the coordinates change as you move your
 """
 from time import sleep
 
-from pypozyx import (PozyxConstants, Coordinates, POZYX_SUCCESS, POZYX_ANCHOR_SEL_AUTO, version,
+from pypozyx import (PozyxConstants, Coordinates, POZYX_SUCCESS, PozyxRegisters, version,
                      DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister)
 from pythonosc.udp_client import SimpleUDPClient
 
@@ -51,7 +51,7 @@ class MultitagPositioning(object):
         print("------------POZYX MULTITAG POSITIONING V{} -------------".format(version))
         print("")
 
-        self.setAnchorsManual()
+        self.setAnchorsManual(save_to_flash=False)
 
         self.printPublishAnchorConfiguration()
 
@@ -89,7 +89,8 @@ class MultitagPositioning(object):
             # enable these if you want to save the configuration to the devices.
             if save_to_flash:
                 self.pozyx.saveAnchorIds(tag_id)
-                self.pozyx.saveRegisters([POZYX_ANCHOR_SEL_AUTO], tag_id)
+                self.pozyx.saveRegisters([PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS], tag_id)
+
             self.printPublishConfigurationResult(status, tag_id)
 
     def printPublishConfigurationResult(self, status, tag_id):
