@@ -20,6 +20,7 @@ class PozyxConstants:
 
     # Pozyx delay constants
     DELAY_POLLING = 0.002
+    DELAY_POLLING_FAST = 0.0005
     DELAY_LOCAL_WRITE = 0.001
     DELAY_LOCAL_FUNCTION = 0.005
     DELAY_REMOTE_WRITE = 0.005

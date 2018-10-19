@@ -11,7 +11,7 @@ parameters and upload this sketch. Watch the coordinates change as you move your
 from time import sleep
 
 from pypozyx import (POZYX_POS_ALG_UWB_ONLY, POZYX_3D, Coordinates, POZYX_SUCCESS, PozyxConstants, version,
-                     DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister, DeviceList)
+                     DeviceCoordinates, PozyxSerial, get_first_pozyx_serial_port, SingleRegister, DeviceList, PozyxRegisters)
 from pythonosc.udp_client import SimpleUDPClient
 
 from pypozyx.tools.version_check import perform_latest_version_check
@@ -47,9 +47,7 @@ class ReadyToLocalize(object):
         print("------------POZYX POSITIONING V{} -------------".format(version))
         print("")
 
-        # self.pozyx.clearDevices(self.remote_id)
-        #
-        # self.setAnchorsManual()
+        self.setAnchorsManual(save_to_flash=False)
         self.printPublishConfigurationResult()
 
     def loop(self):
@@ -98,13 +96,18 @@ class ReadyToLocalize(object):
                 self.osc_udp_client.send_message("/error", [operation, 0, -1])
             # should only happen when not being able to communicate with a remote Pozyx.
 
-    def setAnchorsManual(self):
+    def setAnchorsManual(self, save_to_flash=False):
         """Adds the manually measured anchors to the Pozyx's device list one for one."""
-        status = self.pozyx.clearDevices(self.remote_id)
+        status = self.pozyx.clearDevices(remote_id=self.remote_id)
         for anchor in self.anchors:
-            status &= self.pozyx.addDevice(anchor, self.remote_id)
+            status &= self.pozyx.addDevice(anchor, remote_id=self.remote_id)
         if len(self.anchors) > 4:
-            status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(self.anchors))
+            status &= self.pozyx.setSelectionOfAnchors(PozyxConstants.ANCHOR_SELECT_AUTO, len(self.anchors),
+                                                       remote_id=self.remote_id)
+
+        if save_to_flash:
+            self.pozyx.saveAnchorIds(remote_id=self.remote_id)
+            self.pozyx.saveRegisters([PozyxRegisters.POSITIONING_NUMBER_OF_ANCHORS], remote_id=self.remote_id)
         return status
 
     def printPublishConfigurationResult(self):
