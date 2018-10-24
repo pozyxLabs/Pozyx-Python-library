@@ -54,8 +54,8 @@ class PozyxConstants:
     LED_OFF = False
 
     # Pozyx device modes
-    ANCHOR_MODE = 0
-    TAG_MODE = 1
+    TAG_MODE = 0
+    ANCHOR_MODE = 1
 
     # The GPIO modes
     GPIO_DIGITAL_INPUT = 0
