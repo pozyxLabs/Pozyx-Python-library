@@ -231,6 +231,36 @@ class SingleRegister(Data):
         else:
             return str(self.data[0])
 
+    def __eq__(self, other):
+        if SingleRegister == type(other):
+            return self.value == other.value
+        elif type(other) == int:
+            return self.value == other
+        else:
+            raise ValueError("Can't compare SingleRegister value with non-integer values or registers")
+
+    def __le__(self, other):
+        if SingleRegister == type(other):
+            return self.value <= other.value
+        elif type(other) == int:
+            return self.value <= other
+        else:
+            raise ValueError("Can't compare SingleRegister value with non-integer values or registers")
+
+    def __lt__(self, other):
+        if SingleRegister == type(other):
+            return self.value < other.value
+        elif type(other) == int:
+            return self.value < other
+        else:
+            raise ValueError("Can't compare SingleRegister value with non-integer values or registers")
+
+    def __gt__(self, other):
+        return not self.__le__(other)
+
+    def __ge__(self, other):
+        return not self.__lt__(other)
+
 
 class SingleSensorValue(ByteStructure):
     """
