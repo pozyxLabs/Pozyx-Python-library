@@ -91,7 +91,7 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(sensor_mode):
             sensor_mode = SingleRegister(sensor_mode)
-        if sensor_mode < 0 or sensor_mode > 12:
+        if sensor_mode[0] < 0 or sensor_mode[0] > 12:
             warn("setSensorMode: mode {} not valid".format(sensor_mode))
         status = self.setWrite(PozyxRegisters.SENSORS_MODE, sensor_mode, remote_id)
         # legacy delay?
