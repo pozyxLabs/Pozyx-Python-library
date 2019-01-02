@@ -748,8 +748,8 @@ class PozyxLib(PozyxCore):
         """
         if not dataCheck(ms):
             ms = SingleRegister(ms, size=2)
-        if not 100 < ms[0] <= 60000:
-            warn("setUpdateInterval: ms not 100 < ms < 60000, is {}".format(ms[0]))
+        if not 0 <= ms[0] <= 60000:
+            warn("setUpdateInterval: ms not 0 <= ms <= 60000, is {}".format(ms[0]))
         return self.setWrite(PozyxRegisters.POSITIONING_INTERVAL, ms, remote_id)
 
     def setCoordinates(self, coordinates, remote_id=None):

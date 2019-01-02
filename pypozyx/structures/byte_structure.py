@@ -4,6 +4,28 @@
 import struct
 
 
+
+
+class HexString(object):
+    def __init__(self, string):
+        self._string = string
+        self._bytes = [self[i] for i in range(len(self))]
+
+    @property
+    def string(self):
+        return self._string
+
+    def __getitem__(self, i):
+        return self._string[2 * i: 2 * (i + 1)]
+
+    def __len__(self):
+        return len(self._string) // 2
+
+    def __iter__(self):
+         return iter(self._bytes)
+
+
+# TODO make data a property
 class ByteStructure(object):
     """
     The ByteStructure class is the base class that all custom structs inherit
@@ -16,48 +38,55 @@ class ByteStructure(object):
 
     def __init__(self):
         """Initializes the structures byte data and data arrays"""
-        self.byte_data = '00' * self.byte_size
+        self.byte_data = HexString('00' * self.byte_size)
         self.bytes_to_data()
+        self.data = [0] * len(self.data_format)
 
     def load_bytes(self, byte_data):
         """Loads a hex byte array in the structure's data"""
-        self.byte_data = byte_data
+        self.byte_data = HexString(byte_data)
         self.bytes_to_data()
 
     def bytes_to_data(self):
         """Transforms hex data into packed UINT8 byte values"""
         s = ''.encode()
-        for i in range(int(len(self.byte_data) / 2)):
-            index = 2 * i
-            s += struct.pack('B',
-                             int(self.byte_data[index:index + 2], 16))
+        for byte in self.byte_data:
+            print(byte)
+            s += struct.pack('B', int(byte, 16))
         self.load_packed(s)
 
     def load_packed(self, packed):
         """Unpacks the packed UINT8 bytes in their right format as given in data_format"""
         index = 0
-        self.data = [0] * len(self.data_format)
+        data = [0] * len(self.data_format)
         for i in range(len(self.data_format)):
             data_len = struct.calcsize(self.data_format[i])
-            self.data[i] = struct.unpack(self.data_format[i], packed[
-                                         index:index + data_len])[0]
+            data[i] = struct.unpack(self.data_format[i], packed[index:index + data_len])[0]
             index += data_len
-        self.load(self.data)
+        self.load(data)
+                  
+    @property
+    def hex_string(self):
+        hex_string = ''
+        for byte in self.transform_to_bytes():
+            hex_string += '%0.2x' % byte
+        return hex_string
+
+    @property
+    def bytes_format(self):
+        return 'B' * sum([struct.calcsize(data_format_part) for data_format_part in self.data_format])
+    
+    @property
+    def bytes_data(self):
+        return 
 
     def load_hex_string(self):
         """Loads the data's hex string for sending"""
-        byte_data = self.transform_to_bytes()
-        s = ''
-        for i in range(len(byte_data)):
-            s += '%0.2x' % byte_data[i]
-        self.byte_data = s
+        self.byte_data = self.hex_string
 
     def transform_to_bytes(self):
         """Transforms the data to a UINT8 bytestring in hex"""
-        new_format = ''
-        for i in range(len(self.data)):
-            new_format += 'B' * struct.calcsize(self.data_format[i])
-        return self.transform_data(new_format)
+        return self.transform_data(self.bytes_format)
 
     def set_packed_size(self):
         """Sets the size (bytesize) to the structures data format, but packed"""
@@ -72,29 +101,23 @@ class ByteStructure(object):
 
     def transform_data(self, new_format):
         """Transforms the data to a new format, handy for decoding to bytes"""
-        s = ''.encode()
-        for i in range(len(self.data)):
-            s += struct.pack(self.data_format[i], self.data[i])
+        s = bytes()
+        for data_part_format, data_part_value in zip(self.data_format, self.data):
+            s += struct.pack(data_part_format, data_part_value)
         return list(struct.unpack(new_format, s))
 
-    def change_data(self, index, new_data):
-        """Changes the internal contained data of the structure. Good for large structures"""
-        if type(new_data) == int:
-            self.data[index] = new_data
-        elif type(new_data) == list:
-            for i in range(len(new_data)):
-                self.data[index + i] == new_data[i]
-        else:
-            print("Trying to change data with invalid new values (use int or list)")
-
-    # TODO make convert use True/False not 1/0
     def load(self, data, convert=True):
         """Loads data in its relevant class components."""
-        raise NotImplementedError(
-            'load(data) should be customised for every derived structure')
+        self.data = data
+        # raise NotImplementedError(
+        #     'load(data) should be customised for every derived structure')
 
     def update_data(self):
         """Updates the class's data when one of its components has changed."""
+        pass
+
+    def update_values(self):
+        """Updates the class's members when its data has changed."""
         pass
 
     def __getitem__(self, key):
@@ -123,4 +146,17 @@ class ByteStructure(object):
     def __setattr__(self, name, value):
         """Made to link the direct data updates to also update the data array"""
         self.__dict__[name] = value
-        self.update_data()
+        if name != "data":
+            self.update_data()
+        else:
+            # NOTE: does not work with individual access of data
+            self.update_values()
+
+
+if __name__ == '__main__':
+    byte_structure = ByteStructure()
+    byte_structure.load([1, 2, 3, 4])
+    assert byte_structure.hex_string == '01020304'
+    from pypozyx import Coordinates
+    coordinates = Coordinates(1, 2999, 3)
+    print(coordinates.hex_string)

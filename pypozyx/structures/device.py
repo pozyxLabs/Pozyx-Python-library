@@ -58,10 +58,10 @@ class DeviceCoordinates(ByteStructure):
 
     def update_data(self):
         try:
-            if self.data != [self.network_id, self.flag,
-                             self.pos.x, self.pos.y, self.pos.z]:
-                self.data = [self.network_id, self.flag,
-                             self.pos.x, self.pos.y, self.pos.z]
+            if self.__dict__["data"] != [self.network_id, self.flag,
+                                         self.pos.x, self.pos.y, self.pos.z]:
+                self.__dict__["data"] = [self.network_id, self.flag,
+                                         self.pos.x, self.pos.y, self.pos.z]
         except:
             return
 
@@ -99,8 +99,8 @@ class DeviceRange(ByteStructure):
 
     def update_data(self):
         try:
-            if self.data != [self.timestamp, self.distance, self.RSS]:
-                self.data = [self.timestamp, self.distance, self.RSS]
+            if self.__dict__["data"] != [self.timestamp, self.distance, self.RSS]:
+                self.__dict__["data"] = [self.timestamp, self.distance, self.RSS]
         except:
             return
 
@@ -127,8 +127,8 @@ class NetworkID(Data):
 
     def update_data(self):
         try:
-            if self.data != [self.id]:
-                self.data = [self.id]
+            if self.__dict__["data"] != [self.id]:
+                self.__dict__["data"] = [self.id]
         except:
             return
 
@@ -188,8 +188,8 @@ class RXInfo(ByteStructure):
 
     def update_data(self):
         try:
-            if self.data != [self.remote_id, self.amount_of_bytes]:
-                self.data = [self.remote_id, self.amount_of_bytes]
+            if self.__dict__["data"] != [self.remote_id, self.amount_of_bytes]:
+                self.__dict__["data"] = [self.remote_id, self.amount_of_bytes]
         except:
             return
 
@@ -211,8 +211,8 @@ class TXInfo(ByteStructure):
 
     def update_data(self):
         try:
-            if self.data != [self.remote_id, self.operation]:
-                self.data = [self.remote_id, self.operation]
+            if self.__dict__["data"] != [self.remote_id, self.operation]:
+                self.__dict__["data"] = [self.remote_id, self.operation]
         except:
             return
 
@@ -244,12 +244,7 @@ class UWBSettings(ByteStructure):
 
     def __init__(self, channel=0, bitrate=0, prf=0, plen=0, gain_db=0.0):
         """Initializes the UWB settings."""
-        self.channel = channel
-        self.bitrate = bitrate
-        self.prf = prf
-        self.plen = plen
-        self.gain_db = float(gain_db)
-        self.data = [self.channel, self.bitrate, self.prf, self.plen, self.gain_db]
+        self.data = [channel, bitrate, prf, plen, float(gain_db)]
 
     def load(self, data):
         self.channel = data[0]
@@ -261,13 +256,23 @@ class UWBSettings(ByteStructure):
                      self.prf, self.plen, self.gain_db]
 
     def update_data(self):
-        try:
-            if self.data != [self.channel, self.bitrate,
-                             self.prf, self.plen, self.gain_db]:
-                self.data = [self.channel, self.bitrate,
-                             self.prf, self.plen, self.gain_db]
-        except:
+        if "data" not in self.__dict__:
             return
+        try:
+            if self.__dict__["data"] != [self.channel, self.bitrate,
+                                         self.prf, self.plen, self.gain_db]:
+                self.__dict__["data"] = [self.channel, self.bitrate,
+                                         self.prf, self.plen, self.gain_db]
+        except Exception as e:
+            print("Could not update data array in UWB settings: {}".format(str(e)))
+
+    def update_values(self):
+        self.__dict__["channel"] = self.data[0]
+        self.__dict__["bitrate"] = self.data[1]
+        self.__dict__["prf"] = self.data[2]
+        self.__dict__["plen"] = self.data[3]
+        self.__dict__["gain_db"] = self.data[4]
+
 
     def parse_bitrate(self):
         """Parses the bitrate to be humanly readable."""
@@ -304,26 +309,28 @@ class FilterData(ByteStructure):
     data_format = 'B'
 
     def __init__(self, filter_type=0, filter_strength=0):
-        self.filter_type = filter_type
-        self.filter_strength = filter_strength
-        # TODO add type validation?
-
-        self.value = self.filter_type + self.filter_strength << 4
-        self.load([self.value])
+        self.data = [filter_type + (filter_strength << 4)]
 
     def load(self, data=None, convert=False):
+        # Updates the values automatically due to update_values routine.
         self.data = [0] if data is None else data
 
-        self.filter_type = self.data[0] & 0xF
-        self.filter_strength = self.data[0] >> 4
-        self.value = self.filter_type + self.filter_strength << 4
+    @property
+    def value(self):
+        return self.filter_type + (self.filter_strength << 4)
 
     def update_data(self):
         try:
-            if self.data != [self.value]:
-                self.data = [self.value]
+            print("Triggered!")
+            if self.__dict__["data"] != [self.value]:
+                self.__dict__["data"] = [self.value]
         except:
             return
+
+    def update_values(self):
+        print("Triggered values!")
+        self.__dict__["filter_type"] = self.data[0] & 0xF
+        self.__dict__["filter_strength"] = self.data[0] >> 4
 
     def get_filter_name(self):
         filter_types = {
