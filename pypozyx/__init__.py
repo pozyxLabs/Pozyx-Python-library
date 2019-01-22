@@ -72,7 +72,7 @@ switch at some point.
 
 """
 
-__version__ = '1.2.5'
+__version__ = '1.2.6'
 
 VERSION = __version__
 version = __version__
