@@ -10,7 +10,8 @@ import sys
 
 from pypozyx import PozyxSerial, get_first_pozyx_serial_port, PozyxConstants, POZYX_SUCCESS, UWBSettings, PozyxRegisters
 from pypozyx.structures.device_information import DeviceDetails
-from pypozyx.tools.discover_all_devices import all_discovery_uwb_settings, all_device_coordinates_in_device_list
+from pypozyx.tools.discovery import all_discovery_uwb_settings
+from pypozyx.tools.device_list import all_device_coordinates_in_device_list
 
 
 class Device(object):
