@@ -308,15 +308,16 @@ class FilterData(ByteStructure):
         self.filter_strength = filter_strength
         # TODO add type validation?
 
-        self.value = self.filter_type + self.filter_strength << 4
+        self.value = self.filter_type + (self.filter_strength << 4)
         self.load([self.value])
 
-    def load(self, data=None, convert=False):
-        self.data = [0] if data is None else data
+    def load(self, data=[0], convert=False):
+        self.data = data
+        self.value = data[0]
+        self.update_data()
 
         self.filter_type = self.data[0] & 0xF
         self.filter_strength = self.data[0] >> 4
-        self.value = self.filter_type + self.filter_strength << 4
 
     def update_data(self):
         try:
