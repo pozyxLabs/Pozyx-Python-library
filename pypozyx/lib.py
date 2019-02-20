@@ -2273,3 +2273,78 @@ class PozyxLib(PozyxCore):
         # give the device some time to save to flash memory
         sleep(PozyxConstants.DELAY_FLASH)
         return status
+
+
+    def sendALOHA(self, operation):
+        """Starts an ALOHA transmission with or without the custom payload or sets the custom payload to be sent on next transmission.
+
+        Args:
+            operation: POZYX_QUEUE_CUSTOM_ALOHA, POZYX_SEND_CUSTOM_ALOHA_IMMEDIATE, POZYX_SEND_ALOMA_IMMEDIATE
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+
+        if operation in [PozyxConstants.POZYX_QUEUE_CUSTOM_ALOHA, PozyxConstants.POZYX_SEND_CUSTOM_ALOHA_IMMEDIATE, PozyxConstants.POZYX_SEND_ALOMA_IMMEDIATE]:
+            return self.regFunction(PozyxRegisters.SEND_TX_DATA, Data([operation]), Data([]))
+        return POZYX_FAILURE
+
+    def setTxPayload(self, payload_type):
+        """Sets the payload type that has to be sent when doing an ALOHA transmission.
+
+        Args:
+            payload_type: 
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        return self.regWrite(PozyxRegisters.CONFIG_BLINK_PAYLOAD, Data([payload_type], 'H'))
+
+    def setInterval(self, interval):
+        """Sets the interval in ms the aloha transmission has to wait to do an ALOHA transmission.
+
+        Args:
+            interval: the interval in ms 
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        return self.regWrite(PozyxRegisters.POSITIONING_INTERVAL, Data([interval], 'H'))
+
+    def setVariation(self, variation):
+        """Sets the interval in ms the aloha transmission has to wait to do an ALOHA transmission.
+
+        Args:
+            variation: the variation in ms
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        return self.regWrite(PozyxRegisters.ALOHA_VARIATION, Data([variation]))
+
+    def startALOHA(self):
+        """Sets the device in ALOHA mode.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        return self.regFunction(PozyxRegisters.DO_ALOHA, Data(data=[1]), Data([0]))
+
+    def stopALOHA(self):
+        """Returns the device to normal operation when in ALOHA mode.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        return self.regFunction(PozyxRegisters.DO_ALOHA, Data(data=[0]), Data([0]))
+
+    def getBlinkIndex(self, index):
+        """Reads the blink index from ALOHA transmissions.
+
+        Args:
+            index: Data([0],'i')
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        return self.regRead(PozyxRegisters.BLINK_INDEX, index)
