@@ -15,9 +15,6 @@ class Coordinates(XYZ):
 
     def load(self, data, convert=False):
         self.data = data
-        self.x = data[0]
-        self.y = data[1]
-        self.z = data[2]
 
 
 class Acceleration(XYZ):
@@ -51,18 +48,8 @@ class LinearAcceleration(XYZ):
     byte_size = 6
     data_format = 'hhh'
 
-    def load(self, data, convert=True):
-        if convert:
-            self.x = float(data[0]) / self.physical_convert
-            self.y = float(data[1]) / self.physical_convert
-            self.z = float(data[2]) / self.physical_convert
-        else:
-            self.x = float(data[0])
-            self.y = float(data[1])
-            self.z = float(data[2])
 
-
-class PositionError(XYZ):
+class PositionError(ByteStructure):
     """Container for position error in x, y, z, xy, xz, and yz (in mm)."""
     physical_convert = 1
     byte_size = 12
@@ -70,30 +57,64 @@ class PositionError(XYZ):
 
     def __init__(self, x=0, y=0, z=0, xy=0, xz=0, yz=0):
         """Initializes the PositionError object."""
-        XYZ.__init__(self, x, y, z)
-        self.xy = xy
-        self.xz = xz
-        self.yz = yz
         self.data = [x, y, z, xy, xz, yz]
 
-    def load(self, data):
-        XYZ.load(self, data[0:3])
-        self.xy = data[3] / self.physical_convert
-        self.xz = data[4] / self.physical_convert
-        self.yz = data[5] / self.physical_convert
-
-    def update_data(self):
-        try:
-            if self.data != [self.x, self.y, self.z, self.xy, self.xz, self.yz]:
-                self.data = [self.x, self.y, self.z, self.xy, self.xz, self.yz]
-        except:
-            return
+    def load(self, data, convert=False):
+        self.data = data
 
     def __str__(self):
-        return 'X: {self.x}, Y: {self.y}, Z: {self.z}, XY: {self.xy}, XZ: {self.xz}, YZ: {self.yz}'.format(self=self)
+        return 'X: {}, Y: {}, Z: {}, XY: {}, XZ: {}, YZ: {}'.format(self.x, self.y, self.z, self.xy, self.xz, self.yz)
+
+    @property
+    def x(self):
+        return self.data[0] / self.physical_convert
+
+    @x.setter
+    def x(self, value):
+        self.data[0] = value * self.physical_convert
+
+    @property
+    def y(self):
+        return self.data[1] / self.physical_convert
+
+    @y.setter
+    def y(self, value):
+        self.data[1] = value * self.physical_convert
+
+    @property
+    def z(self):
+        return self.data[2] / self.physical_convert
+
+    @z.setter
+    def z(self, value):
+        self.data[2] = value * self.physical_convert
+
+    @property
+    def xy(self):
+        return self.data[3] / self.physical_convert
+
+    @xy.setter
+    def xy(self, value):
+        self.data[3] = value * self.physical_convert
+
+    @property
+    def xz(self):
+        return self.data[4] / self.physical_convert
+
+    @xz.setter
+    def xz(self, value):
+        self.data[4] = value * self.physical_convert
+
+    @property
+    def yz(self):
+        return self.data[5] / self.physical_convert
+
+    @yz.setter
+    def yz(self, value):
+        self.data[5] = value * self.physical_convert
 
 
-class Quaternion(XYZ):
+class Quaternion(ByteStructure):
     """Container for quaternion data in x, y, z and w."""
     physical_convert = PozyxConstants.QUATERNION_DIV
 
@@ -102,26 +123,12 @@ class Quaternion(XYZ):
 
     def __init__(self, w=0, x=0, y=0, z=0):
         """Initializes the Quaternion object."""
-        XYZ.__init__(self, x, y, z)
         self.data = [w, x, y, z]
-        self.w = w
 
     def load(self, data, convert=True):
         for i in range(len(data)):
             data[i] = float(data[i])
-        XYZ.load(self, data[1:4], convert)
         self.data = data
-        if convert:
-            self.w = data[0] / self.physical_convert
-        else:
-            self.w = data[0]
-
-    def update_data(self):
-        try:
-            if self.data != [self.w, self.x, self.y, self.z]:
-                self.data = [self.w, self.x, self.y, self.z]
-        except:
-            return
 
     def get_sum(self):
         """Returns the normalization value of the quaternion"""
@@ -130,13 +137,43 @@ class Quaternion(XYZ):
     def normalize(self):
         """Normalizes the quaternion's data"""
         sum = self.get_sum()
-        self.w /= sum
-        self.x /= sum
-        self.y /= sum
-        self.z /= sum
+        for i in range(len(self.data)):
+            self.data[i] /= sum
 
     def __str__(self):
         return 'X: {self.x}, Y: {self.y}, Z: {self.z}, W: {self.w}'.format(self=self)
+
+    @property
+    def w(self):
+        return self.data[0] / self.physical_convert
+
+    @w.setter
+    def w(self, value):
+        self.data[0] = value * self.physical_convert
+
+    @property
+    def x(self):
+        return self.data[1] / self.physical_convert
+
+    @x.setter
+    def x(self, value):
+        self.data[1] = value * self.physical_convert
+
+    @property
+    def y(self):
+        return self.data[2] / self.physical_convert
+
+    @y.setter
+    def y(self, value):
+        self.data[2] = value * self.physical_convert
+
+    @property
+    def z(self):
+        return self.data[3] / self.physical_convert
+
+    @z.setter
+    def z(self, value):
+        self.data[3] = value * self.physical_convert
 
 
 class MaxLinearAcceleration(SingleSensorValue):
@@ -173,32 +210,36 @@ class EulerAngles(ByteStructure):
     def __init__(self, heading=0, roll=0, pitch=0):
         """Initializes the EulerAngles object."""
         self.data = [heading, roll, pitch]
-        self.heading = heading
-        self.roll = roll
-        self.pitch = pitch
 
     def load(self, data, convert=True):
         self.data = data
-        if convert:
-            self.heading = float(data[0]) / self.physical_convert
-            self.roll = float(data[1]) / self.physical_convert
-            self.pitch = float(data[2]) / self.physical_convert
-        else:
-            self.heading = float(data[0])
-            self.roll = float(data[1])
-            self.pitch = float(data[2])
-
-    def update_data(self):
-        try:
-            if self.data != [self.heading, self.roll, self.pitch]:
-                self.data = [self.heading, self.roll, self.pitch]
-        except:
-            return
 
     def __str__(self):
+        return 'Heading: {}, Roll: {}, Pitch: {}'.format(self.heading, self.roll, self.pitch)
 
-        return 'Heading: {self.heading}, Roll: {self.roll}, Pitch: {self.pitch}'.format(
-            self=self)
+    @property
+    def heading(self):
+        return self.data[0] / self.physical_convert
+
+    @heading.setter
+    def heading(self, value):
+        self.data[0] = value * self.physical_convert
+
+    @property
+    def roll(self):
+        return self.data[1] / self.physical_convert
+
+    @roll.setter
+    def roll(self, value):
+        self.data[1] = value * self.physical_convert
+
+    @property
+    def pitch(self):
+        return self.data[2] / self.physical_convert
+
+    @pitch.setter
+    def pitch(self, value):
+        self.data[2] = value * self.physical_convert
 
 
 class SensorData(ByteStructure):
@@ -247,10 +288,6 @@ class SensorData(ByteStructure):
         self.gravity_vector.load(data[20:23], convert)
         self.temperature.load([data[23]], convert)
 
-    def update_data(self):
-        """Not used so data remains the raw unformatted data"""
-        pass
-
 
 class RawSensorData(SensorData):
     """Container for raw sensor data
@@ -267,11 +304,12 @@ class RawSensorData(SensorData):
         - temperature: Int8
     """
 
-    def __init__(self, data=[0] * 24):
+    def __init__(self, data=None):
         """Initializes the RawSensorData object"""
+        data = [0] * 24 if data is None else data
         SensorData.__init__(self, data)
 
-    def load(self, data):
+    def load(self, data, convert=False):
         SensorData.load(self, data, convert=False)
 
 
@@ -280,30 +318,47 @@ class CoordinatesWithStatus(ByteStructure):
     byte_size = 13
     data_format = 'iiiB'
 
-    def __init__(self, x=0, y=0, z=0, status=False):
+    def __init__(self, x=0, y=0, z=0, status=0):
         """Initializes the XYZ or XYZ-derived object."""
-        self.x = x
-        self.y = y
-        self.z = z
-        self.status = status
         self.data = [x, y, z, status]
 
     def load(self, data, convert=False):
         self.data = data
-        self.x = data[0]
-        self.y = data[1]
-        self.z = data[2]
-        self.status = data[3]
-
-    def update_data(self):
-        try:
-            if self.data != [self.x, self.y, self.z, self.status]:
-                self.data = [self.x, self.y, self.z, self.status]
-        except:
-            return
 
     def __str__(self):
-        return 'STATUS: {self.status}, X: {self.x}, Y: {self.y}, Z: {self.z}'.format(self=self)
+        return 'STATUS: {}, X: {}, Y: {}, Z: {}'.format(self.status, self.x, self.y, self.z)
+
+    @property
+    def x(self):
+        return self.data[0]
+
+    @x.setter
+    def x(self, value):
+        self.data[0] = value
+
+    @property
+    def y(self):
+        return self.data[1]
+
+    @y.setter
+    def y(self, value):
+        self.data[1] = value
+
+    @property
+    def z(self):
+        return self.data[2]
+
+    @z.setter
+    def z(self, value):
+        self.data[2] = value
+
+    @property
+    def status(self):
+        return self.data[3]
+
+    @status.setter
+    def status(self, value):
+        self.data[3] = value
 
 
 class RangeInformation(ByteStructure):
@@ -311,24 +366,29 @@ class RangeInformation(ByteStructure):
     data_format = 'HI'
 
     def __init__(self, device_id=0, distance=0):
-        self.device_id = device_id
-        self.distance = distance
         self.data = [device_id, distance]
 
     def load(self, data, convert=0):
         self.data = data
-        self.device_id = data[0]
-        self.distance = data[1]
-
-    def update_data(self):
-        try:
-            if self.data != [self.device_id, self.distance]:
-                self.data = [self.device_id, self.distance]
-        except:
-            return
 
     def __str__(self):
-        return "0x%0.4x: %d mm" % (self.device_id, self.distance)
+        return "0x{:04x}: {} mm".format(self.device_id, self.distance)
+
+    @property
+    def device_id(self):
+        return self.data[0]
+
+    @device_id.setter
+    def device_id(self, value):
+        self.data[0] = value
+
+    @property
+    def distance(self):
+        return self.data[1]
+
+    @distance.setter
+    def distance(self, value):
+        self.data[1] = value
 
 
 class PositioningData(ByteStructure):
@@ -341,8 +401,17 @@ class PositioningData(ByteStructure):
         self.containers = []
         self.byte_size = 0
         self.data_format = ''
+        self.amount_of_ranges = 0
 
         self.set_data_structures()
+
+    def load(self, data, convert=0):
+        self.data = data
+        data_index = 0
+        for container in self.containers:
+            data_length = len(container.data_format)
+            container.load(data[data_index:data_index + data_length])
+            data_index += data_length
 
     def add_sensor(self, sensor_class):
         self.byte_size += sensor_class.byte_size
@@ -384,15 +453,6 @@ class PositioningData(ByteStructure):
         else:
             # TODO right error?
             raise ValueError("Ranges not given as a flag")
-
-
-    def load(self, data, convert=0):
-        self.data = data
-        data_index = 0
-        for container in self.containers:
-            data_length = len(container.data_format)
-            container.load(data[data_index:data_index + data_length])
-            data_index += data_length
 
     # TODO
     def __str__(self):
