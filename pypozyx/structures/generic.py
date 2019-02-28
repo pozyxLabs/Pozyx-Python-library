@@ -40,15 +40,15 @@ from pypozyx.structures.byte_structure import ByteStructure
 
 def is_reg_readable(reg):
     """Returns whether a Pozyx register is readable."""
-    if (0x00 <= reg < 0x07) or (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg < 0x24) or (
-            0x27 <= reg < 0x2B) or (0x30 <= reg < 0x48) or (0x4E <= reg < 0x89):
+    if (0x00 <= reg < 0x07) or (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg <= 0x24) or (
+            0x26 <= reg < 0x2B) or (0x30 <= reg < 0x48) or (0x4E <= reg < 0x89):
         return True
     return False
 
 
 def is_reg_writable(reg):
     """Returns whether a Pozyx register is writeable."""
-    if (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg < 0x24) or (0x27 <= reg < 0x2B) or (
+    if (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg <= 0x24) or (0x26 <= reg < 0x2B) or (
             0x30 <= reg < 0x3C) or (0x85 <= reg < 0x89):
         return True
     return False
@@ -56,7 +56,7 @@ def is_reg_writable(reg):
 
 def is_functioncall(reg):
     """Returns whether a Pozyx register is a Pozyx function."""
-    if (0xB0 <= reg < 0xBC) or (0xC0 <= reg < 0xC9):
+    if (0xB0 <= reg <= 0xBC) or (0xC0 <= reg < 0xC9):
         return True
     return False
 

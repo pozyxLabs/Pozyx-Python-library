@@ -40,6 +40,8 @@ class PozyxRegisters:
     # Configure the mode of operation of the pozyx device
     OPERATION_MODE = 0x22
     SENSORS_MODE = 0x23  # Configure the mode of operation of the sensors
+    CONFIG_BLINK_PAYLOAD = 0x24 # Configure payload that needs to be transmitted with ALOHA
+    ALOHA_VARIATION = 0x26 # Configure the variation on the ALOHA
     CONFIG_GPIO_1 = 0x27  # Configure GPIO pin 1.
     CONFIG_GPIO_2 = 0x28  # Configure GPIO pin 2.
     CONFIG_GPIO_3 = 0x29  # Configure GPIO pin 3.
@@ -95,6 +97,7 @@ class PozyxRegisters:
     GPIO_2 = 0x86  # Value of the GPIO pin 2
     GPIO_3 = 0x87  # Value of the GPIO pin 3
     GPIO_4 = 0x88  # Value of the GPIO pin 4
+    BLINK_INDEX = 0x89    # The blink index of the ALOHA transmissions
 
     # Functions
     RESET_SYSTEM = 0xB0  # Reset the Pozyx device
@@ -111,6 +114,7 @@ class PozyxRegisters:
     RESET_FLASH_MEMORY = 0xB9  # Reset a portion of the configuration in flash memory
     SAVE_FLASH_MEMORY = 0xBA  # Store a portion of the configuration in flash memory
     GET_FLASH_DETAILS = 0xBB  # Return information on what is stored in flash
+    DO_ALOHA = 0xBC # Start / stop ALOHA mode
 
     # Device list functions
     # Get all the network IDs's of devices in the device list.
@@ -160,6 +164,8 @@ POZYX_RANGE_PROTOCOL = 0x21    # The ranging protocol
 # Configure the mode of operation of the pozyx device
 POZYX_OPERATION_MODE = 0x22
 POZYX_SENSORS_MODE = 0x23    # Configure the mode of operation of the sensors
+POZYX_CONFIG_BLINK_PAYLOAD = 0x24 # Configure payload that needs to be  transmitted with ALOHA
+POZYX_ALOHA_VARIATION = 0x26 # Configure the variation on the ALOHA
 POZYX_CONFIG_GPIO1 = 0x27    # Configure GPIO pin 1.
 POZYX_CONFIG_GPIO2 = 0x28    # Configure GPIO pin 2.
 POZYX_CONFIG_GPIO3 = 0x29    # Configure GPIO pin 3.
@@ -213,6 +219,7 @@ POZYX_GPIO1 = 0x85    # Value of the GPIO pin 1
 POZYX_GPIO2 = 0x86    # Value of the GPIO pin 2
 POZYX_GPIO3 = 0x87    # Value of the GPIO pin 3
 POZYX_GPIO4 = 0x88    # Value of the GPIO pin 4
+POZYX_BLINK_INDEX = 0x89    # The blink index of the ALOHA transmissions
 
 # Functions
 POZYX_RESET_SYS = 0xB0    # Reset the Pozyx device
@@ -229,6 +236,7 @@ POZYX_POS_GET_ANCHOR_IDS = 0xB8
 POZYX_FLASH_RESET = 0xB9  # Reset a portion of the configuration in flash memory
 POZYX_FLASH_SAVE = 0xBA  # Store a portion of the configuration in flash memory
 POZYX_FLASH_DETAILS = 0xBB  # Return information on what is stored in flash
+POZYX_DO_ALOHA = 0xBC
 
 # Device list functions
 # Get all the network IDs's of devices in the device list.
