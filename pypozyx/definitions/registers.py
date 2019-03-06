@@ -47,6 +47,9 @@ class PozyxRegisters:
     CONFIG_GPIO_3 = 0x29  # Configure GPIO pin 3.
     CONFIG_GPIO_4 = 0x2A  # Configure GPIO pin 4.
 
+    ALL_ALOHA_REGISTERS = [0x18, 0x24, 0x26]
+
+
     # Positioning data
     POSITION_X = 0x30  # x-coordinate of the device in mm.
     POSITION_Y = 0x34  # y-coordinate of the device in mm.

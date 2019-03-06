@@ -94,7 +94,7 @@ def dataCheck(data):
       >>>     sample = SingleRegister(sample)
 
     """
-    if not(Data in type(data).__bases__ or ByteStructure in type(data).__bases__ or Data is type(data) or XYZ in type(data).__bases__):
+    if not(Data in type(data).__bases__ or ByteStructure in type(data).__bases__ or Data is type(data) or XYZ in type(data).__bases__ or SingleRegister in type(data).__bases__):
         return False
     return True
 

@@ -130,6 +130,24 @@ class DeviceRange(ByteStructure):
         self.data[2] = value
 
 
+def parse_id_str(id_):
+    if id_ is None:
+        return None
+    if isinstance(id_, str):
+        if id_.startswith("0x"):
+            return str(int(id_, 16))
+        else:
+            return id_
+    elif isinstance(id_, int):
+        return str(id_)
+
+
+def parse_id_int(id_):
+    if id_ is None:
+        return None
+    return int(parse_id_str(id_))
+
+
 class NetworkID(SingleRegister):
     """
     Container for a device's network ID.
@@ -140,7 +158,7 @@ class NetworkID(SingleRegister):
 
     def __init__(self, network_id=0):
         """Initializes the NetworkID object."""
-        super(NetworkID, self).__init__(network_id, 2, signed=False)
+        super(NetworkID, self).__init__(parse_id_int(network_id), 2, signed=False)
 
     def __str__(self):
         return "0x{:04X}".format(self.id)
@@ -186,7 +204,7 @@ class DeviceList(Data):
             Data.__init__(self, ids, 'H' * len(ids))
 
     def __str__(self):
-        return 'IDs: ' + ', '.join(self)
+        return 'IDs: ' + ', '.join([str(id) for id in self])
 
     def load(self, data, convert=False):
         self.data = data
