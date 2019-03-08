@@ -2371,7 +2371,7 @@ class PozyxLib(PozyxCore):
         if not dataCheck(variation):
             variation = SingleRegister(variation)
 
-        return self.setWrite(PozyxRegisters.ALOHA_VARIATION, Data([variation]), remote_id=remote_id)
+        return self.setWrite(PozyxRegisters.ALOHA_VARIATION, variation, remote_id=remote_id)
 
     def startAloha(self, remote_id=None):
         """Sets the device in ALOHA mode.
