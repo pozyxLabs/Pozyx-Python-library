@@ -175,6 +175,14 @@ class Quaternion(ByteStructure):
     def z(self, value):
         self.data[3] = value * self.physical_convert
 
+    def to_dict(self):
+        return {
+            "x": self.x,
+            "y": self.y,
+            "z": self.z,
+            "w": self.w,
+        }
+
 
 class MaxLinearAcceleration(SingleSensorValue):
     physical_convert = PozyxConstants.MAX_LINEAR_ACCELERATION_DIV_MG
@@ -324,6 +332,7 @@ class CoordinatesWithStatus(ByteStructure):
 
     def load(self, data, convert=False):
         self.data = data
+        print("Loaded data in CoordinatesWithStatus", data, self.x, self.y, self.z)
 
     def __str__(self):
         return 'STATUS: {}, X: {}, Y: {}, Z: {}'.format(self.status, self.x, self.y, self.z)
@@ -359,6 +368,13 @@ class CoordinatesWithStatus(ByteStructure):
     @status.setter
     def status(self, value):
         self.data[3] = value
+
+    def to_dict(self):
+        return {
+            "x": self.x,
+            "y": self.y,
+            "z": self.z,
+        }
 
 
 class RangeInformation(ByteStructure):
@@ -406,6 +422,8 @@ class PositioningData(ByteStructure):
         self.set_data_structures()
 
     def load(self, data, convert=0):
+        print("Loading data", data)
+        print(self.containers)
         self.data = data
         data_index = 0
         for container in self.containers:

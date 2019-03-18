@@ -144,6 +144,14 @@ class XYZ(ByteStructure):
     def z(self, value):
         self.data[2] = value * self.physical_convert
 
+    # TODO maybe use asdict()? Move to dataclasses?
+    def to_dict(self):
+        return {
+            "x": self.x,
+            "y": self.y,
+            "z": self.z,
+        }
+
 
 class Data(ByteStructure):
     """Data allows the user to define arbitrary data structures to use with Pozyx.
