@@ -32,7 +32,12 @@ def discover_all_devices(pozyx):
         if device_list:
             print("Found on {}".format(uwb_settings))
             for device_id in device_list:
-                print("\t- {}".format(device_id))
+                uwbOnDevice = UWBSettings()
+                status = pozyx.getUWBSettings(uwbOnDevice, device_id)
+                if status == PozyxConstants.STATUS_SUCCESS:
+                    print("\t- {}, {}".format(hex(device_id), uwbOnDevice))
+                else:
+                    print("\t- {}".format(hex(device_id)))
 
     pozyx.setUWBSettings(original_uwb_settings)
 
@@ -40,5 +45,9 @@ def discover_all_devices(pozyx):
 if __name__ == '__main__':
     from pypozyx import PozyxSerial, get_first_pozyx_serial_port
     pozyx = PozyxSerial(get_first_pozyx_serial_port())
+
+    uwb = UWBSettings()
+    pozyx.getUWBSettings(uwb)
+    print("Local device on {}".format(uwb))
 
     discover_all_devices(pozyx)

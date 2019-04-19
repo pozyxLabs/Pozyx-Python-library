@@ -71,7 +71,7 @@ def dataCheck(data):
 
       >>> p.setCoordinates([0, 0, 0])
       >>> # or
-      >>> coords =  Coordinates()
+      >>> coords = Coordinates()
       >>> p.setCoordinates(coords)
 
     AND

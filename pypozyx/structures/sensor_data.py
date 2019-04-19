@@ -422,8 +422,6 @@ class PositioningData(ByteStructure):
         self.set_data_structures()
 
     def load(self, data, convert=0):
-        print("Loading data", data)
-        print(self.containers)
         self.data = data
         data_index = 0
         for container in self.containers:
