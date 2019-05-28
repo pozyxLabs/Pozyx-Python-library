@@ -332,7 +332,6 @@ class CoordinatesWithStatus(ByteStructure):
 
     def load(self, data, convert=False):
         self.data = data
-        print("Loaded data in CoordinatesWithStatus", data, self.x, self.y, self.z)
 
     def __str__(self):
         return 'STATUS: {}, X: {}, Y: {}, Z: {}'.format(self.status, self.x, self.y, self.z)

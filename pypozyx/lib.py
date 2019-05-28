@@ -2316,7 +2316,6 @@ class PozyxLib(PozyxCore):
 
         return self.useFunction(PozyxRegisters.SEND_TX_DATA, operation, remote_id=remote_id)
 
-
     def getAlohaBlinkPayload(self, blink_payload, remote_id=None):
         return self.getRead(PozyxRegisters.CONFIG_BLINK_PAYLOAD, blink_payload, remote_id=remote_id)
 
@@ -2382,7 +2381,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
         """
-        return self.setOperationMode(PozyxRegisters.OPERATION_MODE, SingleRegister(PozyxConstants.ALOHA_MODE), remote_id=remote_id)
+        return self.setOperationMode(PozyxConstants.ALOHA_MODE, remote_id=remote_id)
 
     def stopAloha(self, remote_id=None):
         """Returns the device to normal operation when in ALOHA mode.
@@ -2393,7 +2392,7 @@ class PozyxLib(PozyxCore):
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE
         """
-        return self.setOperationMode(PozyxRegisters.OPERATION_MODE, SingleRegister(PozyxConstants.TAG_MODE), remote_id=remote_id)
+        return self.setOperationMode(PozyxConstants.TAG_MODE, remote_id=remote_id)
 
     def getBlinkIndex(self, index, remote_id=None):
         """Reads the blink index from ALOHA transmissions.
