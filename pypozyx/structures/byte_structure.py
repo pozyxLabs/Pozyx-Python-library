@@ -77,25 +77,9 @@ class ByteStructure(object):
             s += struct.pack(self.data_format[i], self.data[i])
         return list(struct.unpack(new_format, s))
 
-    def change_data(self, index, new_data):
-        """Changes the internal contained data of the structure. Good for large structures"""
-        if type(new_data) == int:
-            self.data[index] = new_data
-        elif type(new_data) == list:
-            for i in range(len(new_data)):
-                self.data[index + i] == new_data[i]
-        else:
-            print("Trying to change data with invalid new values (use int or list)")
-
-    # TODO make convert use True/False not 1/0
     def load(self, data, convert=True):
         """Loads data in its relevant class components."""
-        raise NotImplementedError(
-            'load(data) should be customised for every derived structure')
-
-    def update_data(self):
-        """Updates the class's data when one of its components has changed."""
-        pass
+        raise NotImplementedError('load(data) should be customised for every derived structure')
 
     def __getitem__(self, key):
         return self.data[key]
@@ -119,8 +103,3 @@ class ByteStructure(object):
                 s += ', '
             s += str(self.data[i])
         return s
-
-    def __setattr__(self, name, value):
-        """Made to link the direct data updates to also update the data array"""
-        self.__dict__[name] = value
-        self.update_data()

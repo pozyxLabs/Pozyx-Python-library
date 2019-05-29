@@ -2,7 +2,6 @@ import requests
 import json
 import pypozyx
 import warnings
-import time
 
 
 class Version(object):

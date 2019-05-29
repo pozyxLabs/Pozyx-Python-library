@@ -40,15 +40,15 @@ from pypozyx.structures.byte_structure import ByteStructure
 
 def is_reg_readable(reg):
     """Returns whether a Pozyx register is readable."""
-    if (0x00 <= reg < 0x07) or (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg < 0x24) or (
-            0x27 <= reg < 0x2B) or (0x30 <= reg < 0x48) or (0x4E <= reg < 0x89):
+    if (0x00 <= reg < 0x07) or (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg <= 0x24) or (
+            0x26 <= reg < 0x2B) or (0x30 <= reg < 0x48) or (0x4E <= reg < 0x89):
         return True
     return False
 
 
 def is_reg_writable(reg):
     """Returns whether a Pozyx register is writeable."""
-    if (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg < 0x24) or (0x27 <= reg < 0x2B) or (
+    if (0x10 <= reg < 0x12) or (0x14 <= reg < 0x22) or (0x22 <= reg <= 0x24) or (0x26 <= reg < 0x2B) or (
             0x30 <= reg < 0x3C) or (0x85 <= reg < 0x89):
         return True
     return False
@@ -56,7 +56,7 @@ def is_reg_writable(reg):
 
 def is_functioncall(reg):
     """Returns whether a Pozyx register is a Pozyx function."""
-    if (0xB0 <= reg < 0xBC) or (0xC0 <= reg < 0xC9):
+    if (0xB0 <= reg <= 0xBC) or (0xC0 <= reg < 0xC9):
         return True
     return False
 
@@ -71,7 +71,7 @@ def dataCheck(data):
 
       >>> p.setCoordinates([0, 0, 0])
       >>> # or
-      >>> coords =  Coordinates()
+      >>> coords = Coordinates()
       >>> p.setCoordinates(coords)
 
     AND
@@ -94,7 +94,7 @@ def dataCheck(data):
       >>>     sample = SingleRegister(sample)
 
     """
-    if not(Data in type(data).__bases__ or ByteStructure in type(data).__bases__ or Data is type(data) or XYZ in type(data).__bases__):
+    if not(Data in type(data).__bases__ or ByteStructure in type(data).__bases__ or Data is type(data) or XYZ in type(data).__bases__ or SingleRegister in type(data).__bases__):
         return False
     return True
 
@@ -104,9 +104,6 @@ class XYZ(ByteStructure):
     Generic XYZ data structure consisting of 3 integers x, y, and z.
 
     Not recommended to use in practice, as relevant sensor data classes are derived from this.
-
-    If deriving this, don't forget to implement your own update_data function, or data will
-    be [x, y, z] consistently instead of [..., x, y, z, ...].
     """
     physical_convert = 1
 
@@ -115,31 +112,45 @@ class XYZ(ByteStructure):
 
     def __init__(self, x=0, y=0, z=0):
         """Initializes the XYZ or XYZ-derived object."""
-        self.x = x
-        self.y = y
-        self.z = z
         self.data = [x, y, z]
 
     def load(self, data, convert=True):
         self.data = data
-        if convert:
-            self.x = data[0] / self.physical_convert
-            self.y = data[1] / self.physical_convert
-            self.z = data[2] / self.physical_convert
-        else:
-            self.x = data[0]
-            self.y = data[1]
-            self.z = data[2]
-
-    def update_data(self):
-        try:
-            if self.data != [self.x, self.y, self.z]:
-                self.data = [self.x, self.y, self.z]
-        except:
-            return
 
     def __str__(self):
-        return 'X: {self.x}, Y: {self.y}, Z: {self.z}'.format(self=self)
+        return 'X: {}, Y: {}, Z: {}'.format(self.x, self.y, self.z)
+
+    @property
+    def x(self):
+        return self.data[0] / self.physical_convert
+
+    @x.setter
+    def x(self, value):
+        self.data[0] = value * self.physical_convert
+
+    @property
+    def y(self):
+        return self.data[1] / self.physical_convert
+
+    @y.setter
+    def y(self, value):
+        self.data[1] = value * self.physical_convert
+
+    @property
+    def z(self):
+        return self.data[2] / self.physical_convert
+
+    @z.setter
+    def z(self, value):
+        self.data[2] = value * self.physical_convert
+
+    # TODO maybe use asdict()? Move to dataclasses?
+    def to_dict(self):
+        return {
+            "x": self.x,
+            "y": self.y,
+            "z": self.z,
+        }
 
 
 class Data(ByteStructure):
@@ -198,7 +209,7 @@ class SingleRegister(Data):
     byte_size = 1
     data_format = 'B'
 
-    def __init__(self, value=0, size=1, signed=0, print_style='hex'):
+    def __init__(self, value=0, size=1, signed=False, print_style='hex'):
         self.print_style = print_style
         if size == 1:
             data_format = 'b'
@@ -208,7 +219,7 @@ class SingleRegister(Data):
             data_format = 'i'
         else:
             raise ValueError("Size should be 1, 2, or 4")
-        if signed == 0:
+        if not signed:
             data_format = data_format.capitalize()
         Data.__init__(self, [value], data_format)
 
@@ -225,14 +236,14 @@ class SingleRegister(Data):
 
     def __str__(self):
         if self.print_style is 'hex':
-            return hex(self.data[0]).capitalize()
+            return hex(self.value).capitalize()
         elif self.print_style is 'bin':
-            return bin(self.data[0])
+            return bin(self.value)
         else:
-            return str(self.data[0])
+            return str(self.value)
 
     def __eq__(self, other):
-        if SingleRegister == type(other):
+        if type(other) == SingleRegister:
             return self.value == other.value
         elif type(other) == int:
             return self.value == other
@@ -240,7 +251,7 @@ class SingleRegister(Data):
             raise ValueError("Can't compare SingleRegister value with non-integer values or registers")
 
     def __le__(self, other):
-        if SingleRegister == type(other):
+        if type(other) == SingleRegister:
             return self.value <= other.value
         elif type(other) == int:
             return self.value <= other
@@ -248,7 +259,7 @@ class SingleRegister(Data):
             raise ValueError("Can't compare SingleRegister value with non-integer values or registers")
 
     def __lt__(self, other):
-        if SingleRegister == type(other):
+        if type(other) == SingleRegister:
             return self.value < other.value
         elif type(other) == int:
             return self.value < other
@@ -267,9 +278,6 @@ class SingleSensorValue(ByteStructure):
     Generic Single Sensor Value data structure.
 
     Not recommended to use in practice, as relevant sensor data classes are derived from this.
-
-    If deriving this, don't forget to implement your own update_data function, or data will
-    be [value] consistently instead of [..., value, ...].
     """
     physical_convert = 1
 
@@ -278,23 +286,23 @@ class SingleSensorValue(ByteStructure):
 
     def __init__(self, value=0):
         """Initializes the XYZ or XYZ-derived object."""
-        self.value = value
+        self.data = [0]
+
         self.load([value])
+
+    @property
+    def value(self):
+        return self.data[0]
+
+    @value.setter
+    def value(self, new_value):
+        self.data[0] = new_value
 
     def load(self, data=None, convert=True):
         self.data = [0] if data is None else data
 
         if convert:
-            self.value = float(self.data[0]) / self.physical_convert
-        else:
-            self.value = self.data[0]
-
-    def update_data(self):
-        try:
-            if self.data != [self.value]:
-                self.data = [self.value]
-        except:
-            return
+            self.data[0] = float(self.data[0]) / self.physical_convert
 
     def __str__(self):
-        return 'Value: {self.value}'.format(self=self)
+        return 'Value: {}'.format(self.value)

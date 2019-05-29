@@ -577,6 +577,30 @@ class PozyxLib(PozyxCore):
 
         return self.setWrite(PozyxRegisters.RANGING_PROTOCOL, protocol, remote_id)
 
+    def getPositioningAlgorithmData(self, algorithm_data, remote_id=None):
+        """Obtains the Pozyx's positioning algorithm.
+
+        Args:
+            algorithm_data: Container for the read data. AlgorithmData or Data([0]).
+            remote_id (optional): Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        return self.getRead(PozyxRegisters.POSITIONING_ALGORITHM, algorithm_data, remote_id)
+
+    def setPositioningAlgorithmData(self, algorithm_data, remote_id=None):
+        """Obtains the Pozyx's positioning algorithm.
+
+        Args:
+            algorithm_data: Container for the read data. AlgorithmData or Data([0]).
+            remote_id (optional): Remote Pozyx ID.
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
+        """
+        return self.setWrite(PozyxRegisters.POSITIONING_ALGORITHM. algorithm_data, remote_id=remote_id)
+
     def getPositionAlgorithm(self, algorithm, remote_id=None):
         """Obtains the Pozyx's positioning algorithm.
 
@@ -834,8 +858,8 @@ class PozyxLib(PozyxCore):
             >>> pozyx.getPositionFilter(filter_data)
             >>> print(filter_data)  # "Moving average filter with strength 10"
             >>> print(filter_data.get_filter_name())  # "Moving average filter"
-            >>> print(filter_data.filter_type)  # "3"
-            >>> print(filter_data.filter_strength())  # "10"
+            >>> print(filter_data.algorithm)  # "3"
+            >>> print(filter_data.dimension())  # "10"
 
         Returns:
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
@@ -852,7 +876,7 @@ class PozyxLib(PozyxCore):
             POZYX_SUCCESS, POZYX_FAILURE, POZYX_TIMEOUT
         """
         filter_data = FilterData()
-        status = self.getPositionFilter(filter_data, remote_id=remote_id)
+        status = self.getPositionFilterData(filter_data, remote_id=remote_id)
 
         if status != POZYX_SUCCESS:
             warn("Wasn't able to get filter data, returning -1 as strength")
@@ -978,11 +1002,11 @@ class PozyxLib(PozyxCore):
             int_flag = PozyxBitmasks.INT_STATUS_RX_DATA
 
         status = self.useFunction(
-            PozyxRegisters.DO_RANGING, destination_id, Data([]), remote_id)
+            PozyxRegisters.DO_RANGING, destination_id, Data([]), remote_id=remote_id)
         if status == POZYX_SUCCESS:
             status = self.checkForFlag(int_flag, PozyxConstants.DELAY_INTERRUPT)
             if status == POZYX_SUCCESS:
-                self.getDeviceRangeInfo(destination_id, device_range, remote_id)
+                self.getDeviceRangeInfo(destination_id, device_range, remote_id=remote_id)
             return status
         return POZYX_FAILURE
 
@@ -2273,3 +2297,127 @@ class PozyxLib(PozyxCore):
         # give the device some time to save to flash memory
         sleep(PozyxConstants.DELAY_FLASH)
         return status
+
+    def sendAloha(self, operation, remote_id=None):
+        """Starts an ALOHA transmission with or without the custom payload or sets the custom payload to be sent on next transmission.
+
+        Args:
+            operation: POZYX_QUEUE_CUSTOM_ALOHA, POZYX_SEND_CUSTOM_ALOHA_IMMEDIATE, POZYX_SEND_ALOMA_IMMEDIATE
+            remote_id (optional): Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        if not dataCheck(operation):
+            operation = SingleRegister(operation)
+
+        if operation.value not in PozyxConstants.ALL_ALOHA_TYPES:
+            warn("sendAloha: invalid ALOHA type {}".format(operation.value))
+
+        return self.useFunction(PozyxRegisters.SEND_TX_DATA, operation, remote_id=remote_id)
+
+    def getAlohaBlinkPayload(self, blink_payload, remote_id=None):
+        return self.getRead(PozyxRegisters.CONFIG_BLINK_PAYLOAD, blink_payload, remote_id=remote_id)
+
+    def setAlohaBlinkPayload(self, blink_payload, remote_id=None):
+        """Sets the payload type that has to be sent when doing an ALOHA transmission.
+
+        Args:
+            payload_type: 
+            remote_id (optional): Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        if not dataCheck(blink_payload):
+            blink_payload = Data([blink_payload], "H")
+
+        return self.setWrite(PozyxRegisters.CONFIG_BLINK_PAYLOAD, blink_payload, remote_id=remote_id)
+
+    def getAlohaBlinkInterval(self, interval, remote_id=None):
+        return self.getRead(PozyxRegisters.POSITIONING_INTERVAL, interval, remote_id=remote_id)
+
+    # TODO getAlohaData once the spec is better.
+
+    def setAlohaBlinkInterval(self, interval, remote_id=None):
+        """Sets the interval in ms the aloha transmission has to wait to do an ALOHA transmission.
+
+        Args:
+            interval: the interval in ms 
+            remote_id (optional): Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        if not dataCheck(interval):
+            interval = Data([interval], "H")
+
+        return self.setWrite(PozyxRegisters.POSITIONING_INTERVAL, interval, remote_id=remote_id)
+
+    def getAlohaBlinkVariation(self, variation, remote_id=None):
+        return self.getRead(PozyxRegisters.ALOHA_VARIATION, variation, remote_id=remote_id)
+
+    def setAlohaBlinkVariation(self, variation, remote_id=None):
+        """Sets the interval in ms the aloha transmission has to wait to do an ALOHA transmission.
+
+        Args:
+            variation: the variation in ms
+            remote_id (optional): Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        if not dataCheck(variation):
+            variation = SingleRegister(variation)
+
+        return self.setWrite(PozyxRegisters.ALOHA_VARIATION, variation, remote_id=remote_id)
+
+    def startAloha(self, remote_id=None):
+        """Sets the device in ALOHA mode.
+
+        Args:
+            remote_id (optional): Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        return self.setOperationMode(PozyxConstants.ALOHA_MODE, remote_id=remote_id)
+
+    def stopAloha(self, remote_id=None):
+        """Returns the device to normal operation when in ALOHA mode.
+
+        Args:
+            remote_id (optional): Remote Pozyx ID
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        return self.setOperationMode(PozyxConstants.TAG_MODE, remote_id=remote_id)
+
+    def getBlinkIndex(self, index, remote_id=None):
+        """Reads the blink index from ALOHA transmissions.
+
+        Args:
+            index: Data([0],'i')
+
+        Returns:
+            POZYX_SUCCESS, POZYX_FAILURE
+        """
+        return self.getRead(PozyxRegisters.BLINK_INDEX, index, remote_id=remote_id)
+
+    def setOperationMode(self, mode, remote_id=None):
+        """Sets the interval in ms the aloha transmission has to wait to do an ALOHA transmission.
+
+                Args:
+                    mode: the interval in ms
+                    remote_id (optional): Remote Pozyx ID
+
+                Returns:
+                    POZYX_SUCCESS, POZYX_FAILURE
+                """
+        if not dataCheck(mode):
+            mode = SingleRegister(mode)
+
+        return self.setWrite(PozyxRegisters.OPERATION_MODE, mode, remote_id=remote_id)
+
+

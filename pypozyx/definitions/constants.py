@@ -55,8 +55,9 @@ class PozyxConstants:
     LED_OFF = False
 
     # Pozyx device modes
-    ANCHOR_MODE = 0
-    TAG_MODE = 1
+    TAG_MODE = 0
+    ANCHOR_MODE = 1
+    ALOHA_MODE = 2
 
     # The GPIO modes
     GPIO_DIGITAL_INPUT = 0
@@ -187,6 +188,13 @@ class PozyxConstants:
         UWB_PLEN_4096,
     ]
 
+    # ALOHA send types
+    ALOHA_SEND_CUSTOM_QUEUED = 0
+    ALOHA_SEND_CUSTOM_IMMEDIATE = 1
+    ALOHA_SEND_IMMEDIATE = 2
+
+    ALL_ALOHA_TYPES = [ALOHA_SEND_CUSTOM_QUEUED, ALOHA_SEND_CUSTOM_IMMEDIATE, ALOHA_SEND_IMMEDIATE]
+
 
 # Pozyx firmware identifiers
 POZYX_FW_MAJOR = 0xF0
@@ -289,6 +297,11 @@ POZYX_FLASH_REGS = 1
 POZYX_FLASH_ANCHOR_IDS = 2
 POZYX_FLASH_NETWORK = 3
 POZYX_FLASH_ALL = 4
+
+# ALOHA send types
+POZYX_QUEUE_CUSTOM_ALOHA = 0
+POZYX_SEND_CUSTOM_ALOHA_IMMEDIATE = 1
+POZYX_SEND_ALOMA_IMMEDIATE = 2
 
 # possible pin configuration settings
 POZYX_INT_CONFIG = 0x24
