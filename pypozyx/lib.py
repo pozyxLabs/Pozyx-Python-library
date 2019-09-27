@@ -1117,10 +1117,10 @@ class PozyxLib(PozyxCore):
 
     def getPositioningData(self, positioning_data):
         flags = Data([positioning_data.flags], 'H')
-        flags.load_hex_string()
-        s = 'F,%0.2x,%s,%i\r' % (PozyxRegisters.DO_POSITIONING_WITH_DATA, flags.byte_data, positioning_data.byte_size + 61)
-        # very custom solution...
-        r = self.serialExchange(s)
+        temp_data = Data([0] * (positioning_data.byte_size + 60))
+        ret = self.useFunction(PozyxRegisters.DO_POSITIONING_WITH_DATA, flags, temp_data)
+        temp_data.load_hex_string()
+        r = ('%0.2x' % ret) + temp_data.byte_data
         if positioning_data.has_ranges():
             amount_of_ranges = int(r[2 * positioning_data.byte_size:2 * positioning_data.byte_size + 2], 16)
             positioning_data.set_amount_of_ranges(amount_of_ranges)

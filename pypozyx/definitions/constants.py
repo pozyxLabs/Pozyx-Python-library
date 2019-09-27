@@ -8,6 +8,9 @@ POZYX_TIMEOUT = 0x8
 
 
 class PozyxConstants:
+    # I2C
+    POZYX_I2C_ADDRESS = 0x4B
+
     # Pozyx serial buffer sizes
     MAX_BUF_SIZE = 100
     MAX_SERIAL_SIZE = 28

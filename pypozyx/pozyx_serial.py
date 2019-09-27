@@ -250,7 +250,7 @@ class PozyxSerial(PozyxLib):
 
         Args:
             address: Register address to start writing at.
-            data: Data to write to the Pozyx registers.
+            data: Data to read from the Pozyx registers.
                 Has to be ByteStructure-derived object.
 
         Returns:
