@@ -93,6 +93,8 @@ class ByteStructure(object):
 
     def __eq__(self, other):
         """Returns whether the structures contain the same data"""
+        if other is None:
+            return False
         return self.data == other.data and self.data_format == other.data_format
 
     def __str__(self):
