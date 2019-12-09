@@ -18,6 +18,7 @@ setup(
     description='Python library for Pozyx devices',
     install_requires=[
         'pyserial>=3.0'
+        'smbus2>=0.3.0'
     ],
     long_description=long_description,
     author='Laurent Van Acker',

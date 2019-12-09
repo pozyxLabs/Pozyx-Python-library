@@ -80,6 +80,7 @@ version = __version__
 
 from pypozyx.definitions import *
 from pypozyx.pozyx_serial import *
+from pypozyx.pozyx_i2c import *
 from pypozyx.structures.device import *
 from pypozyx.structures.generic import *
 from pypozyx.structures.sensor_data import *
