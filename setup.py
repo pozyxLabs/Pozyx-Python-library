@@ -3,7 +3,7 @@ from os import path
 from setuptools import setup
 from codecs import open
 
-from pypozyx import VERSION as PYPOZYX_VERSION
+from version import VERSION as PYPOZYX_VERSION
 
 here = path.abspath(path.dirname(__file__))
 # Get the long description from the README file

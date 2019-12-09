@@ -72,11 +72,6 @@ switch at some point.
 
 """
 
-__version__ = '1.3.0'
-
-VERSION = __version__
-version = __version__
-
 
 from pypozyx.definitions import *
 from pypozyx.pozyx_serial import *

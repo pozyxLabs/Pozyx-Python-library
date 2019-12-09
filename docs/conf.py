@@ -20,7 +20,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__name__), '..'))
 
-from pypozyx import VERSION as PYPOZYX_VERSION
+from version import VERSION as PYPOZYX_VERSION
 
 
 # -- Project information -----------------------------------------------------
