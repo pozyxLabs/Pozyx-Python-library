@@ -12,7 +12,7 @@ There's a helper in the library for identifying the first serial port that is a 
 
    import pypozyx
 
-   print(pypozyx.get_first_pozyx_serial_port())
+   print(get_first_pozyx_serial_port())
 
 Or from the command line
 
