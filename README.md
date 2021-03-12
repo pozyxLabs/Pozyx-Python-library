@@ -29,9 +29,9 @@ If your port is correct and the serial connection to the Pozyx isn't used by oth
 ## Documentation and examples
 You can find the Python tutorials on our site: https://docs.pozyx.io/creator/latest/python.
 
-Documentation for the Python library can be found here: https://pypozyx.readthedocs.io/.
+Documentation for the Python library can be found here: https://pypozyx.readthedocs.io.
 
-* This was originally a port of the Pozyx's Arduino library, so most of the [Arduino Library Documentation](https://ardupozyx.readthedocs.io/en/latest/) is transformable to this. The major difference is that you don't ever again need to pass along the length of the data you're reading/writing. This is taken care of by the library through the Data and SingleRegister classes like so:
+* This was originally a port of the Pozyx's Arduino library, so most of the [Arduino Library Documentation](https://ardupozyx.readthedocs.io) is transformable to this. The major difference is that you don't ever again need to pass along the length of the data you're reading/writing. This is taken care of by the library through the Data and SingleRegister classes like so:
 
 ```python
 whoami = SingleRegister()
