@@ -1,5 +1,5 @@
 # Pozyx-Python-library
-A Python library to work with the pozyx indoor positioning system[pozyx indoor positioning system](https://pozyx.io) over USB.
+A Python library to work with the [pozyx indoor positioning system](https://pozyx.io) over USB.
 This works with the [Pozyx Creator kit](https://www.pozyx.io/creator)
 
 This library works with both Python 2 and 3.
