@@ -1,5 +1,6 @@
 # Pozyx-Python-library
-A Python library to work with the pozyx indoor positioning system over USB.
+A Python library to work with the pozyx indoor positioning system[pozyx indoor positioning system](https://pozyx.io) over USB.
+This works with the [Pozyx Creator kit](https://www.pozyx.io/creator)
 
 This library works with both Python 2 and 3.
 
@@ -27,7 +28,7 @@ If your port is correct and the serial connection to the Pozyx isn't used by oth
 * **NEW** You can quickly find whether there's a recognized Pozyx device using: `python -c "from pypozyx import *;print(get_first_pozyx_serial_port())"`
 
 ## Documentation and examples
-You can find the Python tutorials on our site: https://docs.pozyx.io/creator/latest/python.
+You can find the Python tutorials on our site: https://docs.pozyx.io/creator/python.
 
 Documentation for the Python library can be found here: https://pypozyx.readthedocs.io.
 
