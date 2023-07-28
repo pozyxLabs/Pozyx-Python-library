@@ -190,9 +190,9 @@ class PozyxLib(PozyxCore):
 
         if not 1 <= gpio_num <= 4:
             warn("setConfigGPIO: GPIO number {} not in range".format(gpio_num))
-        if mode[0] in PozyxConstants.ALL_GPIO_MODES:
+        if mode[0] not in PozyxConstants.ALL_GPIO_MODES:
             warn("setConfigGPIO: {} wrong GPIO mode".format(mode[0]))
-        if pull[0] in PozyxConstants.ALL_GPIO_PULLS:
+        if pull[0] not in PozyxConstants.ALL_GPIO_PULLS:
             warn("setConfigGPIO: {} wrong GPIO pull".format(pull[0]))
 
         gpio_register = PozyxRegisters.CONFIG_GPIO_1 + gpio_num - 1
