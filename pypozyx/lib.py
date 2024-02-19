@@ -1774,7 +1774,7 @@ class PozyxLib(PozyxCore):
         self.getInterruptStatus(SingleRegister())
         params = Data([dimension, num_measurements] +
                       anchors.data, 'BB' + anchors.data_format)
-        status = self.useFunction(0xC2, params, remote_id=remote_id)
+        status = self.useFunction(PozyxRegisters.POZYX_DEVICES_CALIBRATE, params, remote_id=remote_id)
 
         if remote_id is None:
             return self.checkForFlag(PozyxBitmasks.INT_STATUS_FUNC, 25000)
