@@ -186,7 +186,7 @@ class DeviceList(Data):
 
     Using list_size is recommended when having just used getDeviceListSize, while ids
     is recommended when one knows the IDs. When using one, the other automatically
-    gets its respective value. Therefore, only use on of both.
+    gets its respective value. Therefore, only use one of both.
 
     Note also that DeviceList(list_size=1) is the same as NetworkID().
 
