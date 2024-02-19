@@ -172,7 +172,7 @@ class PozyxSerial(PozyxLib):
                                   write_timeout=write_timeout)
             else:
                 if not self.suppress_warnings:
-                    warn("PySerial version %s not supported, please upgrade to 3.0 or (prefferably) higher" %
+                    warn("PySerial version %s not supported, please upgrade to 3.0 or (preferably) higher" %
                          PYSERIAL_VERSION, stacklevel=0)
                 self.ser = Serial(port=port, baudrate=baudrate, timeout=timeout,
                                   writeTimeout=write_timeout)
