@@ -194,7 +194,7 @@ In the library, function wrappers are written in such a way that when no paramet
    from pypozyx import ..., Coordinates, DeviceCoordinates
 
    # assume an anchor 0x6038 that we want to add to the device list and immediately save the device list after.
-   anchor = DeviceCoordinates(0x6038), 0, Coordinates(5000, 5000, 0))
+   anchor = DeviceCoordinates(0x6038, 0, Coordinates(5000, 5000, 0))
    pozyx.addDevice(anchor)
    pozyx.saveNetwork()
 
