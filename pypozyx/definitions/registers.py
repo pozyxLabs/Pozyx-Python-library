@@ -68,7 +68,7 @@ class PozyxRegisters:
     ACCELERATION_X = 0x54  # Accelerometer data (in mg)
     ACCELERATION_Y = 0x56
     ACCELERATION_Z = 0x58
-    MAGNETIC_X = 0x5A  # Magnemtometer data
+    MAGNETIC_X = 0x5A  # Magnetometer data
     MAGNETIC_Y = 0x5C
     MAGNETIC_Z = 0x5E
     GYRO_X = 0x60  # Gyroscope data
