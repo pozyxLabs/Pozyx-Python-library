@@ -732,7 +732,7 @@ class PozyxLib(PozyxCore):
             '0x6720, 0x6811, 0x6891'
         """
         # TODO remove this check altogether in 2.0
-        if not 0 < len(anchors) <= 16:
+        if not 0 < len(anchors) <= 10:
             warn("getPositioningAnchorIds: Anchor number out of range, use between 0-10 anchors")
         device_list_size = SingleRegister()
         status = self.getDeviceListSize(device_list_size, remote_id)
