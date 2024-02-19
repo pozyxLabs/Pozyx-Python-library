@@ -1259,7 +1259,7 @@ class PozyxLib(PozyxCore):
     def remoteRegFunctionOnlyData(self, destination, address, params, data):
         """Performs a remote function without waiting for the acknowledgement.
 
-        Advanded custom internal use only, you're not expected to use this unless you know what you're doing.
+        Advanced custom internal use only, you're not expected to use this unless you know what you're doing.
 
         """
         send_data = Data([0, address] + params.data, 'BB' + params.data_format)
